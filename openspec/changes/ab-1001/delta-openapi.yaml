@@ -1,0 +1,36 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.1.0
+  description: Delta for AB-1001. Only the health endpoint is introduced; all other endpoints arrive in later tickets.
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Service and database health
+      responses:
+        "200":
+          description: Service and database are reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example:
+                status: ok
+        "503":
+          description: Database is unreachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example:
+                status: error
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
