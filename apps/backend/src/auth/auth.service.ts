@@ -18,6 +18,7 @@ export interface AuthServiceDeps {
 export interface AuthService {
   register(input: RegisterRequest): Promise<User>;
   login(input: LoginRequest): Promise<AuthTokensResponse>;
+  logout(userId: string, refreshToken: string): Promise<void>;
 }
 
 const userSelect = { id: true, email: true, createdAt: true } as const;
@@ -70,6 +71,14 @@ export function createAuthService({ prisma, hasher, jwt }: AuthServiceDeps): Aut
       });
       const accessToken = await signAccessToken(found.id, jwt.secret);
       return { accessToken, refreshToken, user: toUser(found) };
+    },
+
+    // One scoped update: unknown, already-revoked and other users' tokens are all no-ops.
+    async logout(userId, refreshToken) {
+      await prisma.refreshToken.updateMany({
+        where: { tokenHash: hashRefreshToken(refreshToken), userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
     },
   };
 }

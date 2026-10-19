@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import type { Health } from "@todo/shared";
 import { createAuthRouter } from "./auth/auth.routes.js";
+import { createAuthenticate } from "./auth/authenticate.js";
 import { createAuthService } from "./auth/auth.service.js";
 import type { PasswordHasher } from "./auth/password.js";
 import type { Ping } from "./db.js";
@@ -30,7 +31,10 @@ export function createApp({ ping, prisma, hasher, jwt }: AppDeps): Express {
     }
   });
 
-  app.use("/auth", createAuthRouter(createAuthService({ prisma, hasher, jwt })));
+  app.use(
+    "/auth",
+    createAuthRouter(createAuthService({ prisma, hasher, jwt }), createAuthenticate(jwt)),
+  );
 
   app.use(errorHandler);
 

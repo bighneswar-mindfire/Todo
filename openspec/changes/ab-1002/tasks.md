@@ -56,21 +56,21 @@
 
 ## 4. Authenticate middleware and logout
 
-- [ ] 4.1 (Sonnet) `src/auth/authenticate.ts`: strict `Bearer <token>` parsing (scheme case-insensitive, exactly one non-empty token), `verifyAccessToken`, sets `req.auth`; every failure 401 `UNAUTHORIZED`.
-- [ ] 4.2 (Sonnet) `logout` (scoped `updateMany` by `tokenHash` + `userId` + `revokedAt: null`, always 204) and `POST /auth/logout` (`authenticate`, then body validation).
-- [ ] 4.3 `apps/backend/src/auth/authenticate.test.ts`, `describe("auth: access token verification")` (uses a small test-only protected route):
-  - [ ] Valid access token accepted
-  - [ ] Missing Authorization header
-  - [ ] Malformed Authorization header
-  - [ ] Tampered access token
-  - [ ] Expired access token
-  - [ ] Refresh token rejected as access token
-- [ ] 4.4 `apps/backend/src/auth/logout.test.ts`, `describe("auth: logout")`:
-  - [ ] Logout revokes the refresh token
-  - [ ] Logout is idempotent
-  - [ ] Cannot revoke another user's token
-  - [ ] Logout without refresh token rejected
-- [ ] **Checkpoint 4**: build, lint, test.
+- [x] 4.1 (Sonnet) `src/auth/authenticate.ts`: strict `Bearer <token>` parsing (scheme case-insensitive, exactly one non-empty token), `verifyAccessToken`, sets `req.auth`; every failure 401 `UNAUTHORIZED`.
+- [x] 4.2 (Sonnet) `logout` (scoped `updateMany` by `tokenHash` + `userId` + `revokedAt: null`, always 204) and `POST /auth/logout` (`authenticate`, then body validation).
+- [x] 4.3 `apps/backend/src/auth/authenticate.test.ts`, `describe("auth: access token verification")` (uses a small test-only protected route):
+  - [x] Valid access token accepted
+  - [x] Missing Authorization header
+  - [x] Malformed Authorization header
+  - [x] Tampered access token
+  - [x] Expired access token
+  - [x] Refresh token rejected as access token
+- [x] 4.4 `apps/backend/src/auth/logout.test.ts`, `describe("auth: logout")`:
+  - [x] Logout revokes the refresh token
+  - [x] Logout is idempotent
+  - [x] Cannot revoke another user's token
+  - [x] Logout without refresh token rejected
+- [x] **Checkpoint 4**: build, lint, test.
 
 ## 5. Refresh with rotation
 

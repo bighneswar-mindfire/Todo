@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Router, type RequestHandler } from "express";
 import {
   loginRequestSchema,
+  logoutRequestSchema,
   registerRequestSchema,
   zodIssuesToDetails,
   type ErrorDetail,
@@ -23,7 +24,7 @@ function parseBody<T>(schema: BodySchema<T>, body: unknown): T {
   return result.data;
 }
 
-export function createAuthRouter(service: AuthService): Router {
+export function createAuthRouter(service: AuthService, authenticate: RequestHandler): Router {
   const router = Router();
 
   router.post("/register", async (req, res) => {
@@ -34,6 +35,12 @@ export function createAuthRouter(service: AuthService): Router {
   router.post("/login", async (req, res) => {
     const tokens = await service.login(parseBody(loginRequestSchema, req.body));
     res.status(200).json(tokens);
+  });
+
+  router.post("/logout", authenticate, async (req, res) => {
+    const { refreshToken } = parseBody(logoutRequestSchema, req.body);
+    await service.logout(req.auth!.userId, refreshToken);
+    res.status(204).end();
   });
 
   return router;
