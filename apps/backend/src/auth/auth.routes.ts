@@ -2,6 +2,7 @@ import { Router, type RequestHandler } from "express";
 import {
   loginRequestSchema,
   logoutRequestSchema,
+  refreshRequestSchema,
   registerRequestSchema,
   zodIssuesToDetails,
   type ErrorDetail,
@@ -34,6 +35,12 @@ export function createAuthRouter(service: AuthService, authenticate: RequestHand
 
   router.post("/login", async (req, res) => {
     const tokens = await service.login(parseBody(loginRequestSchema, req.body));
+    res.status(200).json(tokens);
+  });
+
+  router.post("/refresh", async (req, res) => {
+    const { refreshToken } = parseBody(refreshRequestSchema, req.body);
+    const tokens = await service.refresh(refreshToken);
     res.status(200).json(tokens);
   });
 

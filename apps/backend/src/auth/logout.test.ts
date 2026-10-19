@@ -43,6 +43,11 @@ describe("auth: logout", () => {
     const res = await logout(session, { refreshToken: session.refreshToken });
     expect(res.status).toBe(204);
     expect(await revokedAt(session.refreshToken)).toBeInstanceOf(Date);
+    const refreshed = await request(t.app)
+      .post("/auth/refresh")
+      .send({ refreshToken: session.refreshToken });
+    expect(refreshed.status).toBe(401);
+    expect(refreshed.body.error.code).toBe("INVALID_REFRESH_TOKEN");
   });
 
   it("Logout is idempotent", async () => {

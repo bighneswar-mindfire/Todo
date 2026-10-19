@@ -74,16 +74,16 @@
 
 ## 5. Refresh with rotation
 
-- [ ] 5.1 (Sonnet, **[SUBAGENT]**, est. over 45 min) `refresh` in `auth.service.ts` per D4: read by hash; interactive `$transaction` whose first statement is `SELECT 1 FROM "User" WHERE id = $1::uuid FOR UPDATE`; re-read the row under the lock; revoked -> revoke-all, commit, return `reuse`; expired -> `invalid`; else claim (`updateMany` `revokedAt: null`), insert the new token with a fresh 7-day `expiresAt`, return `rotated`; map `reuse`/`invalid` to 401 `INVALID_REFRESH_TOKEN` outside the transaction; plus `POST /auth/refresh`.
-- [ ] 5.2 `apps/backend/src/auth/refresh.test.ts`, `describe("auth: token refresh with rotation")`:
-  - [ ] Refresh with valid token
-  - [ ] Old token is revoked after rotation
-  - [ ] Reuse revokes the whole session family
-  - [ ] Unknown refresh token rejected
-  - [ ] Expired refresh token rejected
-  - [ ] Missing refresh token rejected
-- [ ] 5.3 `[design]` tests: a rotated token gets a fresh 7-day `expiresAt`; a concurrent rotation and reuse of the previous token leave no un-revoked refresh token for the user (assert the end state in the DB).
-- [ ] **Checkpoint 5**: build, lint, test.
+- [x] 5.1 (Sonnet, **[SUBAGENT]**, est. over 45 min) `refresh` in `auth.service.ts` per D4: read by hash; interactive `$transaction` whose first statement is `SELECT 1 FROM "User" WHERE id = $1::uuid FOR UPDATE`; re-read the row under the lock; revoked -> revoke-all, commit, return `reuse`; expired -> `invalid`; else claim (`updateMany` `revokedAt: null`), insert the new token with a fresh 7-day `expiresAt`, return `rotated`; map `reuse`/`invalid` to 401 `INVALID_REFRESH_TOKEN` outside the transaction; plus `POST /auth/refresh`.
+- [x] 5.2 `apps/backend/src/auth/refresh.test.ts`, `describe("auth: token refresh with rotation")`:
+  - [x] Refresh with valid token
+  - [x] Old token is revoked after rotation
+  - [x] Reuse revokes the whole session family
+  - [x] Unknown refresh token rejected
+  - [x] Expired refresh token rejected
+  - [x] Missing refresh token rejected
+- [x] 5.3 `[design]` tests: a rotated token gets a fresh 7-day `expiresAt`; a concurrent rotation and reuse of the previous token leave no un-revoked refresh token for the user (assert the end state in the DB).
+- [x] **Checkpoint 5**: build, lint, test.
 
 ## 6. Error envelope, wiring checks, definition of done
 
