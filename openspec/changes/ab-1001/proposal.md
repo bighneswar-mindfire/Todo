@@ -4,7 +4,7 @@ AB-1001 lays the foundation every later ticket (AB-1002 to AB-1016) builds on. W
 
 ## What Changes
 
-- pnpm workspace monorepo: `apps/backend`, `apps/frontend`, `packages/shared`, all tool and dependency versions pinned exactly (no `@latest`, no `^`/`~`).
+- pnpm workspace monorepo: `apps/backend`, `apps/frontend`, `packages/shared`, plus a private test-only `packages/repo-checks` for tooling scenario tests, all tool and dependency versions pinned exactly (no `@latest`, no `^`/`~`).
 - Node 22 and pnpm 10 pinned via `.nvmrc`, `engines` and `packageManager`.
 - PostgreSQL 16 via `docker-compose.yml`; Prisma schema for User, RefreshToken, PasswordResetOtp, Note, Tag, NoteTag, ShareLink, NoteVersion plus the first migration (including a full-text search `tsvector` column and GIN index on Note).
 - `packages/shared` skeleton as the single home for Zod schemas and TypeScript types.

@@ -34,7 +34,7 @@
 
 - [x] 6.1 Husky `pre-commit` (build, lint, test) and `commit-msg` (commitlint)
 - [x] 6.2 commitlint config requiring `type(scope): description AB#ticket`
-- [x] 6.3 Tests: "No floating versions", "Workspace packages resolve", "Wrong runtime rejected", "Clean checkpoint", "Failing check blocks commit", "Bad commit message rejected"
+- [x] 6.3 Tests (in the test-only `packages/repo-checks` workspace package): "No floating versions", "Workspace packages resolve", "Wrong runtime rejected", "Clean checkpoint", "Failing check blocks commit", "Bad commit message rejected"
 
 ## 7. Claude Code configuration
 
@@ -49,5 +49,5 @@
 - [x] 8.1 `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (>=80%)
 - [x] 8.2 `openspec validate ab-1001`
 - [x] 8.3 Smoke test: `docker compose up`, migrate, call `/health`
-- [ ] 8.4 Conventional commit `feat(setup): project foundation AB#1001`
+- [x] 8.4 Conventional commit `feat(setup): project foundation AB#1001`
 - [ ] 8.5 `/review` in a fresh terminal (all ✅), `openspec archive ab-1001`, `/pr`

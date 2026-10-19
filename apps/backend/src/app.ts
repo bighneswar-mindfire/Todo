@@ -16,7 +16,7 @@ export function createApp({ ping }: AppDeps): Express {
       const body: Health = { status: "ok" };
       res.status(200).json(body);
     } catch (err) {
-      console.error("health check failed:", err instanceof Error ? err.message : err);
+      console.error("health check failed:", String(err));
       const body: Health = { status: "error" };
       res.status(503).json(body);
     }
