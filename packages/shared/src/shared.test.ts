@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { emailSchema, healthSchema, parseEnv, registerRequestSchema, zodIssuesToDetails } from "./index.js";
+import {
+  emailSchema,
+  forgotPasswordRequestSchema,
+  healthSchema,
+  parseEnv,
+  registerRequestSchema,
+  resetPasswordRequestSchema,
+  zodIssuesToDetails,
+} from "./index.js";
 
 const JWT_SECRET = "s".repeat(32);
 
@@ -40,6 +48,32 @@ describe("auth: shared schema helpers", () => {
   it("[design] email is trimmed and lowercased before format validation", () => {
     expect(emailSchema.parse("  A@B.COM ")).toBe("a@b.com");
     expect(emailSchema.safeParse("  not-an-email ").success).toBe(false);
+  });
+});
+
+describe("auth: password reset shared schemas", () => {
+  const valid = { email: "a@b.com", otp: "012345", newPassword: "longenough" };
+
+  it("[design] otp must be exactly 6 digits", () => {
+    expect(resetPasswordRequestSchema.safeParse(valid).success).toBe(true);
+    for (const otp of ["12345", "1234567", "12345a", " 12345", "12 345", ""]) {
+      expect(resetPasswordRequestSchema.safeParse({ ...valid, otp }).success, otp).toBe(false);
+    }
+    expect(resetPasswordRequestSchema.safeParse({ ...valid, otp: 123456 }).success).toBe(false);
+  });
+
+  it("[design] newPassword is bounded to 8..128 characters", () => {
+    const parse = (newPassword: string) =>
+      resetPasswordRequestSchema.safeParse({ ...valid, newPassword }).success;
+    expect(parse("x".repeat(7))).toBe(false);
+    expect(parse("x".repeat(8))).toBe(true);
+    expect(parse("x".repeat(128))).toBe(true);
+    expect(parse("x".repeat(129))).toBe(false);
+  });
+
+  it("[design] forgot and reset emails are normalized", () => {
+    expect(forgotPasswordRequestSchema.parse({ email: "  A@B.COM " }).email).toBe("a@b.com");
+    expect(resetPasswordRequestSchema.parse({ ...valid, email: " A@B.COM " }).email).toBe("a@b.com");
   });
 });
 

@@ -13,6 +13,14 @@ function sourceFiles(dir: string): string[] {
   });
 }
 
+function assertNoLocalZod(): void {
+  for (const file of sourceFiles(srcDir)) {
+    const text = readFileSync(file, "utf8");
+    expect(text, file).not.toMatch(/from\s+["']zod["']/);
+    expect(text, file).not.toMatch(/\bz\.object\(/);
+  }
+}
+
 describe("auth: configuration and shared schemas", () => {
   it("Backend consumes shared auth schemas", () => {
     const routes = readFileSync(join(srcDir, "auth", "auth.routes.ts"), "utf8");
@@ -27,10 +35,6 @@ describe("auth: configuration and shared schemas", () => {
       expect(sharedImport?.[1]).toContain(schema);
     }
 
-    for (const file of sourceFiles(srcDir)) {
-      const text = readFileSync(file, "utf8");
-      expect(text, file).not.toMatch(/from\s+["']zod["']/);
-      expect(text, file).not.toMatch(/\bz\.object\(/);
-    }
+    assertNoLocalZod();
   });
 });
