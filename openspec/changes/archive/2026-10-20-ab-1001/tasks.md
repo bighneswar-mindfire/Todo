@@ -50,4 +50,4 @@
 - [x] 8.2 `openspec validate ab-1001`
 - [x] 8.3 Smoke test: `docker compose up`, migrate, call `/health`
 - [x] 8.4 Conventional commit `feat(setup): project foundation AB#1001`
-- [ ] 8.5 `/review` in a fresh terminal (all ✅), `openspec archive ab-1001`, `/pr`
+- [x] 8.5 `/review` in a fresh terminal (all ✅), `openspec archive ab-1001`, `/pr`
