@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts"],
+    env: { JWT_SECRET: "test-secret-test-secret-test-secret-0123" },
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

@@ -32,27 +32,27 @@
 
 ## 3. Register and login
 
-- [ ] 3.1 (Haiku) Test helpers `src/auth/test-helpers.ts`: cheap hasher, known test `JWT_SECRET`, `buildTestApp()`, `uniqueEmail()`, `cleanupUsers()`; add test `JWT_SECRET` to `apps/backend/vitest.config.ts` (`test.env`) so tests do not depend on a local `.env`.
-- [ ] 3.2 (Sonnet) Wire dependencies: `createApp({ ping, prisma, hasher, jwt })` mounts `/auth` and the error handler last; update `server.ts` (production hasher, dummy hash, jwt config from env) and `health.test.ts` for the new deps.
-- [ ] 3.3 (Haiku) Add `JWT_SECRET=` placeholder (32+ chars, with a comment) to `apps/backend/.env.example`.
-- [ ] 3.4 (Sonnet) `auth.service.ts` `register` (hash first, `select` id/email/createdAt, `P2002` -> 409 `EMAIL_TAKEN`, import `Prisma` from the generated client) and `login` (unknown email verifies against the dummy hash; identical 401; creates refresh row with 7-day expiry) plus `auth.routes.ts` `POST /auth/register` and `POST /auth/login` (`safeParse(req.body ?? {})` -> `AppError(VALIDATION_ERROR)`).
-- [ ] 3.5 `apps/backend/src/auth/register.test.ts`, `describe("auth: user registration")`:
-  - [ ] Register with valid credentials
-  - [ ] Email is normalized
-  - [ ] Password is stored hashed
-  - [ ] Duplicate email rejected
-  - [ ] Invalid email rejected
-  - [ ] Short password rejected
-  - [ ] Overlong password rejected
-- [ ] 3.6 `apps/backend/src/auth/login.test.ts`, `describe("auth: user login")`:
-  - [ ] Login with correct credentials
-  - [ ] Email matching is case-insensitive
-  - [ ] Access token claims and lifetime
-  - [ ] Refresh token persisted as hash with 7-day expiry
-  - [ ] Wrong password rejected
-  - [ ] Unknown email rejected identically
-  - [ ] Malformed login body rejected
-- [ ] **Checkpoint 3**: build, lint, test.
+- [x] 3.1 (Haiku) Test helpers `src/auth/test-helpers.ts`: cheap hasher, known test `JWT_SECRET`, `buildTestApp()`, `uniqueEmail()`, `cleanupUsers()`; add test `JWT_SECRET` to `apps/backend/vitest.config.ts` (`test.env`) so tests do not depend on a local `.env`.
+- [x] 3.2 (Sonnet) Wire dependencies: `createApp({ ping, prisma, hasher, jwt })` mounts `/auth` and the error handler last; update `server.ts` (production hasher, dummy hash, jwt config from env) and `health.test.ts` for the new deps.
+- [x] 3.3 (Haiku) Add `JWT_SECRET=` placeholder (32+ chars, with a comment) to `apps/backend/.env.example`.
+- [x] 3.4 (Sonnet) `auth.service.ts` `register` (hash first, `select` id/email/createdAt, `P2002` -> 409 `EMAIL_TAKEN`, import `Prisma` from the generated client) and `login` (unknown email verifies against the dummy hash; identical 401; creates refresh row with 7-day expiry) plus `auth.routes.ts` `POST /auth/register` and `POST /auth/login` (`safeParse(req.body ?? {})` -> `AppError(VALIDATION_ERROR)`).
+- [x] 3.5 `apps/backend/src/auth/register.test.ts`, `describe("auth: user registration")`:
+  - [x] Register with valid credentials
+  - [x] Email is normalized
+  - [x] Password is stored hashed
+  - [x] Duplicate email rejected
+  - [x] Invalid email rejected
+  - [x] Short password rejected
+  - [x] Overlong password rejected
+- [x] 3.6 `apps/backend/src/auth/login.test.ts`, `describe("auth: user login")`:
+  - [x] Login with correct credentials
+  - [x] Email matching is case-insensitive
+  - [x] Access token claims and lifetime
+  - [x] Refresh token persisted as hash with 7-day expiry
+  - [x] Wrong password rejected
+  - [x] Unknown email rejected identically
+  - [x] Malformed login body rejected
+- [x] **Checkpoint 3**: build, lint, test.
 
 ## 4. Authenticate middleware and logout
 
