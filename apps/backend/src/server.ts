@@ -1,10 +1,16 @@
 import { createApp } from "./app.js";
+import { PRODUCTION_SCRYPT_PARAMS, createPasswordHasher } from "./auth/password.js";
 import { createPrisma, prismaPing } from "./db.js";
 import { loadEnv } from "./env.js";
 
 const env = loadEnv();
 const prisma = createPrisma(env.DATABASE_URL);
-const app = createApp({ ping: prismaPing(prisma) });
+const app = createApp({
+  ping: prismaPing(prisma),
+  prisma,
+  hasher: createPasswordHasher(PRODUCTION_SCRYPT_PARAMS),
+  jwt: { secret: env.JWT_SECRET },
+});
 
 const server = app.listen(env.PORT, () => {
   console.log(`backend listening on http://localhost:${env.PORT}`);

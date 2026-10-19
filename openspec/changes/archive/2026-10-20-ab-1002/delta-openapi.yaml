@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.2.0
+  description: Delta for AB-1002. Adds the auth endpoints and the shared error envelope. Refresh tokens travel in the JSON body.
+paths:
+  /auth/register:
+    post:
+      operationId: register
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          description: Invalid email or password, or an unparseable or unsupported request body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered (EMAIL_TAKEN)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/login:
+    post:
+      operationId: login
+      summary: Exchange credentials for an access and refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthTokensResponse"
+        "400":
+          description: Malformed body, or an unparseable or unsupported request body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unknown email or wrong password (INVALID_CREDENTIALS)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/refresh:
+    post:
+      operationId: refreshTokens
+      summary: Rotate a refresh token for a new access and refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: New token pair; the presented refresh token is revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "400":
+          description: Missing refreshToken, or an unparseable or unsupported request body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unknown, expired or revoked refresh token (INVALID_REFRESH_TOKEN). Reuse of a revoked token revokes all of the user's refresh tokens.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: Revoke a refresh token (idempotent)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+      responses:
+        "204":
+          description: Token revoked, already revoked, unknown, or owned by another user (no-op)
+        "400":
+          description: Missing refreshToken, or an unparseable or unsupported request body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, malformed, tampered or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token, 15 minute lifetime. A refresh token is never accepted here.
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          description: Trimmed and lowercased before storage
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+    LogoutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+    User:
+      type: object
+      required: [id, email, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+    RegisterResponse:
+      type: object
+      required: [user]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken]
+      properties:
+        accessToken:
+          type: string
+          description: JWT, sub = user id, expires 15 minutes after issue
+        refreshToken:
+          type: string
+          description: Opaque random string, valid 7 days, only its hash is stored
+    AuthTokensResponse:
+      allOf:
+        - $ref: "#/components/schemas/TokenPair"
+        - type: object
+          required: [user]
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_TAKEN
+                - INVALID_CREDENTIALS
+                - INVALID_REFRESH_TOKEN
+                - UNAUTHORIZED
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              description: Present on VALIDATION_ERROR; one entry per invalid field
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

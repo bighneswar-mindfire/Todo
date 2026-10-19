@@ -1,12 +1,21 @@
 import express, { type Express } from "express";
 import type { Health } from "@todo/shared";
+import { createAuthRouter } from "./auth/auth.routes.js";
+import { createAuthenticate } from "./auth/authenticate.js";
+import { createAuthService } from "./auth/auth.service.js";
+import type { PasswordHasher } from "./auth/password.js";
 import type { Ping } from "./db.js";
+import type { PrismaClient } from "./generated/prisma/client.js";
+import { errorHandler } from "./middleware/error-handler.js";
 
 export interface AppDeps {
   ping: Ping;
+  prisma: PrismaClient;
+  hasher: PasswordHasher;
+  jwt: { secret: string };
 }
 
-export function createApp({ ping }: AppDeps): Express {
+export function createApp({ ping, prisma, hasher, jwt }: AppDeps): Express {
   const app = express();
   app.use(express.json());
 
@@ -21,6 +30,13 @@ export function createApp({ ping }: AppDeps): Express {
       res.status(503).json(body);
     }
   });
+
+  app.use(
+    "/auth",
+    createAuthRouter(createAuthService({ prisma, hasher, jwt }), createAuthenticate(jwt)),
+  );
+
+  app.use(errorHandler);
 
   return app;
 }
