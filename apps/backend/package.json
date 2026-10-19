@@ -1,0 +1,32 @@
+{
+  "name": "@todo/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "prisma generate --config prisma7.config.ts",
+    "migrate:dev": "prisma migrate dev --config prisma7.config.ts",
+    "migrate:deploy": "prisma migrate deploy --config prisma7.config.ts",
+    "dev": "tsx watch src/server.ts",
+    "build": "pnpm generate && tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "@todo/shared": "workspace:*",
+    "dotenv": "18.0.8",
+    "express": "5.3.0",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/pg": "8.23.1",
+    "@types/supertest": "7.2.1",
+    "@vitest/coverage-v8": "5.0.5",
+    "prisma": "7.10.1",
+    "supertest": "7.3.1",
+    "tsx": "4.23.15",
+    "vitest": "5.0.5"
+  }
+}

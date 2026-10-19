@@ -1,0 +1,110 @@
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const root = fileURLToPath(new URL("../../../", import.meta.url));
+const read = (path: string): string => readFileSync(join(root, path), "utf8");
+const readJson = (path: string) => JSON.parse(read(path)) as Record<string, unknown>;
+
+const workspacePackages = [
+  "package.json",
+  "apps/backend/package.json",
+  "apps/frontend/package.json",
+  "packages/shared/package.json",
+  "packages/repo-checks/package.json",
+];
+
+function commitlint(message: string) {
+  return spawnSync("pnpm", ["exec", "commitlint"], {
+    cwd: root,
+    input: message,
+    encoding: "utf8",
+    shell: true,
+  });
+}
+
+describe("monorepo layout", () => {
+  it("Workspace packages resolve: all three workspace packages exist and are linked", () => {
+    expect(read("pnpm-workspace.yaml")).toContain("apps/*");
+    expect(read("pnpm-workspace.yaml")).toContain("packages/*");
+    for (const dir of ["apps/backend", "apps/frontend", "packages/shared"]) {
+      expect(existsSync(join(root, dir, "package.json"))).toBe(true);
+    }
+    expect(existsSync(join(root, "apps/backend/node_modules/@todo/shared/package.json"))).toBe(true);
+    expect(existsSync(join(root, "apps/frontend/node_modules/@todo/shared/package.json"))).toBe(true);
+  });
+
+  it("No floating versions: no dependency uses latest, ^ or ~", () => {
+    for (const file of workspacePackages) {
+      const pkg = readJson(file);
+      for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
+        const deps = (pkg[field] ?? {}) as Record<string, string>;
+        for (const [name, version] of Object.entries(deps)) {
+          expect(version, `${file} ${name}`).not.toMatch(/latest|\^|~/);
+        }
+      }
+    }
+  });
+
+  it("Wrong runtime rejected: Node 22 and pnpm 10 are pinned with engine-strict", () => {
+    const pkg = readJson("package.json");
+    const engines = pkg["engines"] as Record<string, string>;
+    expect(engines["node"]).toBe(">=22.12.0 <23");
+    expect(engines["pnpm"]).toBe(">=10 <11");
+    expect(pkg["packageManager"]).toMatch(/^pnpm@10\.\d+\.\d+$/);
+    expect(read(".npmrc")).toContain("engine-strict=true");
+    expect(read(".nvmrc").trim()).toBe("22");
+  });
+});
+
+describe("quality gates", () => {
+  it("Clean checkpoint: root defines build, lint and test scripts", () => {
+    const scripts = readJson("package.json")["scripts"] as Record<string, string>;
+    expect(scripts["build"]).toBeTruthy();
+    expect(scripts["lint"]).toBeTruthy();
+    expect(scripts["test"]).toBeTruthy();
+  });
+
+  it("Failing check blocks commit: pre-commit runs build, lint and test chained with &&", () => {
+    const hook = read(".husky/pre-commit");
+    expect(hook).toContain("pnpm build");
+    expect(hook).toContain("pnpm lint --max-warnings 0");
+    expect(hook).toContain("pnpm test");
+    expect(hook.split("&&")).toHaveLength(3);
+    expect(read(".husky/commit-msg")).toContain("commitlint");
+  });
+
+  it("Bad commit message rejected: commitlint fails without the AB#ticket suffix", () => {
+    expect(commitlint("feat(setup): add thing").status).not.toBe(0);
+    expect(commitlint("added stuff AB#1001").status).not.toBe(0);
+  });
+
+  it("Good commit message accepted: type(scope): description AB#ticket", () => {
+    expect(commitlint("feat(setup): add monorepo AB#1001").status).toBe(0);
+  });
+});
+
+describe("claude code configuration", () => {
+  it("Reviewer is read-only: the agent grants only Read, Grep and Glob", () => {
+    const agent = read(".claude/agents/reviewer.md");
+    const tools = /^tools:\s*(.+)$/m.exec(agent)?.[1]?.split(",").map((t) => t.trim());
+    expect(tools).toEqual(["Read", "Grep", "Glob"]);
+  });
+
+  it("Context7 configured: .mcp.json defines a pinned Context7 server", () => {
+    const mcp = readJson(".mcp.json") as { mcpServers: Record<string, { args: string[] }> };
+    const args = mcp.mcpServers["context7"]?.args ?? [];
+    expect(args.some((a) => /^@upstash\/context7-mcp@\d+\.\d+\.\d+$/.test(a))).toBe(true);
+  });
+
+  it("Workflow commands exist: spec, plan, tasks, implement, review, pr, parallel", () => {
+    for (const name of ["spec", "plan", "tasks", "implement", "review", "pr", "parallel"]) {
+      expect(existsSync(join(root, ".claude/commands", `${name}.md`)), name).toBe(true);
+    }
+    for (const file of ["CLAUDE.md", "apps/backend/CLAUDE.md", "apps/frontend/CLAUDE.md", "packages/shared/CLAUDE.md"]) {
+      expect(existsSync(join(root, file)), file).toBe(true);
+    }
+  });
+});
