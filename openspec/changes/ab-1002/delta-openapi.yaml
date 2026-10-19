@@ -22,13 +22,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/RegisterResponse"
         "400":
-          description: Invalid email or password (VALIDATION_ERROR)
+          description: Invalid email or password, or an unparseable or unsupported request body (VALIDATION_ERROR)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Email already registered (EMAIL_TAKEN)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
           content:
             application/json:
               schema:
@@ -51,13 +57,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthTokensResponse"
         "400":
-          description: Malformed body (VALIDATION_ERROR)
+          description: Malformed body, or an unparseable or unsupported request body (VALIDATION_ERROR)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unknown email or wrong password (INVALID_CREDENTIALS)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
           content:
             application/json:
               schema:
@@ -80,13 +92,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/TokenPair"
         "400":
-          description: Missing refreshToken (VALIDATION_ERROR)
+          description: Missing refreshToken, or an unparseable or unsupported request body (VALIDATION_ERROR)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unknown, expired or revoked refresh token (INVALID_REFRESH_TOKEN). Reuse of a revoked token revokes all of the user's refresh tokens.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
           content:
             application/json:
               schema:
@@ -107,13 +125,19 @@ paths:
         "204":
           description: Token revoked, already revoked, unknown, or owned by another user (no-op)
         "400":
-          description: Missing refreshToken (VALIDATION_ERROR)
+          description: Missing refreshToken, or an unparseable or unsupported request body (VALIDATION_ERROR)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing, malformed, tampered or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
           content:
             application/json:
               schema:
@@ -216,6 +240,7 @@ components:
                 - INVALID_CREDENTIALS
                 - INVALID_REFRESH_TOKEN
                 - UNAUTHORIZED
+                - INTERNAL_ERROR
             message:
               type: string
             details:
