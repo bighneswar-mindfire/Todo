@@ -5,6 +5,7 @@ import {
   logoutRequestSchema,
   refreshRequestSchema,
   registerRequestSchema,
+  resetPasswordRequestSchema,
   zodIssuesToDetails,
   type ErrorDetail,
 } from "@todo/shared";
@@ -48,6 +49,11 @@ export function createAuthRouter(service: AuthService, authenticate: RequestHand
   router.post("/forgot-password", async (req, res) => {
     const { email } = parseBody(forgotPasswordRequestSchema, req.body);
     res.status(202).json(await service.forgotPassword(email));
+  });
+
+  router.post("/reset-password", async (req, res) => {
+    await service.resetPassword(parseBody(resetPasswordRequestSchema, req.body));
+    res.status(204).end();
   });
 
   router.post("/logout", authenticate, async (req, res) => {

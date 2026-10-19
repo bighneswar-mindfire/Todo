@@ -94,6 +94,32 @@ describe("auth: forgot password", () => {
     expect(await otpRows(email)).toHaveLength(1);
   });
 
+  it("New request invalidates earlier OTP", async () => {
+    const email = await registerUser(t.app);
+    await forgot(email).expect(202);
+    const first = t.lastOtpFor(email);
+    await forgot(email).expect(202);
+    let second = t.lastOtpFor(email);
+    // A 1-in-a-million collision would make the first code valid again; draw again if it happens.
+    while (second === first) {
+      await forgot(email).expect(202);
+      second = t.lastOtpFor(email);
+    }
+
+    const rows = await otpRows(email);
+    expect(rows.filter((r) => r.usedAt === null)).toHaveLength(1);
+
+    const stale = await request(t.app)
+      .post("/auth/reset-password")
+      .send({ email, otp: first, newPassword: "a brand new password" });
+    expect(stale.status).toBe(400);
+    expect(stale.body.error.code).toBe("INVALID_OTP");
+    await request(t.app)
+      .post("/auth/reset-password")
+      .send({ email, otp: second, newPassword: "a brand new password" })
+      .expect(204);
+  });
+
   it("Malformed forgot-password body rejected", async () => {
     const sentBefore = t.sentOtps.length;
     for (const email of [undefined, 123, "not-an-email", null]) {
