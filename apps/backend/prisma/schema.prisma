@@ -54,7 +54,7 @@ model Note {
   content       Json
   contentText   String                   @default("")
   // Generated column (title weight A, contentText weight B); defined in the migration SQL.
-  searchVector  Unsupported("tsvector")?
+  searchVector  Unsupported("tsvector")? @default(dbgenerated())
   deletedAt     DateTime?
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt

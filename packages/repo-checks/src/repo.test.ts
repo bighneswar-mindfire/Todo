@@ -68,11 +68,11 @@ describe("quality gates", () => {
   });
 
   it("Failing check blocks commit: pre-commit runs build, lint and test chained with &&", () => {
-    const hook = read(".husky/pre-commit");
-    expect(hook).toContain("pnpm build");
-    expect(hook).toContain("pnpm lint --max-warnings 0");
-    expect(hook).toContain("pnpm test");
-    expect(hook.split("&&")).toHaveLength(3);
+    const commands = read(".husky/pre-commit")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line !== "" && !line.startsWith("#"));
+    expect(commands).toEqual(["pnpm build && pnpm lint --max-warnings 0 && pnpm test"]);
     expect(read(".husky/commit-msg")).toContain("commitlint");
   });
 

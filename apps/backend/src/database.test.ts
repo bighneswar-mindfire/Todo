@@ -1,9 +1,9 @@
-import "dotenv/config";
 import { afterAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import { createPrisma, prismaPing } from "./db.js";
+import { loadEnv } from "./env.js";
 
-const connectionString = process.env["DATABASE_URL"] ?? "postgresql://todo:todo@localhost:5432/todo";
+const connectionString = loadEnv().DATABASE_URL;
 const pool = new pg.Pool({ connectionString });
 const prisma = createPrisma(connectionString);
 
