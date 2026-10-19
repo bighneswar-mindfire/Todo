@@ -1,5 +1,6 @@
 import type {
   AuthTokensResponse,
+  ForgotPasswordResponse,
   LoginRequest,
   RegisterRequest,
   TokenPair,
@@ -7,6 +8,7 @@ import type {
 } from "@todo/shared";
 import { AppError } from "../errors.js";
 import { Prisma, type PrismaClient } from "../generated/prisma/client.js";
+import { OTP_TTL_MS, consoleOtpSender, generateOtp, hashOtp, type OtpSender } from "./otp.js";
 import { createDummyHash, type PasswordHasher } from "./password.js";
 import {
   REFRESH_TOKEN_TTL_MS,
@@ -19,13 +21,17 @@ export interface AuthServiceDeps {
   prisma: PrismaClient;
   hasher: PasswordHasher;
   jwt: { secret: string };
+  otpSender?: OtpSender;
 }
+
+export const FORGOT_PASSWORD_MESSAGE = "If the account exists, a reset code has been sent.";
 
 export interface AuthService {
   register(input: RegisterRequest): Promise<User>;
   login(input: LoginRequest): Promise<AuthTokensResponse>;
   refresh(refreshToken: string): Promise<TokenPair>;
   logout(userId: string, refreshToken: string): Promise<void>;
+  forgotPassword(email: string): Promise<ForgotPasswordResponse>;
 }
 
 type RotationResult =
@@ -47,7 +53,12 @@ function invalidRefreshToken(): AppError {
   return new AppError("INVALID_REFRESH_TOKEN", 401, "Invalid refresh token");
 }
 
-export function createAuthService({ prisma, hasher, jwt }: AuthServiceDeps): AuthService {
+export function createAuthService({
+  prisma,
+  hasher,
+  jwt,
+  otpSender = consoleOtpSender,
+}: AuthServiceDeps): AuthService {
   // Started when the app is built so the first unknown-email login pays no extra cost.
   const dummyHash = createDummyHash(hasher);
   dummyHash.catch(() => undefined);
@@ -147,6 +158,32 @@ export function createAuthService({ prisma, hasher, jwt }: AuthServiceDeps): Aut
         where: { tokenHash: hashRefreshToken(refreshToken), userId, revokedAt: null },
         data: { revokedAt: new Date() },
       });
+    },
+
+    // Unknown emails answer identically and leave no trace. The user-row lock serializes
+    // concurrent requests so exactly one OTP stays active (design D3).
+    async forgotPassword(email) {
+      const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+      if (!user) return { message: FORGOT_PASSWORD_MESSAGE };
+
+      const otp = generateOtp();
+      await prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT 1 FROM "User" WHERE id = ${user.id}::uuid FOR UPDATE`;
+        const now = new Date();
+        await tx.passwordResetOtp.updateMany({
+          where: { userId: user.id, usedAt: null },
+          data: { usedAt: now },
+        });
+        await tx.passwordResetOtp.create({
+          data: {
+            userId: user.id,
+            otpHash: hashOtp(otp, user.id, jwt.secret),
+            expiresAt: new Date(now.getTime() + OTP_TTL_MS),
+          },
+        });
+      });
+      otpSender.send(email, otp);
+      return { message: FORGOT_PASSWORD_MESSAGE };
     },
   };
 }
