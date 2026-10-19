@@ -1,7 +1,7 @@
 import { errorResponseSchema } from "@todo/shared";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { buildTestApp, cleanupUsers, uniqueEmail } from "./test-helpers.js";
+import { buildTestApp, cleanupUsers, registerUser, uniqueEmail } from "./test-helpers.js";
 
 const t = buildTestApp();
 const PASSWORD = "Sup3r-secret-password-XYZ";
@@ -75,6 +75,46 @@ describe("auth: error envelope", () => {
       expect(res.status).toBeGreaterThanOrEqual(400);
       errorResponseSchema.parse(res.body);
       for (const secret of secrets) expect(res.text).not.toContain(secret);
+      expect(res.text).not.toMatch(/\bat \S+ \(|node_modules|\.ts:\d+|"stack"/);
+    }
+  });
+});
+
+describe("auth: password reset error handling and shared schemas", () => {
+  it("No leakage in reset errors", async () => {
+    const email = await registerUser(t.app);
+    await request(t.app).post("/auth/forgot-password").send({ email }).expect(202);
+    const realOtp = t.lastOtpFor(email);
+    const guess = realOtp === "424242" ? "424243" : "424242";
+    const submittedPassword = "Sub-mitted-pass-WORD-123";
+    const weakPassword = "Weak-77";
+
+    const responses: request.Response[] = [
+      await request(t.app).post("/auth/forgot-password").send({ email: "not-an-email" }),
+      await request(t.app)
+        .post("/auth/reset-password")
+        .send({ email, otp: guess, newPassword: submittedPassword }),
+      await request(t.app)
+        .post("/auth/reset-password")
+        .send({ email: uniqueEmail(), otp: guess, newPassword: submittedPassword }),
+      await request(t.app)
+        .post("/auth/reset-password")
+        .send({ email, otp: realOtp, newPassword: weakPassword }),
+      await request(t.app)
+        .post("/auth/reset-password")
+        .send({ email, otp: "12ab", newPassword: submittedPassword }),
+      await request(t.app)
+        .post("/auth/reset-password")
+        .set("Content-Type", "application/json")
+        .send(`{"email": "${email}", "otp": "${guess}", "newPassword": "${submittedPassword}"`),
+    ];
+
+    for (const res of responses) {
+      expect(res.status).toBe(400);
+      errorResponseSchema.parse(res.body);
+      for (const secret of [guess, realOtp, submittedPassword, weakPassword, "12ab"]) {
+        expect(res.text).not.toContain(secret);
+      }
       expect(res.text).not.toMatch(/\bat \S+ \(|node_modules|\.ts:\d+|"stack"/);
     }
   });

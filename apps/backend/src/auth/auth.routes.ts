@@ -1,9 +1,11 @@
 import { Router, type RequestHandler } from "express";
 import {
+  forgotPasswordRequestSchema,
   loginRequestSchema,
   logoutRequestSchema,
   refreshRequestSchema,
   registerRequestSchema,
+  resetPasswordRequestSchema,
   zodIssuesToDetails,
   type ErrorDetail,
 } from "@todo/shared";
@@ -42,6 +44,16 @@ export function createAuthRouter(service: AuthService, authenticate: RequestHand
     const { refreshToken } = parseBody(refreshRequestSchema, req.body);
     const tokens = await service.refresh(refreshToken);
     res.status(200).json(tokens);
+  });
+
+  router.post("/forgot-password", async (req, res) => {
+    const { email } = parseBody(forgotPasswordRequestSchema, req.body);
+    res.status(202).json(await service.forgotPassword(email));
+  });
+
+  router.post("/reset-password", async (req, res) => {
+    await service.resetPassword(parseBody(resetPasswordRequestSchema, req.body));
+    res.status(204).end();
   });
 
   router.post("/logout", authenticate, async (req, res) => {

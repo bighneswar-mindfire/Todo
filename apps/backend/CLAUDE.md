@@ -20,3 +20,11 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - **Per-user lock rule:** any write that rotates or revokes a user's refresh tokens as a family must first run `SELECT 1 FROM "User" WHERE id = $1::uuid FOR UPDATE` inside an interactive `$transaction` (see `refresh` in `auth.service.ts`). The transaction returns a result instead of throwing so a family revoke commits. Logout is the only exception: it only moves a token toward revoked.
 - Protect routes with `createAuthenticate({ secret })`; it sets `req.auth = { userId }` and answers 401 `UNAUTHORIZED` for anything but a valid access token.
 - Auth tests use `buildTestApp`, `uniqueEmail` and `cleanupUsers` from `src/auth/test-helpers.ts`. Emails carry a per-file run id so parallel test files never delete each other's users.
+
+## Password reset (AB-1003)
+
+- `POST /auth/forgot-password` (202, identical for unknown emails) and `POST /auth/reset-password` (204). No email is sent: the OTP goes through the injected `OtpSender`; the default `consoleOtpSender` logs `[password-reset] OTP for <email>: <code>`. Tests pass a capturing sender (`buildTestApp` -> `lastOtpFor(email)`); pass `otpSender: "default"` to exercise the console one.
+- OTP: 6 digits (`randomInt`), 10 min TTL, 5 attempts, single use, one active per user. Stored as `HMAC-SHA256(JWT_SECRET, "password-reset-otp:<userId>:<otp>")` (`src/auth/otp.ts`), so rotating `JWT_SECRET` invalidates outstanding OTPs. Never log or return the raw OTP anywhere except the sender.
+- Every reset failure is the same 400 `INVALID_OTP` (unknown email, wrong, expired, used, superseded, locked). The reset transaction returns a result instead of throwing so a wrong attempt's counter commits, and it follows the per-user lock rule above. A successful reset also revokes all of the user's refresh tokens; already-issued access tokens stay valid until they expire.
+- Known gaps (out of scope): no rate limit or cooldown on `forgot-password`, and known emails do DB writes unknown ones skip (small timing difference).
+

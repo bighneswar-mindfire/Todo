@@ -20,6 +20,20 @@ export const logoutRequestSchema = z.object({
   refreshToken: z.string().min(1).max(256),
 });
 
+export const forgotPasswordRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const forgotPasswordResponseSchema = z.object({
+  message: z.string(),
+});
+
+export const resetPasswordRequestSchema = z.object({
+  email: emailSchema,
+  otp: z.string().regex(/^\d{6}$/),
+  newPassword: z.string().min(8).max(128),
+});
+
 export const userSchema = z.object({
   id: z.uuid(),
   email: z.email(),
@@ -50,6 +64,7 @@ export const errorCodeSchema = z.enum([
   "EMAIL_TAKEN",
   "INVALID_CREDENTIALS",
   "INVALID_REFRESH_TOKEN",
+  "INVALID_OTP",
   "UNAUTHORIZED",
   "INTERNAL_ERROR",
 ]);
@@ -71,6 +86,9 @@ export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RefreshRequest = z.infer<typeof refreshRequestSchema>;
 export type LogoutRequest = z.infer<typeof logoutRequestSchema>;
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
+export type ForgotPasswordResponse = z.infer<typeof forgotPasswordResponseSchema>;
+export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 export type User = z.infer<typeof userSchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 export type TokenPair = z.infer<typeof tokenPairSchema>;

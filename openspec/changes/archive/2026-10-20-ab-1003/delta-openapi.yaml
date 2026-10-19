@@ -1,0 +1,131 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.3.0
+  description: Delta for AB-1003. Adds forgot-password and OTP-based reset-password. OTPs are logged to the server console (no email).
+paths:
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      summary: Request a password-reset OTP
+      description: >
+        If an account exists for the email, a 6-digit OTP valid for 10 minutes is generated, stored hashed and logged to the
+        server console. The response is identical whether or not the account exists. Earlier unused OTPs of that user are invalidated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "202":
+          description: Request accepted (same response for known and unknown emails)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResponse"
+        "400":
+          description: Missing or malformed email, or an unparseable or unsupported request body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      summary: Set a new password using an OTP
+      description: >
+        On success the password is replaced, the OTP is consumed and all of the user's refresh tokens are revoked, atomically.
+        No tokens are issued; the client logs in afterwards.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "204":
+          description: Password changed, OTP consumed, all sessions revoked
+        "400":
+          description: >
+            VALIDATION_ERROR for a malformed body (bad email, otp not exactly 6 digits, newPassword outside 8 to 128 characters).
+            INVALID_OTP for an unknown email, wrong, expired, already used, superseded or locked (5 failed attempts) OTP; all share one message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          description: Trimmed and lowercased before lookup
+    ForgotPasswordResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Fixed generic text, for example "If the account exists, a reset code has been sent."
+    ResetPasswordRequest:
+      type: object
+      required: [email, otp, newPassword]
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          pattern: "^\\d{6}$"
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Extends the AB-1002 enum with INVALID_OTP
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_TAKEN
+                - INVALID_CREDENTIALS
+                - INVALID_REFRESH_TOKEN
+                - INVALID_OTP
+                - UNAUTHORIZED
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              description: Present on VALIDATION_ERROR; one entry per invalid field
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
