@@ -87,15 +87,15 @@
 
 ## 6. Error envelope, wiring checks, definition of done
 
-- [ ] 6.1 `apps/backend/src/auth/errors.test.ts`, `describe("auth: error envelope")`:
-  - [ ] Validation error shape
-  - [ ] No credential leakage in errors
-- [ ] 6.2 Test: **Backend consumes shared auth schemas** (`describe("auth: configuration and shared schemas")`): asserts the auth routes import the request schemas from `@todo/shared` and that `apps/backend/src` declares no Zod auth schemas and does not import `zod`. Success of `pnpm build` is part of Checkpoint 6.
-- [ ] 6.3 `pnpm test --coverage`: at least 80% on new code (thresholds already enforced); fix gaps with tests, not exclusions.
-- [ ] 6.4 Manual smoke test against the running dev server: register -> login -> refresh -> reuse of the old token -> logout, plus each error status (400, 401, 409), confirming status codes match `delta-openapi.yaml`.
-- [ ] 6.5 `openspec validate ab-1002` passes; confirm 34 scenarios map to 34 named tests (no scenario missing, none duplicated).
-- [ ] 6.6 Update `apps/backend/CLAUDE.md` with the auth conventions (error envelope, `AppError`, per-user lock rule for refresh-token writes) and `JWT_SECRET` requirement.
-- [ ] **Checkpoint 6 / DoD**: `pnpm build` 0 errors and 0 warnings, `pnpm lint --max-warnings 0`, `pnpm test --coverage` green. Then commit (`feat(auth): ... AB#1002`), `/review AB-1002` in a fresh terminal (all green), `openspec archive`, `/pr`.
+- [x] 6.1 `apps/backend/src/auth/errors.test.ts`, `describe("auth: error envelope")`:
+  - [x] Validation error shape
+  - [x] No credential leakage in errors
+- [x] 6.2 Test: **Backend consumes shared auth schemas** (`describe("auth: configuration and shared schemas")`): asserts the auth routes import the request schemas from `@todo/shared` and that `apps/backend/src` declares no Zod auth schemas and does not import `zod`. Success of `pnpm build` is part of Checkpoint 6.
+- [x] 6.3 `pnpm test --coverage`: at least 80% on new code (thresholds already enforced); fix gaps with tests, not exclusions.
+- [x] 6.4 Manual smoke test against the running dev server: register -> login -> refresh -> reuse of the old token -> logout, plus each error status (400, 401, 409), confirming status codes match `delta-openapi.yaml`.
+- [x] 6.5 `openspec validate ab-1002` passes; confirm 34 scenarios map to 34 named tests (no scenario missing, none duplicated).
+- [x] 6.6 Update `apps/backend/CLAUDE.md` with the auth conventions (error envelope, `AppError`, per-user lock rule for refresh-token writes) and `JWT_SECRET` requirement.
+- [x] **Checkpoint 6 / DoD**: `pnpm build` 0 errors and 0 warnings, `pnpm lint --max-warnings 0`, `pnpm test --coverage` green. Then commit (`feat(auth): ... AB#1002`), `/review AB-1002` in a fresh terminal (all green), `openspec archive`, `/pr`.
 
 ## Scenario to test map (34)
 

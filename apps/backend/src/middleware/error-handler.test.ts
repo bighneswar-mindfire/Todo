@@ -65,6 +65,39 @@ describe("error handler", () => {
     expect(JSON.stringify(spy.mock.calls)).not.toContain(SECRET);
   });
 
+  it("[design] Unsupported charset: returns 400 VALIDATION_ERROR", async () => {
+    const res = await request(buildApp())
+      .post("/echo")
+      .set("Content-Type", "application/json; charset=bogus")
+      .send(JSON.stringify({ a: 1 }));
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("[design] Unsupported content encoding: returns 400 VALIDATION_ERROR", async () => {
+    const res = await request(buildApp())
+      .post("/echo")
+      .set("Content-Type", "application/json")
+      .set("Content-Encoding", "bogus")
+      .send(JSON.stringify({ a: 1 }));
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("[design] Thrown non-Error value: returns 500 INTERNAL_ERROR without echoing it", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const app = express();
+    app.get("/throw-string", () => {
+      throw SECRET;
+    });
+    app.use(errorHandler);
+    const res = await request(app).get("/throw-string");
+    expect(res.status).toBe(500);
+    expect(res.body.error.code).toBe("INTERNAL_ERROR");
+    expect(res.text).not.toContain(SECRET);
+    expect(JSON.stringify(spy.mock.calls)).not.toContain(SECRET);
+  });
+
   it("[design] AppError: maps to its status, code, message and details", async () => {
     const res = await request(buildApp()).get("/app-error");
     expect(res.status).toBe(401);
