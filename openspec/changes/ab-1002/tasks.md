@@ -24,11 +24,11 @@
 
 ## 2. Backend building blocks
 
-- [ ] 2.1 [PARALLEL] (Sonnet) `apps/backend/src/errors.ts` (`AppError(code, status, message, details?)`) and `src/middleware/error-handler.ts` (4-arg): `AppError` -> its status/code; body-parser errors by `err.type`/`err.status` -> 400 `VALIDATION_ERROR` with fixed message and `details: [{ field: "body", ... }]`, never echoing or logging `err.message`/`err.body`; anything else -> log class/safe message only, 500 `INTERNAL_ERROR`, no stack. `[design]` tests: malformed JSON returns 400 with no echoed content; oversized body -> 400; unexpected error -> 500 `INTERNAL_ERROR` with no stack trace.
-- [ ] 2.2 [PARALLEL] (Sonnet) `src/auth/password.ts`: `createPasswordHasher(params)` returning `{ hash, verify }` per D1 (async scrypt, `scrypt$N$r$p$salt$hash`, `maxmem = 2*128*N*r`, bounds-checked params on verify, equal-length check before `timingSafeEqual`); exported production params N=2^16, r=8, p=2; `createDummyHash` helper. `[design]` tests: round trip; wrong password false; out-of-range or corrupt stored hash -> false without allocating; two hashes of one password differ.
-- [ ] 2.3 [PARALLEL] (Sonnet) `src/auth/tokens.ts`: `signAccessToken` (single `iat`, `exp = iat + 900`, `typ: "at+jwt"`, HS256), `verifyAccessToken` (`algorithms`, `requiredClaims`, `typ`, claims via `safeParse`, any failure -> `AppError(UNAUTHORIZED, 401)`), `generateRefreshToken` (32 bytes base64url), `hashRefreshToken` (sha256 hex), `REFRESH_TOKEN_TTL_MS` (7 days) and `ACCESS_TOKEN_TTL_SECONDS` (900) constants.
-- [ ] 2.4 (Haiku) Express type augmentation `req.auth?: { userId: string }` in `src/types/express.d.ts`.
-- [ ] **Checkpoint 2**: build, lint, test.
+- [x] 2.1 [PARALLEL] (Sonnet) `apps/backend/src/errors.ts` (`AppError(code, status, message, details?)`) and `src/middleware/error-handler.ts` (4-arg): `AppError` -> its status/code; body-parser errors by `err.type`/`err.status` -> 400 `VALIDATION_ERROR` with fixed message and `details: [{ field: "body", ... }]`, never echoing or logging `err.message`/`err.body`; anything else -> log class/safe message only, 500 `INTERNAL_ERROR`, no stack. `[design]` tests: malformed JSON returns 400 with no echoed content; oversized body -> 400; unexpected error -> 500 `INTERNAL_ERROR` with no stack trace.
+- [x] 2.2 [PARALLEL] (Sonnet) `src/auth/password.ts`: `createPasswordHasher(params)` returning `{ hash, verify }` per D1 (async scrypt, `scrypt$N$r$p$salt$hash`, `maxmem = 2*128*N*r`, bounds-checked params on verify, equal-length check before `timingSafeEqual`); exported production params N=2^16, r=8, p=2; `createDummyHash` helper. `[design]` tests: round trip; wrong password false; out-of-range or corrupt stored hash -> false without allocating; two hashes of one password differ.
+- [x] 2.3 [PARALLEL] (Sonnet) `src/auth/tokens.ts`: `signAccessToken` (single `iat`, `exp = iat + 900`, `typ: "at+jwt"`, HS256), `verifyAccessToken` (`algorithms`, `requiredClaims`, `typ`, claims via `safeParse`, any failure -> `AppError(UNAUTHORIZED, 401)`), `generateRefreshToken` (32 bytes base64url), `hashRefreshToken` (sha256 hex), `REFRESH_TOKEN_TTL_MS` (7 days) and `ACCESS_TOKEN_TTL_SECONDS` (900) constants.
+- [x] 2.4 (Haiku) Express type augmentation `req.auth?: { userId: string }` in `src/types/express.d.ts`.
+- [x] **Checkpoint 2**: build, lint, test.
 
 ## 3. Register and login
 
