@@ -58,7 +58,7 @@ export const trashNoteSummarySchema = noteSummaryBase.extend({
   deletedAt: z.iso.datetime(),
 });
 
-const listMeta = { page: z.number().int(), limit: z.number().int(), total: z.number().int() };
+export const listMeta = { page: z.number().int(), limit: z.number().int(), total: z.number().int() };
 
 export const noteListResponseSchema = z.object({ items: z.array(noteSummarySchema), ...listMeta });
 export const trashListResponseSchema = z.object({

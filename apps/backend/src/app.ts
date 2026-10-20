@@ -10,6 +10,8 @@ import type { PrismaClient } from "./generated/prisma/client.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { createNotesRouter } from "./notes/notes.routes.js";
 import { createNotesService } from "./notes/notes.service.js";
+import { createSearchRouter } from "./search/search.routes.js";
+import { createSearchService } from "./search/search.service.js";
 import { createTagsRouter } from "./tags/tags.routes.js";
 import { createTagsService } from "./tags/tags.service.js";
 
@@ -45,6 +47,8 @@ export function createApp({ ping, prisma, hasher, jwt, otpSender }: AppDeps): Ex
   const tagsService = createTagsService({ prisma });
   app.use("/tags", createTagsRouter(tagsService, createAuthenticate(jwt)));
   app.use("/notes", createNotesRouter(createNotesService({ prisma }), tagsService, createAuthenticate(jwt)));
+
+  app.use("/search", createSearchRouter(createSearchService({ prisma }), createAuthenticate(jwt)));
 
   app.use(errorHandler);
 
