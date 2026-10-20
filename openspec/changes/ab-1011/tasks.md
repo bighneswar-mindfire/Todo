@@ -23,11 +23,11 @@
 
 ## 2. URL state, tag color and queries
 
-- [ ] 2.1 Create `src/lib/list-params.ts`: `PAGE_SIZE = 20`, `parseListParams(URLSearchParams)` (`page` must match `^[1-9]\d*$` else 1; `tagId` validated with `noteListQuerySchema.shape.tagId.safeParse` from `@todo/shared`, invalid dropped) and `buildListParams({ page, tagId })` (bare for page 1 without a tag; key order `page`, `tagId`) (Sonnet)
-- [ ] 2.2 [PARALLEL] Create `src/lib/tag-color.ts`: `textColorFor(hex)` returns black or white from relative luminance (Haiku)
-- [ ] 2.3 [PARALLEL] Create `src/queries/notes.ts`: `notesKeys`, `useNotesList({ page, tagId })` with `placeholderData: keepPreviousData`, and `useTags()` as a separate query (Sonnet)
-- [ ] 2.4 Unit tests (not scenarios) in `src/lib/list-params.test.ts` and `src/lib/tag-color.test.ts`: page parsing edge cases (`abc`, `0`, `-1`, `1.5`, `2`), tagId validity, build output order, black and white thresholds (Haiku)
-- [ ] 2.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.1 Create `src/lib/list-params.ts`: `PAGE_SIZE = 20`, `parseListParams(URLSearchParams)` (`page` must match `^[1-9]\d*$` else 1; `tagId` validated with `noteListQuerySchema.shape.tagId.safeParse` from `@todo/shared`, invalid dropped) and `buildListParams({ page, tagId })` (bare for page 1 without a tag; key order `page`, `tagId`) (Sonnet)
+- [x] 2.2 [PARALLEL] Create `src/lib/tag-color.ts`: `textColorFor(hex)` returns black or white from relative luminance (Haiku)
+- [x] 2.3 [PARALLEL] Create `src/queries/notes.ts`: `notesKeys`, `useNotesList({ page, tagId })` with `placeholderData: keepPreviousData`, and `useTags()` as a separate query (Sonnet)
+- [x] 2.4 Unit tests (not scenarios) in `src/lib/list-params.test.ts` and `src/lib/tag-color.test.ts`: page parsing edge cases (`abc`, `0`, `-1`, `1.5`, `2`), tagId validity, build output order, black and white thresholds (Haiku)
+- [x] 2.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Components
 
