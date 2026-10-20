@@ -121,7 +121,7 @@
 
 - [x] 5.1 Update `apps/frontend/CLAUDE.md`: structure, `/api` proxy and `VITE_API_BASE`, session store and refresh rules, test helpers (Haiku)
 - [x] 5.2 Manual smoke with the `run` skill: start Postgres and backend, `pnpm --filter @todo/frontend dev`, register, log in, reload (session persists), forgot/reset using the OTP from the backend console, log out; note results in the PR description (Sonnet)
-- [x] 5.3 Scenario audit: confirm every one of the 47 scenario titles in `specs/frontend-auth/spec.md` has exactly one test with that exact name (grep script or manual list) (Haiku)
+- [x] 5.3 Scenario audit: confirm every one of the 49 scenario titles in `specs/frontend-auth/spec.md` has exactly one test with that exact name (grep script or manual list) (Haiku)
 - [x] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`
 
 ## 6. Review fix R3 (refresh failure without server rejection)

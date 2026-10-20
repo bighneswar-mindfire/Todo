@@ -116,7 +116,7 @@ Each form uses `useForm({ resolver: zodResolver(sharedSchema, { error: friendlyZ
 - Mutations are `useMutation({ mutationFn })` calling the endpoint functions; navigation happens in `onSuccess`.
 - Alternative: hand-rolled `useState` forms with `schema.safeParse`. Rejected: RHF already pairs with the Zod resolver and gives field-level error wiring; hand-rolling would reimplement it per page.
 
-Messages shown: login "Invalid email or password"; reset "Invalid or expired code"; register-taken "That email is already registered" (the spec's own wording is "email already registered"; the exact copy is fixed in the tasks and tests).
+Messages shown: login "Invalid email or password"; reset "Invalid or expired code"; register-taken "Email already registered" (the spec and the tests pin this exact copy).
 
 ### D8. UI primitives: shadcn/ui, copied in, no CLI, no Radix
 
