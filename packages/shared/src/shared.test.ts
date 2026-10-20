@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  createNoteRequestSchema,
   emailSchema,
+  errorCodeSchema,
   forgotPasswordRequestSchema,
   healthSchema,
+  pageQuerySchema,
   parseEnv,
   registerRequestSchema,
   resetPasswordRequestSchema,
+  updateNoteRequestSchema,
   zodIssuesToDetails,
 } from "./index.js";
 
@@ -83,5 +87,41 @@ describe("auth: configuration and shared schemas", () => {
     expect(() => parseEnv(base)).toThrow(/JWT_SECRET/);
     expect(() => parseEnv({ ...base, JWT_SECRET: "x".repeat(31) })).toThrow(/JWT_SECRET/);
     expect(parseEnv({ ...base, JWT_SECRET }).JWT_SECRET).toBe(JWT_SECRET);
+  });
+});
+
+describe("shared note schemas", () => {
+  const doc = { type: "doc", content: [] };
+
+  it("[design] title bounds are trimmed 1 to 200", () => {
+    const ok = (title: string) => createNoteRequestSchema.safeParse({ title, content: doc }).success;
+    expect(ok("")).toBe(false);
+    expect(ok("   ")).toBe(false);
+    expect(ok("a")).toBe(true);
+    expect(ok("a".repeat(200))).toBe(true);
+    expect(ok("a".repeat(201))).toBe(false);
+  });
+
+  it("[design] content must be a doc and defaults to an empty doc", () => {
+    expect(createNoteRequestSchema.safeParse({ title: "t", content: { type: "paragraph" } }).success).toBe(false);
+    expect(createNoteRequestSchema.safeParse({ title: "t", content: "x" }).success).toBe(false);
+    expect(createNoteRequestSchema.parse({ title: "t" }).content).toEqual(doc);
+  });
+
+  it("[design] an empty patch is rejected", () => {
+    expect(updateNoteRequestSchema.safeParse({}).success).toBe(false);
+    expect(updateNoteRequestSchema.safeParse({ title: "x" }).success).toBe(true);
+    expect(updateNoteRequestSchema.safeParse({ content: doc }).success).toBe(true);
+  });
+
+  it("[design] page and limit coerce, default and are bounded", () => {
+    expect(pageQuerySchema.parse({})).toEqual({ page: 1, limit: 20 });
+    expect(pageQuerySchema.parse({ page: "2", limit: "100" })).toEqual({ page: 2, limit: 100 });
+    expect(pageQuerySchema.safeParse({ limit: "101" }).success).toBe(false);
+    expect(pageQuerySchema.safeParse({ page: "0" }).success).toBe(false);
+  });
+
+  it("[design] NOT_FOUND is a known error code", () => {
+    expect(errorCodeSchema.options).toContain("NOT_FOUND");
   });
 });

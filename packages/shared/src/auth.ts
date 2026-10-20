@@ -66,6 +66,7 @@ export const errorCodeSchema = z.enum([
   "INVALID_REFRESH_TOKEN",
   "INVALID_OTP",
   "UNAUTHORIZED",
+  "NOT_FOUND",
   "INTERNAL_ERROR",
 ]);
 
