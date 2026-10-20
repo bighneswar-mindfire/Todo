@@ -2,13 +2,20 @@ import { Router, type RequestHandler } from "express";
 import {
   createNoteRequestSchema,
   noteIdParamSchema,
+  noteListQuerySchema,
+  noteTagParamsSchema,
   pageQuerySchema,
   updateNoteRequestSchema,
 } from "@todo/shared";
 import { parseBody, parseParams, parseQuery } from "../http/parse.js";
+import type { TagsService } from "../tags/tags.service.js";
 import type { NotesService } from "./notes.service.js";
 
-export function createNotesRouter(service: NotesService, authenticate: RequestHandler): Router {
+export function createNotesRouter(
+  service: NotesService,
+  tags: TagsService,
+  authenticate: RequestHandler,
+): Router {
   const router = Router();
   router.use(authenticate);
 
@@ -18,7 +25,7 @@ export function createNotesRouter(service: NotesService, authenticate: RequestHa
   });
 
   router.get("/", async (req, res) => {
-    res.status(200).json(await service.list(req.auth!.userId, parseQuery(pageQuerySchema, req.query)));
+    res.status(200).json(await service.list(req.auth!.userId, parseQuery(noteListQuerySchema, req.query)));
   });
 
   // Registered before "/:id" so "trash" is never parsed as a note id.
@@ -46,6 +53,18 @@ export function createNotesRouter(service: NotesService, authenticate: RequestHa
   router.post("/:id/restore", async (req, res) => {
     const { id } = parseParams(noteIdParamSchema, req.params);
     res.status(200).json(await service.restore(req.auth!.userId, id));
+  });
+
+  router.put("/:id/tags/:tagId", async (req, res) => {
+    const { id, tagId } = parseParams(noteTagParamsSchema, req.params);
+    await tags.attach(req.auth!.userId, id, tagId);
+    res.status(204).end();
+  });
+
+  router.delete("/:id/tags/:tagId", async (req, res) => {
+    const { id, tagId } = parseParams(noteTagParamsSchema, req.params);
+    await tags.detach(req.auth!.userId, id, tagId);
+    res.status(204).end();
   });
 
   return router;

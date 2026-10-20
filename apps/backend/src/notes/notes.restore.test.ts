@@ -1,7 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildTestApp, cleanupUsers, type TestApp } from "../auth/test-helpers.js";
-import { auth, createNote, registerAndLogin, setDeletedAt } from "./test-helpers.js";
+import { auth, createNote, registerAndLogin, setDeletedAt , attachTag, createTag } from "./test-helpers.js";
 
 describe("notes: restore note", () => {
   let t: TestApp;
@@ -54,5 +54,16 @@ describe("notes: restore note", () => {
     expect(res.body.error.code).toBe("NOT_FOUND");
     const row = await t.prisma.note.findUniqueOrThrow({ where: { id: note.id } });
     expect(row.deletedAt).not.toBeNull();
+  });
+
+  it("Restore keeps tags", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user);
+    const tag = await createTag(t.app, user, { name: "Keep" });
+    await attachTag(t.app, user, note.id, tag.id);
+    await request(t.app).delete(`/notes/${note.id}`).set(auth(user)).expect(204);
+    const res = await request(t.app).post(`/notes/${note.id}/restore`).set(auth(user));
+    expect(res.status).toBe(200);
+    expect(res.body.tags.map((x: { id: string }) => x.id)).toEqual([tag.id]);
   });
 });

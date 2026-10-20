@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildTestApp, cleanupUsers, type TestApp } from "../auth/test-helpers.js";
-import { DOC, auth, createNote, registerAndLogin, setDeletedAt } from "./test-helpers.js";
+import { DOC, auth, createNote, registerAndLogin, setDeletedAt , attachTag, createTag } from "./test-helpers.js";
 
 describe("notes: get note", () => {
   let t: TestApp;
@@ -52,5 +52,17 @@ describe("notes: get note", () => {
     const res = await request(t.app).get("/notes/not-a-uuid").set(auth(user));
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("Get note includes tags", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user);
+    const b = await createTag(t.app, user, { name: "b-tag" });
+    const a = await createTag(t.app, user, { name: "a-tag" });
+    await attachTag(t.app, user, note.id, b.id);
+    await attachTag(t.app, user, note.id, a.id);
+    const res = await request(t.app).get(`/notes/${note.id}`).set(auth(user));
+    expect(res.status).toBe(200);
+    expect(res.body.tags.map((x: { name: string }) => x.name)).toEqual(["a-tag", "b-tag"]);
   });
 });

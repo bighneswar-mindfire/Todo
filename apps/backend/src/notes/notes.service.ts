@@ -4,7 +4,9 @@ import {
   type CreateNoteRequest,
   type Note,
   type NoteListResponse,
+  type NoteListQuery,
   type PageQuery,
+  type TagRef,
   type TipTapDoc,
   type TrashListResponse,
   type UpdateNoteRequest,
@@ -19,7 +21,7 @@ export interface NotesServiceDeps {
 
 export interface NotesService {
   create(userId: string, input: CreateNoteRequest): Promise<Note>;
-  list(userId: string, page: PageQuery): Promise<NoteListResponse>;
+  list(userId: string, query: NoteListQuery): Promise<NoteListResponse>;
   get(userId: string, id: string): Promise<Note>;
   update(userId: string, id: string, input: UpdateNoteRequest): Promise<Note>;
   softDelete(userId: string, id: string): Promise<void>;
@@ -37,10 +39,22 @@ function toJson(doc: TipTapDoc): Prisma.InputJsonValue {
   return doc as Prisma.InputJsonValue;
 }
 
+const tagsInclude = {
+  orderBy: { tag: { name: "asc" } },
+  select: { tag: { select: { id: true, name: true, color: true } } },
+} as const;
+
+type TagLinks = { tag: TagRef }[];
+
+function flattenTags(links: TagLinks): TagRef[] {
+  return links.map((l) => l.tag);
+}
+
 function toNote(row: {
   id: string;
   title: string;
   content: Prisma.JsonValue;
+  tags: TagLinks;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -49,6 +63,7 @@ function toNote(row: {
     id: row.id,
     title: row.title,
     content: row.content as TipTapDoc,
+    tags: flattenTags(row.tags),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     deletedAt: row.deletedAt ? row.deletedAt.toISOString() : null,
@@ -65,7 +80,10 @@ function restoreCutoff(): Date {
 
 export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
   async function findOwned(userId: string, id: string): Promise<Note> {
-    const row = await prisma.note.findFirst({ where: { id, userId } });
+    const row = await prisma.note.findFirst({
+      where: { id, userId },
+      include: { tags: tagsInclude },
+    });
     if (!row) throw notFound();
     return toNote(row);
   }
@@ -75,18 +93,33 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
       const row = await prisma.note.create({
         data: { userId, title, content: toJson(content), contentText: extractText(content) },
       });
-      return toNote(row);
+      return toNote({ ...row, tags: [] });
     },
 
-    async list(userId, { page, limit }) {
-      const where = { userId, deletedAt: null };
+    async list(userId, { page, limit, tagId }) {
+      if (tagId !== undefined) {
+        const tag = await prisma.tag.findFirst({ where: { id: tagId, userId }, select: { id: true } });
+        if (!tag) throw new AppError("NOT_FOUND", 404, "Tag not found");
+      }
+      const where: Prisma.NoteWhereInput = {
+        userId,
+        deletedAt: null,
+        ...(tagId !== undefined ? { tags: { some: { tagId } } } : {}),
+      };
       const [rows, total] = await prisma.$transaction([
         prisma.note.findMany({
           where,
           orderBy: { updatedAt: "desc" },
           skip: (page - 1) * limit,
           take: limit,
-          select: { id: true, title: true, contentText: true, createdAt: true, updatedAt: true },
+          select: {
+            id: true,
+            title: true,
+            contentText: true,
+            createdAt: true,
+            updatedAt: true,
+            tags: tagsInclude,
+          },
         }),
         prisma.note.count({ where }),
       ]);
@@ -95,6 +128,7 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
           id: r.id,
           title: r.title,
           excerpt: excerpt(r.contentText),
+          tags: flattenTags(r.tags),
           createdAt: r.createdAt.toISOString(),
           updatedAt: r.updatedAt.toISOString(),
         })),
@@ -105,7 +139,10 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
     },
 
     async get(userId, id) {
-      const row = await prisma.note.findFirst({ where: { id, userId, deletedAt: null } });
+      const row = await prisma.note.findFirst({
+        where: { id, userId, deletedAt: null },
+        include: { tags: tagsInclude },
+      });
       if (!row) throw notFound();
       return toNote(row);
     },
