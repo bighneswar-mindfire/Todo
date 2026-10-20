@@ -1,0 +1,71 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.10.0
+  description: |
+    Delta for AB-1010 (frontend foundation and auth UI). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1002 (register, login, refresh, logout) and AB-1003 (forgot-password, reset-password).
+
+    The frontend consumes the endpoints listed under `x-frontend-consumes`, which also records how the UI must react to each status code. Tests assert these reactions. The error body is always `{ error: { code, message, details? } }`.
+
+    Transport note: the browser calls the API under the `/api` base path. In development the Vite dev server proxies `/api/*` to the backend at `http://localhost:3000` and strips the `/api` prefix, because the backend has neither CORS nor an `/api` prefix. The backend routes are unchanged.
+paths: {}
+x-frontend-consumes:
+  /auth/register:
+    post:
+      operationId: register
+      auth: none
+      onStatus:
+        "201": Navigate to /login with the "account created" notice. No session is created.
+        "400": VALIDATION_ERROR. Show each `details[].field` message on the matching field.
+        "409": EMAIL_TAKEN. Inline error on the email field.
+        "500": INTERNAL_ERROR. Generic form-level alert.
+  /auth/login:
+    post:
+      operationId: login
+      auth: none
+      onStatus:
+        "200": Store accessToken, refreshToken and user, then navigate to the requested path or "/".
+        "400": VALIDATION_ERROR. Show field messages.
+        "401": INVALID_CREDENTIALS. One generic form-level alert, identical for wrong password and unknown email. Never triggers a token refresh.
+        "500": INTERNAL_ERROR. Generic form-level alert.
+  /auth/refresh:
+    post:
+      operationId: refresh
+      auth: none (sends the refresh token in the body)
+      trigger: Called by the API client when an authenticated request returns 401. Single-flight, at most once per failed request.
+      onStatus:
+        "200": Store the rotated token pair and retry the original request once.
+        "400": VALIDATION_ERROR. Treated as a failed refresh.
+        "401": INVALID_REFRESH_TOKEN. Clear the session and navigate to /login.
+  /auth/logout:
+    post:
+      operationId: logout
+      auth: bearer
+      onStatus:
+        "204": Clear session and query cache, navigate to /login.
+        "400": Ignored. Session is still cleared locally.
+        "401": Ignored (no refresh attempt for logout). Session is still cleared locally.
+        "500": Ignored. Session is still cleared locally.
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      auth: none
+      onStatus:
+        "202": Show the generic confirmation and navigate to /reset-password with the email prefilled. Identical for known and unknown emails.
+        "400": VALIDATION_ERROR. Inline error on the email field.
+        "500": INTERNAL_ERROR. Generic form-level alert.
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      auth: none
+      onStatus:
+        "204": Navigate to /login with the "password changed" notice.
+        "400": VALIDATION_ERROR shows field messages. INVALID_OTP shows one form-level alert "Invalid or expired code" and keeps the fields.
+        "500": INTERNAL_ERROR. Generic form-level alert.
+components:
+  schemas:
+    ClientErrorCode:
+      description: |
+        Client-only error code produced by the frontend API client when no HTTP response was received (fetch rejected). It is never sent by the backend and is not part of `errorCodeSchema` in `@todo/shared`. It exists only on the frontend `ApiError` type.
+      type: string
+      enum: [NETWORK_ERROR]

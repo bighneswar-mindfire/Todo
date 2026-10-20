@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  clientErrorCodeSchema,
   createNoteRequestSchema,
   createTagRequestSchema,
   emailSchema,
@@ -21,6 +22,11 @@ const JWT_SECRET = "s".repeat(32);
 describe("shared schemas", () => {
   it("accepts a valid health payload", () => {
     expect(healthSchema.parse({ status: "ok" })).toEqual({ status: "ok" });
+  });
+
+  it("keeps the client-only error code out of the backend error codes", () => {
+    expect(clientErrorCodeSchema.parse("NETWORK_ERROR")).toBe("NETWORK_ERROR");
+    expect(errorCodeSchema.safeParse("NETWORK_ERROR").success).toBe(false);
   });
 
   it("rejects an unknown health status", () => {

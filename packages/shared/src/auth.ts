@@ -71,6 +71,9 @@ export const errorCodeSchema = z.enum([
   "INTERNAL_ERROR",
 ]);
 
+// Produced by the frontend API client when no HTTP response arrived. The backend never sends it.
+export const clientErrorCodeSchema = z.enum(["NETWORK_ERROR"]);
+
 export const errorDetailSchema = z.object({
   field: z.string(),
   message: z.string(),
@@ -97,6 +100,7 @@ export type TokenPair = z.infer<typeof tokenPairSchema>;
 export type AuthTokensResponse = z.infer<typeof authTokensResponseSchema>;
 export type AccessTokenClaims = z.infer<typeof accessTokenClaimsSchema>;
 export type ErrorCode = z.infer<typeof errorCodeSchema>;
+export type ClientErrorCode = z.infer<typeof clientErrorCodeSchema>;
 export type ErrorDetail = z.infer<typeof errorDetailSchema>;
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
