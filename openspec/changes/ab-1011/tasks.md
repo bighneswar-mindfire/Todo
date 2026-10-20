@@ -14,7 +14,7 @@
 - [x] 1.1 Create `src/api/notes.ts`: `listNotes({ page, limit, tagId })` (query built with `URLSearchParams` in order `page`, `limit`, `tagId`, `tagId` only when set; `auth: "bearer"`, `schema: noteListResponseSchema`) and `listTags()` (`tagListResponseSchema`) (Sonnet)
 - [x] 1.2 [PARALLEL] Extend `src/test/fake-api.ts`: `FakeRequest` and `FakeCall` gain `query: URLSearchParams`; route key still ignores the query string (Haiku)
 - [x] 1.3 [PARALLEL] Extend `src/test/fixtures.ts`: `makeNote`, `makeTag`, `notesPage({ items, page, limit, total })`, `routeEmptyNotes()` (empty `GET /notes` and `GET /tags`), and a `deferred()` helper for held responses (Haiku)
-- [ ] 1.4 Update the existing tests that open `/` (`App.test.tsx`, `foundation.test.tsx`) to call `routeEmptyNotes()` where they now trigger list requests (Haiku)
+- [x] 1.4 Update the existing tests that open `/` (`App.test.tsx`, `foundation.test.tsx`) to call `routeEmptyNotes()` where they now trigger list requests (Haiku)
 
 `src/api/notes.test.ts` - Requirement: Notes API functions
 - [x] 1.5 Test "listNotes builds the query"
@@ -39,56 +39,56 @@
 
 ## 4. Page, route and page tests
 
-- [ ] 4.1 `git mv` `pages/HomePage.tsx` and `HomePage.test.tsx` to `NotesPage.*`; keep header (email, **Log out**) and the logout mutation unchanged; update `routes/router.tsx` so `/` renders `NotesPage` (Sonnet)
-- [ ] 4.2 Implement `NotesPage` per design D3 to D6: read `useSearchParams` through `parseListParams`; wire queries, `TagFilter`, list, `PaginationBar` and the render order (404 with tag, generic error with **Retry**, loading `role="status"` "Loading notes", empty states, list); tag change drops `page`; pagination pushes, out-of-range effect replaces (guarded by `!isPlaceholderData`) (Sonnet)
-- [ ] 4.3 Keep the three relocated AB-1010 tests (logout and home) green in `NotesPage.test.tsx` with `routeEmptyNotes()` (Haiku)
+- [x] 4.1 `git mv` `pages/HomePage.tsx` and `HomePage.test.tsx` to `NotesPage.*`; keep header (email, **Log out**) and the logout mutation unchanged; update `routes/router.tsx` so `/` renders `NotesPage` (Sonnet)
+- [x] 4.2 Implement `NotesPage` per design D3 to D6: read `useSearchParams` through `parseListParams`; wire queries, `TagFilter`, list, `PaginationBar` and the render order (404 with tag, generic error with **Retry**, loading `role="status"` "Loading notes", empty states, list); tag change drops `page`; pagination pushes, out-of-range effect replaces (guarded by `!isPlaceholderData`) (Sonnet)
+- [x] 4.3 Keep the three relocated AB-1010 tests (logout and home) green in `NotesPage.test.tsx` with `routeEmptyNotes()` (Haiku)
 
 `src/pages/NotesPage.test.tsx` - Requirement: Notes list page
-- [ ] 4.4 Test "Notes are listed with their details"
-- [ ] 4.5 Test "Tags are shown on each note"
-- [ ] 4.6 Test "Empty excerpt is omitted"
-- [ ] 4.7 Test "API order is kept"
-- [ ] 4.8 Test "First request uses defaults"
-- [ ] 4.9 Test "Unauthenticated visit is redirected"
+- [x] 4.4 Test "Notes are listed with their details"
+- [x] 4.5 Test "Tags are shown on each note"
+- [x] 4.6 Test "Empty excerpt is omitted"
+- [x] 4.7 Test "API order is kept"
+- [x] 4.8 Test "First request uses defaults"
+- [x] 4.9 Test "Unauthenticated visit is redirected"
 
 `src/pages/NotesPage.test.tsx` - Requirement: Pagination
-- [ ] 4.10 Test "Pagination hidden for a single page"
-- [ ] 4.11 Test "Pagination shows position"
-- [ ] 4.12 Test "Next loads the next page"
-- [ ] 4.13 Test "Last page disables Next"
-- [ ] 4.14 Test "Previous page stays visible while loading"
-- [ ] 4.15 Test "Page beyond the end falls back to the last page"
+- [x] 4.10 Test "Pagination hidden for a single page"
+- [x] 4.11 Test "Pagination shows position"
+- [x] 4.12 Test "Next loads the next page"
+- [x] 4.13 Test "Last page disables Next"
+- [x] 4.14 Test "Previous page stays visible while loading"
+- [x] 4.15 Test "Page beyond the end falls back to the last page"
 
 `src/pages/NotesPage.test.tsx` - Requirement: Tag filter
-- [ ] 4.16 Test "Filter buttons list the tags"
-- [ ] 4.17 Test "Choosing a tag filters the list"
-- [ ] 4.18 Test "Choosing a tag resets the page"
-- [ ] 4.19 Test "Clearing the filter"
-- [ ] 4.20 Test "All notes clears the filter"
-- [ ] 4.21 Test "Notes do not wait for tags"
-- [ ] 4.22 Test "Tags failure does not block the list"
+- [x] 4.16 Test "Filter buttons list the tags"
+- [x] 4.17 Test "Choosing a tag filters the list"
+- [x] 4.18 Test "Choosing a tag resets the page"
+- [x] 4.19 Test "Clearing the filter"
+- [x] 4.20 Test "All notes clears the filter"
+- [x] 4.21 Test "Notes do not wait for tags"
+- [x] 4.22 Test "Tags failure does not block the list"
 
 `src/pages/NotesPage.test.tsx` - Requirement: URL-driven view state
-- [ ] 4.23 Test "View restored from the URL"
-- [ ] 4.24 Test "Invalid page treated as 1"
-- [ ] 4.25 Test "Malformed tagId ignored"
+- [x] 4.23 Test "View restored from the URL"
+- [x] 4.24 Test "Invalid page treated as 1"
+- [x] 4.25 Test "Malformed tagId ignored"
 
 `src/pages/NotesPage.test.tsx` - Requirement: Loading, empty and error states
-- [ ] 4.26 Test "Loading indicator"
-- [ ] 4.27 Test "Empty account"
-- [ ] 4.28 Test "Empty filter result"
-- [ ] 4.29 Test "Request failure with retry"
-- [ ] 4.30 Test "Network failure shown"
-- [ ] 4.31 Test "Unknown tag in the URL"
+- [x] 4.26 Test "Loading indicator"
+- [x] 4.27 Test "Empty account"
+- [x] 4.28 Test "Empty filter result"
+- [x] 4.29 Test "Request failure with retry"
+- [x] 4.30 Test "Network failure shown"
+- [x] 4.31 Test "Unknown tag in the URL"
 
 `src/pages/NotesPage.test.tsx` - Requirement: Notes API functions
-- [ ] 4.32 Test "Malformed response becomes an error state" (page level: a 200 body failing the schema shows the failure alert with **Retry**)
+- [x] 4.32 Test "Malformed response becomes an error state" (page level: a 200 body failing the schema shows the failure alert with **Retry**)
 
-- [ ] 4.33 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 4.33 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 5. Docs, audit and smoke
 
-- [ ] 5.1 Update `apps/frontend/CLAUDE.md` with an AB-1011 section: list page structure, URL state helpers, query keys and the `routeEmptyNotes()` test helper (Haiku)
-- [ ] 5.2 Manual smoke with the `run` skill: start Postgres, backend and frontend; create 25 notes and two tags through the Vite proxy with curl; verify the list, paging, tag filter, bad `page`/`tagId` in the URL, and Retry with the backend stopped. No browser is available, so record what was checked by curl and tests (Playwright is AB-1016) (Sonnet)
-- [ ] 5.3 Scenario audit: confirm each of the 30 scenario titles in `specs/frontend-notes-list/spec.md` has exactly one test with that exact name (Haiku)
-- [ ] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`
+- [x] 5.1 Update `apps/frontend/CLAUDE.md` with an AB-1011 section: list page structure, URL state helpers, query keys and the `routeEmptyNotes()` test helper (Haiku)
+- [x] 5.2 Manual smoke with the `run` skill: start Postgres, backend and frontend; create 25 notes and two tags through the Vite proxy with curl; verify the list, paging, tag filter, bad `page`/`tagId` in the URL, and Retry with the backend stopped. No browser is available, so record what was checked by curl and tests (Playwright is AB-1016) (Sonnet)
+- [x] 5.3 Scenario audit: confirm each of the 30 scenario titles in `specs/frontend-notes-list/spec.md` has exactly one test with that exact name (Haiku)
+- [x] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`
