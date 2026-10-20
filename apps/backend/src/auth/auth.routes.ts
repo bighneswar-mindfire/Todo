@@ -6,26 +6,9 @@ import {
   refreshRequestSchema,
   registerRequestSchema,
   resetPasswordRequestSchema,
-  zodIssuesToDetails,
-  type ErrorDetail,
 } from "@todo/shared";
-import { AppError } from "../errors.js";
+import { parseBody } from "../http/parse.js";
 import type { AuthService } from "./auth.service.js";
-
-interface BodySchema<T> {
-  safeParse(
-    data: unknown,
-  ): { success: true; data: T } | { success: false; error: { issues: Parameters<typeof zodIssuesToDetails>[0] } };
-}
-
-function parseBody<T>(schema: BodySchema<T>, body: unknown): T {
-  const result = schema.safeParse(body ?? {});
-  if (!result.success) {
-    const details: ErrorDetail[] = zodIssuesToDetails(result.error.issues);
-    throw new AppError("VALIDATION_ERROR", 400, "Validation failed", details);
-  }
-  return result.data;
-}
 
 export function createAuthRouter(service: AuthService, authenticate: RequestHandler): Router {
   const router = Router();

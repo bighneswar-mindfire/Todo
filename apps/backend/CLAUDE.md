@@ -28,3 +28,12 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - Every reset failure is the same 400 `INVALID_OTP` (unknown email, wrong, expired, used, superseded, locked). The reset transaction returns a result instead of throwing so a wrong attempt's counter commits, and it follows the per-user lock rule above. A successful reset also revokes all of the user's refresh tokens; already-issued access tokens stay valid until they expire.
 - Known gaps (out of scope): no rate limit or cooldown on `forgot-password`, and known emails do DB writes unknown ones skip (small timing difference).
 
+
+## Notes (AB-1004)
+
+- `/notes` (all routes behind `authenticate`): `POST /`, `GET /`, `GET /trash`, `GET /:id`, `PATCH /:id`, `DELETE /:id` (204, soft), `POST /:id/restore`. `GET /trash` is registered before `/:id`.
+- Every query filters `{ id, userId }` plus state; mutations are one `updateMany` and `count === 0` is 404 `NOT_FOUND` (missing, foreign and wrong-state notes are indistinguishable by design).
+- Soft delete sets `deletedAt` only. Restore and trash use the shared `TRASH_RETENTION_DAYS` (30) window from `deletedAt`. There is no purge job, so no note row is ever physically deleted.
+- `contentText` is derived server-side by `extractText` (`src/notes/content-text.ts`) on create and whenever `content` is patched; lists return a 200-char `excerpt`, never `content`.
+- Request bodies are capped at 1 MB; larger ones fail as 400 `VALIDATION_ERROR` via the error handler.
+- Notes tests use `registerAndLogin`, `createNote`, `setDeletedAt` from `src/notes/test-helpers.ts` (age is simulated by writing `deletedAt` through Prisma).
