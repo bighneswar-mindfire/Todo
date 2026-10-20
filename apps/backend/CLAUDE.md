@@ -61,3 +61,11 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - Every public failure (unknown, revoked, expired, deleted note) is the same 404 `NOT_FOUND`; a malformed token is 400. The 200 sets `Cache-Control: no-store` and `Referrer-Policy: no-referrer` and returns only `title`, `content`, `updatedAt`.
 - Token = 32 `randomBytes`, base64url (43 chars), stored plaintext so the owner can list it. Never log it. Deleting a note keeps its links; they resume on restore.
 - Sharing tests use `createShare`, `listShares`, `openShared` from `src/sharing/test-helpers.ts`.
+
+## Version history (AB-1009)
+
+- Routes on the notes router: `GET /notes/:id/versions` (newest first, `{ items, page, limit, total }`, summaries without `content`), `GET /notes/:id/versions/:versionNumber`, `POST /notes/:id/versions/:versionNumber/restore` (200, returns the note). `versionNumber` is the public handle (integer >= 1, per note).
+- Every changed save goes through `saveNoteState(tx, ...)` in `versions/record-save.ts`, inside `prisma.$transaction`: it locks the note row (`FOR UPDATE`, which also checks owner and not-deleted), skips the write when title and content are unchanged (no version, `updatedAt` not advanced), then updates the note and inserts `max + 1`. Never allocate a version number outside it.
+- Create writes version 1 in the same nested write. Trash delete/restore create no version. Restore appends a version and never edits or removes existing ones; tags and share links are untouched.
+- Notes created before AB-1009 have no versions until their first changed save (that save is version 1). Tests simulate this with `prisma.noteVersion.deleteMany`.
+- Versions tests use `patchNote`, `listVersions`, `getVersion`, `restoreVersion` from `src/versions/test-helpers.ts`.

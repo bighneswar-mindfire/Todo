@@ -8,16 +8,19 @@ import {
   noteTagParamsSchema,
   pageQuerySchema,
   updateNoteRequestSchema,
+  versionNumberParamSchema,
 } from "@todo/shared";
 import { parseBody, parseParams, parseQuery } from "../http/parse.js";
 import type { SharingService } from "../sharing/sharing.service.js";
 import type { TagsService } from "../tags/tags.service.js";
+import type { VersionsService } from "../versions/versions.service.js";
 import type { NotesService } from "./notes.service.js";
 
 export function createNotesRouter(
   service: NotesService,
   tags: TagsService,
   sharing: SharingService,
+  versions: VersionsService,
   authenticate: RequestHandler,
 ): Router {
   const router = Router();
@@ -86,6 +89,21 @@ export function createNotesRouter(
     const { id, shareId } = parseParams(noteShareParamsSchema, req.params);
     await sharing.revoke(req.auth!.userId, id, shareId);
     res.status(204).end();
+  });
+
+  router.get("/:id/versions", async (req, res) => {
+    const { id } = parseParams(noteIdParamSchema, req.params);
+    res.status(200).json(await versions.list(req.auth!.userId, id, parseQuery(pageQuerySchema, req.query)));
+  });
+
+  router.get("/:id/versions/:versionNumber", async (req, res) => {
+    const { id, versionNumber } = parseParams(versionNumberParamSchema, req.params);
+    res.status(200).json(await versions.get(req.auth!.userId, id, versionNumber));
+  });
+
+  router.post("/:id/versions/:versionNumber/restore", async (req, res) => {
+    const { id, versionNumber } = parseParams(versionNumberParamSchema, req.params);
+    res.status(200).json(await versions.restore(req.auth!.userId, id, versionNumber));
   });
 
   return router;

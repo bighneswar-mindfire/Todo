@@ -13,7 +13,7 @@ All `/notes` endpoints SHALL require a valid access token via the `authenticate`
 - **THEN** the response is 401 with error code `UNAUTHORIZED`
 
 ### Requirement: Create note
-The system SHALL let an authenticated user create a note via `POST /notes` with a `title` and TipTap JSON `content`. The title SHALL be trimmed and 1 to 200 characters. The content SHALL be a JSON object with `type` equal to `"doc"`; when omitted it SHALL default to an empty document. The server SHALL derive `contentText` as the concatenated plain text of the content.
+The system SHALL let an authenticated user create a note via `POST /notes` with a `title` and TipTap JSON `content`. The title SHALL be trimmed and 1 to 200 characters. The content SHALL be a JSON object with `type` equal to `"doc"`; when omitted it SHALL default to an empty document. The server SHALL derive `contentText` as the concatenated plain text of the content. The note and its version 1 (copy of the title, content and `contentText`) SHALL be created in one transaction.
 
 #### Scenario: Create note with valid input
 - **WHEN** an authenticated user posts a valid title and TipTap document to `/notes`
@@ -46,6 +46,10 @@ The system SHALL let an authenticated user create a note via `POST /notes` with 
 #### Scenario: Oversized body rejected
 - **WHEN** a user posts a request body larger than 1 MB to `/notes`
 - **THEN** the response is 400 with error code `VALIDATION_ERROR` and no note is created
+
+#### Scenario: Create records version 1
+- **WHEN** an authenticated user creates a note
+- **THEN** the note has exactly one version, numbered 1, with the same title and content
 
 ### Requirement: List notes
 The system SHALL return the authenticated user's active notes via `GET /notes`, ordered by `updatedAt` descending, as summaries (`id`, `title`, `excerpt`, `tags`, `createdAt`, `updatedAt`) with pagination. `excerpt` SHALL be the first 200 characters of `contentText`. `tags` SHALL be an array of `{ id, name, color }` ordered by name. `page` SHALL default to 1 and `limit` to 20, with a maximum of 100. An optional `tagId` query parameter SHALL restrict the result (and `total`) to active notes carrying that tag; the tag MUST belong to the caller.
@@ -114,7 +118,7 @@ The system SHALL return one active note owned by the caller, including full `con
 - **THEN** the response is 400 with error code `VALIDATION_ERROR`
 
 ### Requirement: Update note
-The system SHALL let the owner partially update an active note via `PATCH /notes/{id}` with `title` and/or `content`. At least one field SHALL be supplied. Validation rules match creation. When `content` changes, `contentText` SHALL be re-derived. `updatedAt` SHALL advance.
+The system SHALL let the owner partially update an active note via `PATCH /notes/{id}` with `title` and/or `content`. At least one field SHALL be supplied. Validation rules match creation. When `content` changes, `contentText` SHALL be re-derived. `updatedAt` SHALL advance. When the resulting title or content differs from the note's current title or content, a new version SHALL be recorded in the same transaction (see the `versions` capability); when neither differs, the response SHALL be 200 and no version SHALL be recorded.
 
 #### Scenario: Update title only
 - **WHEN** the owner patches only `title`
@@ -139,6 +143,18 @@ The system SHALL let the owner partially update an active note via `PATCH /notes
 #### Scenario: Cannot update a deleted note
 - **WHEN** the owner patches a soft-deleted note
 - **THEN** the response is 404 with error code `NOT_FOUND`
+
+#### Scenario: Update records a new version
+- **WHEN** the owner patches the title of a note that has version 1
+- **THEN** the note has two versions and version 2 carries the new title and current content
+
+#### Scenario: Unchanged patch records no version
+- **WHEN** the owner patches `title` and `content` with values equal to the current ones
+- **THEN** the response is 200 and the note still has the same number of versions
+
+#### Scenario: First edit of a pre-existing note starts its history
+- **WHEN** the owner edits a note that has no versions because it predates versioning
+- **THEN** the edit is recorded as version 1
 
 ### Requirement: Soft delete note
 The system SHALL soft delete a note via `DELETE /notes/{id}` by setting `deletedAt` to the current time. It SHALL NOT physically remove the row or its content.

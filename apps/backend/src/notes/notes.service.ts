@@ -11,6 +11,7 @@ import {
 } from "@todo/shared";
 import { AppError } from "../errors.js";
 import type { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import { saveNoteState } from "../versions/record-save.js";
 import { extractText } from "./content-text.js";
 import { excerpt, flattenTags, tagsInclude, type TagLinks } from "./summary.js";
 
@@ -74,8 +75,15 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
 
   return {
     async create(userId, { title, content }) {
+      const contentText = extractText(content);
       const row = await prisma.note.create({
-        data: { userId, title, content: toJson(content), contentText: extractText(content) },
+        data: {
+          userId,
+          title,
+          content: toJson(content),
+          contentText,
+          versions: { create: { versionNumber: 1, title, content: toJson(content), contentText } },
+        },
       });
       return toNote({ ...row, tags: [] });
     },
@@ -132,17 +140,16 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
     },
 
     async update(userId, id, { title, content }) {
-      const data: Prisma.NoteUpdateManyMutationInput = {};
-      if (title !== undefined) data.title = title;
-      if (content !== undefined) {
-        data.content = toJson(content);
-        data.contentText = extractText(content);
-      }
-      const { count } = await prisma.note.updateMany({
-        where: { id, userId, deletedAt: null },
-        data,
-      });
-      if (count === 0) throw notFound();
+      await prisma.$transaction((tx) =>
+        saveNoteState(tx, {
+          userId,
+          noteId: id,
+          next: {
+            ...(title !== undefined ? { title } : {}),
+            ...(content !== undefined ? { content } : {}),
+          },
+        }),
+      );
       return findOwned(userId, id);
     },
 

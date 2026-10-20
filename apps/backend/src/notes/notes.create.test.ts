@@ -87,4 +87,14 @@ describe("notes: create note", () => {
     expect(res.status).toBe(201);
     expect(res.body.tags).toEqual([]);
   });
+
+  it("Create records version 1", async () => {
+    const res = await post({ title: "first", content: DOC("body") });
+    expect(res.status).toBe(201);
+    const versions = await t.prisma.noteVersion.findMany({ where: { noteId: res.body.id } });
+    expect(versions).toHaveLength(1);
+    expect(versions[0]!.versionNumber).toBe(1);
+    expect(versions[0]!.title).toBe("first");
+    expect(versions[0]!.content).toEqual(DOC("body"));
+  });
 });
