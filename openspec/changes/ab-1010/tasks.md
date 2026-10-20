@@ -21,34 +21,34 @@
 
 ## 2. Core: errors, API client, session store, refresh
 
-- [ ] 2.1 Verify Zustand v5 custom `PersistStorage` (`getItem` returning `StorageValue` or `null`, `setItem`, `removeItem`) with Context7 before coding (Sonnet)
-- [ ] 2.2 Create `src/stores/session.ts`: `useSession` with `session`, `setSession`, `setTokens`, `clearSession`; validating `PersistStorage` over `localStorage` (try/catch, in-memory fallback, `authTokensResponseSchema.nullable()`, bad key removed); `partialize`, `version: 1`; `selectIsAuthenticated`; `storage` event listener calling `persist.rehydrate()` (Sonnet)
-- [ ] 2.3 [PARALLEL] Create `src/api/errors.ts` (`ApiError` with `status`, `code: ErrorCode | ClientErrorCode`, `message`, `details`) (Haiku)
-- [ ] 2.4 Create `src/api/client.ts`: `request()` per design D4 (absolute URL from `API_BASE` default `/api`, JSON body, Bearer from store, `NETWORK_ERROR`, 204 handling, error-envelope and response-schema parsing, `INTERNAL_ERROR` fallback) (Sonnet)
-- [ ] 2.5 Create `src/api/refresh.ts` (`refreshSession`, single-flight promise, token-compare, `clearSession` on failure) and wire `retryOn401` single retry into `request()` (Sonnet)
-- [ ] 2.6 Create `src/api/auth.ts`: `register`, `login`, `refresh`, `logout` (`retryOn401: false`), `forgotPassword`, `resetPassword` typed with shared schemas (Sonnet)
+- [x] 2.1 Verify Zustand v5 custom `PersistStorage` (`getItem` returning `StorageValue` or `null`, `setItem`, `removeItem`) with Context7 before coding (Sonnet)
+- [x] 2.2 Create `src/stores/session.ts`: `useSession` with `session`, `setSession`, `setTokens`, `clearSession`; validating `PersistStorage` over `localStorage` (try/catch, in-memory fallback, `authTokensResponseSchema.nullable()`, bad key removed); `partialize`, `version: 1`; `selectIsAuthenticated`; `storage` event listener calling `persist.rehydrate()` (Sonnet)
+- [x] 2.3 [PARALLEL] Create `src/api/errors.ts` (`ApiError` with `status`, `code: ErrorCode | ClientErrorCode`, `message`, `details`) (Haiku)
+- [x] 2.4 Create `src/api/client.ts`: `request()` per design D4 (absolute URL from `API_BASE` default `/api`, JSON body, Bearer from store, `NETWORK_ERROR`, 204 handling, error-envelope and response-schema parsing, `INTERNAL_ERROR` fallback) (Sonnet)
+- [x] 2.5 Create `src/api/refresh.ts` (`refreshSession`, single-flight promise, token-compare, `clearSession` on failure) and wire `retryOn401` single retry into `request()` (Sonnet)
+- [x] 2.6 Create `src/api/auth.ts`: `register`, `login`, `refresh`, `logout` (`retryOn401: false`), `forgotPassword`, `resetPassword` typed with shared schemas (Sonnet)
 
 `src/api/client.test.ts` - Requirement: API client
-- [ ] 2.7 Test "Bearer token attached"
-- [ ] 2.8 Test "Public requests carry no token"
-- [ ] 2.9 Test "Error envelope becomes ApiError"
-- [ ] 2.10 Test "Validation details preserved"
-- [ ] 2.11 Test "Network failure is reported"
-- [ ] 2.12 Test "Empty success response"
+- [x] 2.7 Test "Bearer token attached"
+- [x] 2.8 Test "Public requests carry no token"
+- [x] 2.9 Test "Error envelope becomes ApiError"
+- [x] 2.10 Test "Validation details preserved"
+- [x] 2.11 Test "Network failure is reported"
+- [x] 2.12 Test "Empty success response"
 
 `src/stores/session.test.ts` - Requirement: Session store and persistence
-- [ ] 2.13 Test "Session set after login"
-- [ ] 2.14 Test "Session restored after reload" (re-import the module with `vi.resetModules`)
-- [ ] 2.15 Test "Corrupt persisted session ignored" (invalid JSON and schema-invalid value)
-- [ ] 2.16 Test "Clear session"
+- [x] 2.13 Test "Session set after login"
+- [x] 2.14 Test "Session restored after reload" (re-import the module with `vi.resetModules`)
+- [x] 2.15 Test "Corrupt persisted session ignored" (invalid JSON and schema-invalid value)
+- [x] 2.16 Test "Clear session"
 
 `src/api/refresh.test.ts` - Requirement: Silent token refresh
-- [ ] 2.17 Test "Expired access token refreshed transparently"
-- [ ] 2.18 Test "Concurrent 401s refresh once" (three `Promise.all` requests, one `/auth/refresh` hit)
-- [ ] 2.19 Test "Failed refresh signs the user out"
-- [ ] 2.20 Test "Retry is not repeated"
-- [ ] 2.21 Test "Public endpoints never trigger refresh"
-- [ ] 2.22 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.17 Test "Expired access token refreshed transparently"
+- [x] 2.18 Test "Concurrent 401s refresh once" (three `Promise.all` requests, one `/auth/refresh` hit)
+- [x] 2.19 Test "Failed refresh signs the user out"
+- [x] 2.20 Test "Retry is not repeated"
+- [x] 2.21 Test "Public endpoints never trigger refresh"
+- [x] 2.22 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. App shell: providers, router, guards, form helpers
 
