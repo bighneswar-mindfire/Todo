@@ -8,6 +8,8 @@ import type { PasswordHasher } from "./auth/password.js";
 import type { Ping } from "./db.js";
 import type { PrismaClient } from "./generated/prisma/client.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import { createNotesRouter } from "./notes/notes.routes.js";
+import { createNotesService } from "./notes/notes.service.js";
 
 export interface AppDeps {
   ping: Ping;
@@ -19,7 +21,7 @@ export interface AppDeps {
 
 export function createApp({ ping, prisma, hasher, jwt, otpSender }: AppDeps): Express {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
 
   app.get("/health", async (_req, res) => {
     try {
@@ -37,6 +39,8 @@ export function createApp({ ping, prisma, hasher, jwt, otpSender }: AppDeps): Ex
     "/auth",
     createAuthRouter(createAuthService({ prisma, hasher, jwt, ...(otpSender ? { otpSender } : {}) }), createAuthenticate(jwt)),
   );
+
+  app.use("/notes", createNotesRouter(createNotesService({ prisma }), createAuthenticate(jwt)));
 
   app.use(errorHandler);
 

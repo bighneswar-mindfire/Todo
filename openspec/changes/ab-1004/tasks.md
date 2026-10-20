@@ -10,88 +10,88 @@
 
 ## 0. Prep (Haiku)
 
-- [ ] 0.1 Confirm `docker compose up -d` and `pnpm --filter @todo/backend migrate:deploy` are clean and `pnpm test` is green before changes.
-- [ ] 0.2 Verify against Context7 (Prisma 7, Express 5, Zod): `updateMany` count semantics, `$transaction([findMany, count])`, writing `Json` fields (`InputJsonValue`), Express 5 `express.json({ limit })` and async route handlers, Zod `z.coerce.number()` and `.refine`.
+- [x] 0.1 Confirm `docker compose up -d` and `pnpm --filter @todo/backend migrate:deploy` are clean and `pnpm test` is green before changes.
+- [x] 0.2 Verify against Context7 (Prisma 7, Express 5, Zod): `updateMany` count semantics, `$transaction([findMany, count])`, writing `Json` fields (`InputJsonValue`), Express 5 `express.json({ limit })` and async route handlers, Zod `z.coerce.number()` and `.refine`.
 
 ## 1. Shared package (Sonnet)
 
-- [ ] 1.1 `packages/shared/src/auth.ts`: add `NOT_FOUND` to `errorCodeSchema`.
-- [ ] 1.2 `packages/shared/src/notes.ts` (+ export from `index.ts`): `TRASH_RETENTION_DAYS = 30`, `tipTapDocSchema`, `createNoteRequestSchema` (title trimmed 1..200, content defaults to an empty doc), `updateNoteRequestSchema` (at least one field), `noteIdParamSchema`, `pageQuerySchema` (page >= 1, 1 <= limit <= 100, defaults 1 and 20), `noteSchema`, `noteSummarySchema`, `trashNoteSummarySchema`, list response schemas and inferred types.
-- [ ] 1.3 `[design]` tests in `packages/shared/src/shared.test.ts`: title bounds 0/1/200/201 and whitespace-only; content must have `type: "doc"`; default empty doc; empty patch rejected; `page`/`limit` coercion, defaults and bounds; `NOT_FOUND` in `errorCodeSchema`.
-- [ ] **Checkpoint 1**: build, lint, test.
+- [x] 1.1 `packages/shared/src/auth.ts`: add `NOT_FOUND` to `errorCodeSchema`.
+- [x] 1.2 `packages/shared/src/notes.ts` (+ export from `index.ts`): `TRASH_RETENTION_DAYS = 30`, `tipTapDocSchema`, `createNoteRequestSchema` (title trimmed 1..200, content defaults to an empty doc), `updateNoteRequestSchema` (at least one field), `noteIdParamSchema`, `pageQuerySchema` (page >= 1, 1 <= limit <= 100, defaults 1 and 20), `noteSchema`, `noteSummarySchema`, `trashNoteSummarySchema`, list response schemas and inferred types.
+- [x] 1.3 `[design]` tests in `packages/shared/src/shared.test.ts`: title bounds 0/1/200/201 and whitespace-only; content must have `type: "doc"`; default empty doc; empty patch rejected; `page`/`limit` coercion, defaults and bounds; `NOT_FOUND` in `errorCodeSchema`.
+- [x] **Checkpoint 1**: build, lint, test.
 
 ## 2. Content text helper and HTTP plumbing
 
-- [ ] 2.1 [PARALLEL] (Sonnet) `apps/backend/src/notes/content-text.ts`: `extractText(doc)` per D4 (text nodes in order, space between block nodes, trim and collapse whitespace, skip malformed nodes without throwing).
-- [ ] 2.2 [PARALLEL] (Haiku) `[design]` tests in `content-text.test.ts`: separate paragraphs do not fuse words; nested lists/marks; empty doc gives `""`; malformed nodes skipped.
-- [ ] 2.3 [PARALLEL] (Sonnet) Move `parseBody` from `auth/auth.routes.ts` to `apps/backend/src/http/parse.ts`, add `parseQuery` and `parseParams` using the same error mapping (`zodIssuesToDetails`, 400 `VALIDATION_ERROR`); update the auth routes import. Existing auth tests must stay green.
-- [ ] **Checkpoint 2**: build, lint, test.
+- [x] 2.1 [PARALLEL] (Sonnet) `apps/backend/src/notes/content-text.ts`: `extractText(doc)` per D4 (text nodes in order, space between block nodes, trim and collapse whitespace, skip malformed nodes without throwing).
+- [x] 2.2 [PARALLEL] (Haiku) `[design]` tests in `content-text.test.ts`: separate paragraphs do not fuse words; nested lists/marks; empty doc gives `""`; malformed nodes skipped.
+- [x] 2.3 [PARALLEL] (Sonnet) Move `parseBody` from `auth/auth.routes.ts` to `apps/backend/src/http/parse.ts`, add `parseQuery` and `parseParams` using the same error mapping (`zodIssuesToDetails`, 400 `VALIDATION_ERROR`); update the auth routes import. Existing auth tests must stay green.
+- [x] **Checkpoint 2**: build, lint, test.
 
 ## 3. Notes service and router (Sonnet)
 
-- [ ] 3.1 `apps/backend/src/notes/notes.service.ts`: `createNotesService({ prisma })` with `create`, `list`, `get`, `update`, `softDelete`, `listTrash`, `restore` per D3, D5, D6, D9 (owner + state in every where; `updateMany` count 0 -> `AppError("NOT_FOUND", 404, "Note not found")`; list = `findMany` + `count` in one transaction; excerpt = first 200 chars of `contentText`; content never selected for lists).
-- [ ] 3.2 `apps/backend/src/notes/notes.routes.ts`: `createNotesRouter(service, authenticate)`; `authenticate` applied to the whole router; `GET /trash` before `/:id`; `POST /`, `GET /`, `GET /:id`, `PATCH /:id`, `DELETE /:id` (204), `POST /:id/restore`.
-- [ ] 3.3 `app.ts`: mount at `/notes`, `express.json({ limit: "1mb" })`.
-- [ ] 3.4 (Haiku) `auth/test-helpers.ts` (or a new `notes/test-helpers.ts`): `registerAndLogin(app)` returning the access token and user id, `createNote(app, token, body)`, and a `setDeletedAt(prisma, id, daysAgo)` helper.
-- [ ] **Checkpoint 3**: build, lint, test.
+- [x] 3.1 `apps/backend/src/notes/notes.service.ts`: `createNotesService({ prisma })` with `create`, `list`, `get`, `update`, `softDelete`, `listTrash`, `restore` per D3, D5, D6, D9 (owner + state in every where; `updateMany` count 0 -> `AppError("NOT_FOUND", 404, "Note not found")`; list = `findMany` + `count` in one transaction; excerpt = first 200 chars of `contentText`; content never selected for lists).
+- [x] 3.2 `apps/backend/src/notes/notes.routes.ts`: `createNotesRouter(service, authenticate)`; `authenticate` applied to the whole router; `GET /trash` before `/:id`; `POST /`, `GET /`, `GET /:id`, `PATCH /:id`, `DELETE /:id` (204), `POST /:id/restore`.
+- [x] 3.3 `app.ts`: mount at `/notes`, `express.json({ limit: "1mb" })`.
+- [x] 3.4 (Haiku) `auth/test-helpers.ts` (or a new `notes/test-helpers.ts`): `registerAndLogin(app)` returning the access token and user id, `createNote(app, token, body)`, and a `setDeletedAt(prisma, id, daysAgo)` helper.
+- [x] **Checkpoint 3**: build, lint, test.
 
 ## 4. Scenario tests (Sonnet; Haiku for the repetitive files)
 
 Each test file asserts status, error `code` (matching `delta-openapi.yaml`) and database state where the scenario says so.
 
-- [ ] 4.1 `notes.auth.test.ts`, `describe("notes: authentication")`:
-  - [ ] Missing token rejected
-- [ ] 4.2 `notes.create.test.ts`, `describe("notes: create note")`:
-  - [ ] Create note with valid input
-  - [ ] Title is trimmed
-  - [ ] Content omitted defaults to empty document
-  - [ ] Plain text derived from content
-  - [ ] Empty title rejected
-  - [ ] Overlong title rejected
-  - [ ] Invalid content rejected
-  - [ ] Oversized body rejected
-- [ ] 4.3 `notes.list.test.ts`, `describe("notes: list notes")`:
-  - [ ] List returns only own active notes
-  - [ ] List ordered by most recently updated
-  - [ ] List paginates
-  - [ ] Excerpt is truncated
-  - [ ] Invalid pagination rejected
-- [ ] 4.4 `notes.get.test.ts`, `describe("notes: get note")`:
-  - [ ] Get own note
-  - [ ] Other user's note hidden
-  - [ ] Unknown note
-  - [ ] Deleted note not retrievable
-  - [ ] Malformed id rejected
-- [ ] 4.5 `notes.update.test.ts`, `describe("notes: update note")`:
-  - [ ] Update title only
-  - [ ] Update content re-derives text
-  - [ ] Empty patch rejected
-  - [ ] Invalid field rejected
-  - [ ] Cannot update another user's note
-  - [ ] Cannot update a deleted note
-- [ ] 4.6 `notes.delete.test.ts`, `describe("notes: soft delete note")`:
-  - [ ] Delete sets deletedAt only
-  - [ ] Deleted note leaves the list
-  - [ ] Delete already-deleted note
-  - [ ] Cannot delete another user's note
-- [ ] 4.7 `notes.trash.test.ts`, `describe("notes: trash listing")`:
-  - [ ] Trash shows own deleted notes
-  - [ ] Trash excludes notes past 30 days
-  - [ ] Trash isolated per user
-- [ ] 4.8 `notes.restore.test.ts`, `describe("notes: restore note")`:
-  - [ ] Restore within window
-  - [ ] Restore outside window rejected
-  - [ ] Restore an active note rejected
-  - [ ] Cannot restore another user's note
-- [ ] **Checkpoint 4**: build, lint, test (all 36 scenario tests present, none skipped; `rg "it\\(" apps/backend/src/notes` titles match the spec).
+- [x] 4.1 `notes.auth.test.ts`, `describe("notes: authentication")`:
+  - [x] Missing token rejected
+- [x] 4.2 `notes.create.test.ts`, `describe("notes: create note")`:
+  - [x] Create note with valid input
+  - [x] Title is trimmed
+  - [x] Content omitted defaults to empty document
+  - [x] Plain text derived from content
+  - [x] Empty title rejected
+  - [x] Overlong title rejected
+  - [x] Invalid content rejected
+  - [x] Oversized body rejected
+- [x] 4.3 `notes.list.test.ts`, `describe("notes: list notes")`:
+  - [x] List returns only own active notes
+  - [x] List ordered by most recently updated
+  - [x] List paginates
+  - [x] Excerpt is truncated
+  - [x] Invalid pagination rejected
+- [x] 4.4 `notes.get.test.ts`, `describe("notes: get note")`:
+  - [x] Get own note
+  - [x] Other user's note hidden
+  - [x] Unknown note
+  - [x] Deleted note not retrievable
+  - [x] Malformed id rejected
+- [x] 4.5 `notes.update.test.ts`, `describe("notes: update note")`:
+  - [x] Update title only
+  - [x] Update content re-derives text
+  - [x] Empty patch rejected
+  - [x] Invalid field rejected
+  - [x] Cannot update another user's note
+  - [x] Cannot update a deleted note
+- [x] 4.6 `notes.delete.test.ts`, `describe("notes: soft delete note")`:
+  - [x] Delete sets deletedAt only
+  - [x] Deleted note leaves the list
+  - [x] Delete already-deleted note
+  - [x] Cannot delete another user's note
+- [x] 4.7 `notes.trash.test.ts`, `describe("notes: trash listing")`:
+  - [x] Trash shows own deleted notes
+  - [x] Trash excludes notes past 30 days
+  - [x] Trash isolated per user
+- [x] 4.8 `notes.restore.test.ts`, `describe("notes: restore note")`:
+  - [x] Restore within window
+  - [x] Restore outside window rejected
+  - [x] Restore an active note rejected
+  - [x] Cannot restore another user's note
+- [x] **Checkpoint 4**: build, lint, test (all 36 scenario tests present, none skipped; `rg "it\\(" apps/backend/src/notes` titles match the spec).
 
 ## 5. Docs, verification and commit (Haiku)
 
-- [ ] 5.1 Backend README/CLAUDE note: the `/notes` endpoints, the 30-day restore window and the no-purge decision.
-- [ ] 5.2 `pnpm test --coverage` meets the DoD threshold; `pnpm exec openspec validate ab-1004`.
-- [ ] 5.3 Manual smoke run: register, login, create, list, patch, delete, see it in trash, restore; a second user's token gets 404 on the first user's note id.
-- [ ] 5.4 Commit per phase as `feat(notes): ... AB#1004` once green (Husky enforces). Do not push without asking.
-- [ ] **Checkpoint 5**: build, lint, test.
+- [x] 5.1 Backend README/CLAUDE note: the `/notes` endpoints, the 30-day restore window and the no-purge decision.
+- [x] 5.2 `pnpm test --coverage` meets the DoD threshold; `pnpm exec openspec validate ab-1004`.
+- [x] 5.3 Manual smoke run: register, login, create, list, patch, delete, see it in trash, restore; a second user's token gets 404 on the first user's note id.
+- [x] 5.4 Commit per phase as `feat(notes): ... AB#1004` once green (Husky enforces). Do not push without asking.
+- [x] **Checkpoint 5**: build, lint, test.
 
 ## After implementation (not part of /implement)
 
