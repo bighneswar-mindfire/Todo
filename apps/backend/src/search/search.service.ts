@@ -2,6 +2,7 @@ import type { SearchQuery, SearchResponse } from "@todo/shared";
 import { AppError } from "../errors.js";
 import { Prisma, type PrismaClient } from "../generated/prisma/client.js";
 import { excerpt, flattenTags, tagsInclude } from "../notes/summary.js";
+import { buildHighlight, MARK_START, MARK_STOP, SENTINELS } from "./highlight.js";
 
 export interface SearchServiceDeps {
   prisma: PrismaClient;
@@ -15,6 +16,16 @@ interface RankedRow {
   id: string;
   rank: number;
 }
+
+interface HeadlineRow {
+  id: string;
+  titleHl: string;
+  snippetHl: string;
+}
+
+// HighlightAll returns the source text untouched (fragment mode strips tags and short leading words);
+// the snippet window is cut in buildHighlight.
+const HEADLINE_OPTIONS = `HighlightAll=true,StartSel=${MARK_START},StopSel=${MARK_STOP}`;
 
 export function createSearchService({ prisma }: SearchServiceDeps): SearchService {
   return {
@@ -61,9 +72,21 @@ export function createSearchService({ prisma }: SearchServiceDeps): SearchServic
       });
       const byId = new Map(rows.map((r) => [r.id, r]));
 
+      // Headlines only for this page's rows. Sentinels are stripped from the source so note text cannot forge one.
+      const headlines = await prisma.$queryRaw<HeadlineRow[]>`
+        SELECT n.id,
+          ts_headline('english', translate(n.title, ${SENTINELS}, ''), query, ${HEADLINE_OPTIONS}) AS "titleHl",
+          ts_headline('english', translate(n."contentText", ${SENTINELS}, ''), query, ${HEADLINE_OPTIONS}) AS "snippetHl"
+        FROM "Note" n
+        CROSS JOIN websearch_to_tsquery('english', ${q}::text) AS query
+        WHERE n.id = ANY(${ranked.map((r) => r.id)}::uuid[])
+          AND n."userId" = ${userId}::uuid`;
+      const headlineById = new Map(headlines.map((h) => [h.id, h]));
+
       const items = ranked.flatMap(({ id, rank }) => {
         const r = byId.get(id);
-        if (!r) return [];
+        const h = headlineById.get(id);
+        if (!r || !h) return [];
         return [
           {
             id: r.id,
@@ -73,6 +96,7 @@ export function createSearchService({ prisma }: SearchServiceDeps): SearchServic
             createdAt: r.createdAt.toISOString(),
             updatedAt: r.updatedAt.toISOString(),
             rank,
+            highlight: buildHighlight(h.titleHl, h.snippetHl, r.contentText),
           },
         ];
       });

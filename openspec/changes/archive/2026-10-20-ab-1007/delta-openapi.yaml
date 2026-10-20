@@ -1,0 +1,197 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.7.0
+  description: Delta for AB-1007. GET /search results gain a highlight object (title and snippet with matched words wrapped in <mark>). Additive and backward compatible: no new endpoint, status code or error code. Requires a Bearer access token.
+security:
+  - bearerAuth: []
+paths:
+  /search:
+    get:
+      operationId: searchNotes
+      summary: Full-text search over the caller's active notes
+      description: |
+        PostgreSQL full-text search over the weighted note vector (title above body, english configuration).
+        q uses web-search syntax: plain words are ANDed, "quoted text" is a phrase, `or` is a union, a leading `-` excludes a word.
+        Words match after stemming. A query that parses to nothing (for example only stop words) returns an empty page.
+        Results are ordered by rank descending, then updatedAt descending, then id. Soft-deleted notes are never returned.
+        Each item carries highlight.title and highlight.snippet. Matched words (after stemming, excluded words never) are wrapped in <mark></mark>.
+        All note text in highlight is HTML-escaped (& < > " ') and <mark>/</mark> are the only markup emitted, so clients may render it as HTML.
+        Highlights are computed only for the items of the requested page.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search text, trimmed, 1 to 200 characters
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: tagId
+          in: query
+          required: false
+          description: Restrict to matching notes carrying this tag. The tag must belong to the caller.
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: A page of ranked note summaries (possibly empty)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        "400":
+          description: Missing, blank or overlong q, invalid page or limit, or malformed tagId (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: tagId does not exist or is owned by another user (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    TagRef:
+      type: object
+      required: [id, name, color]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+    SearchResult:
+      type: object
+      description: A NoteSummary plus the relevance score. No content field.
+      required: [id, title, excerpt, tags, createdAt, updatedAt, rank, highlight]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        excerpt:
+          type: string
+          maxLength: 200
+          description: First 200 characters of contentText
+        tags:
+          type: array
+          description: Ordered by name
+          items:
+            $ref: "#/components/schemas/TagRef"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        rank:
+          type: number
+          description: ts_rank relevance score, higher is more relevant
+        highlight:
+          $ref: "#/components/schemas/Highlight"
+    Highlight:
+      type: object
+      description: HTML-safe highlighted text. The only markup is <mark> and </mark> around matched words.
+      required: [title, snippet]
+      properties:
+        title:
+          type: string
+          description: The whole title, escaped, with matched words wrapped in <mark>
+          example: Quarterly <mark>budget</mark> review
+        snippet:
+          type: string
+          description: Up to 2 fragments (about 200 characters of source text, 300 including tags) of contentText around the best matches, escaped. With no body match, the escaped leading text without marks.
+          example: please send the <mark>invoice</mark> today
+    SearchResponse:
+      type: object
+      required: [items, page, limit, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+          description: All matches regardless of page
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Unchanged from AB-1005. No new error code.
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_TAKEN
+                - INVALID_CREDENTIALS
+                - INVALID_REFRESH_TOKEN
+                - INVALID_OTP
+                - UNAUTHORIZED
+                - NOT_FOUND
+                - TAG_NAME_TAKEN
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              description: Present on VALIDATION_ERROR; one entry per invalid field
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

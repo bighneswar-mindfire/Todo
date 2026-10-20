@@ -8,7 +8,12 @@ export const searchQuerySchema = pageQuerySchema.extend({
   tagId: z.uuid().optional(),
 });
 
-export const searchResultSchema = noteSummarySchema.extend({ rank: z.number() });
+export const highlightSchema = z.object({ title: z.string(), snippet: z.string() });
+
+export const searchResultSchema = noteSummarySchema.extend({
+  rank: z.number(),
+  highlight: highlightSchema,
+});
 
 export const searchResponseSchema = z.object({
   items: z.array(searchResultSchema),
@@ -16,5 +21,6 @@ export const searchResponseSchema = z.object({
 });
 
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
+export type Highlight = z.infer<typeof highlightSchema>;
 export type SearchResult = z.infer<typeof searchResultSchema>;
 export type SearchResponse = z.infer<typeof searchResponseSchema>;
