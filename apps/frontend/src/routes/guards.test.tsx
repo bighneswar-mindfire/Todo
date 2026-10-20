@@ -1,10 +1,13 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { renderApp } from "@/test/render";
 import { json, route } from "@/test/fake-api";
-import { makeSession, signIn } from "@/test/fixtures";
+import { makeSession, signIn, routeEmptyNotes } from "@/test/fixtures";
 
 describe("route protection", () => {
+  // Landing on "/" now loads the notes list.
+  beforeEach(routeEmptyNotes);
+
   it("Signed-out visitor redirected to login", async () => {
     const { router } = renderApp("/");
 

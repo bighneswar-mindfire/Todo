@@ -3,6 +3,7 @@ import { vi } from "vitest";
 export interface FakeRequest {
   method: string;
   path: string;
+  query: URLSearchParams;
   headers: Headers;
   body: unknown;
 }
@@ -60,6 +61,7 @@ export function installFakeApi(): void {
         key,
         method,
         path,
+        query: url.searchParams,
         headers: new Headers(init?.headers),
         body: raw ? JSON.parse(raw) : undefined,
       };

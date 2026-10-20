@@ -16,3 +16,11 @@ React 19 + TypeScript + Vite. Auth UI and the app foundation exist (AB-1010); no
 - **Routing:** `routes/router.tsx` exports `routes`; `RequireAuth` guards protected pages, `RedirectIfAuthed` guards auth pages and sends signed-in users to the page they originally asked for. Transient UI state (notices, prefilled email) travels in navigation `state`, never the URL.
 - **Forms:** react-hook-form + `zodResolver(sharedSchema, { error: friendlyZodMessage })`. Map server failures with `applyApiError`. Login and forgot-password messages must stay generic (no account enumeration).
 - **Tests:** `test/fake-api.ts` stubs `fetch` (register routes as `route("POST /auth/login", ...)`, inspect `callsTo(...)`); `test/render.tsx` `renderApp(path | { pathname, state })` mounts the real routes in a memory router; `test/fixtures.ts` has `signIn()`. `test-setup.ts` resets the fake API, `localStorage` and the session before each test. One test per spec scenario, titled exactly as the scenario.
+
+## AB-1011 notes list
+
+- **Page:** `pages/NotesPage.tsx` is the protected `/` route (header with email and Log out, tag filter, list, pagination). Row components live in `components/notes/` (`NoteListItem`, `TagChip`, `TagFilter`, `PaginationBar`).
+- **URL is the state:** `?page=&tagId=`. Read it with `parseListParams(searchParams)` and write it with `buildListParams({ page, tagId })` (`lib/list-params.ts`); bad values fall back to defaults, page 1 and no tag stay out of the URL. Page size is `PAGE_SIZE` (20).
+- **Data:** `api/notes.ts` (`listNotes`, `listTags`) and `queries/notes.ts` (`useNotesList` with `keepPreviousData`, `useTags`, `notesKeys`). Later tickets that create, edit or delete a note invalidate `notesKeys.all` and `notesKeys.tags` (counts change).
+- **Tests:** `routeEmptyNotes()` registers an empty `/notes` and `/tags` for any test that lands on `/`; `makeNote`, `makeTag`, `notesPage`, `deferred` are in `test/fixtures.ts`; `FakeCall.query` holds the request's `URLSearchParams`.
+- Rows are not links yet; opening a note arrives with the editor ticket.

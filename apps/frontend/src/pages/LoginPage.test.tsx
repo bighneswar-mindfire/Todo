@@ -1,8 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { useSession } from "@/stores/session";
 import { callsTo, errorResponse, json, route } from "@/test/fake-api";
-import { makeSession } from "@/test/fixtures";
+import { makeSession, routeEmptyNotes } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 
 type User = ReturnType<typeof renderApp>["user"];
@@ -18,6 +18,9 @@ async function submit(user: User, email: string, password: string) {
 }
 
 describe("login screen", () => {
+  // Landing on "/" now loads the notes list.
+  beforeEach(routeEmptyNotes);
+
   it("Successful login", async () => {
     const session = makeSession();
     route("POST /auth/login", () => json(200, session));

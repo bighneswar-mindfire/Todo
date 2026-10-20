@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.11.0
+  description: |
+    Delta for AB-1011 (frontend notes list page). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1004 and AB-1005 (`GET /notes`, including the `tagId` filter and tags on summaries) and AB-1005 (`GET /tags`).
+
+    The frontend consumes the endpoints listed under `x-frontend-consumes`, which also records how the UI must react to each status code. Tests assert these reactions. The error body is always `{ error: { code, message, details? } }`. Requests go through the `/api` base path (Vite proxy in development), unchanged from AB-1010.
+paths: {}
+x-frontend-consumes:
+  /notes:
+    get:
+      operationId: listNotes
+      auth: bearer
+      query:
+        page: integer >= 1, default 1. The UI sends the value from the URL, or 1.
+        limit: integer 1..100, default 20. The UI always sends 20.
+        tagId: uuid, optional. Sent only when a valid tag filter is active.
+      response: NoteListResponse from `@todo/shared` (`items` of NoteSummary with `id`, `title`, `excerpt`, `tags`, `createdAt`, `updatedAt`; plus `page`, `limit`, `total`).
+      onStatus:
+        "200": Render the items in API order. Show pagination when ceil(total / limit) > 1. No items with total 0 shows "No notes yet" (or "No notes with this tag" when filtered). No items on page > 1 with total > 0 replaces the URL with the last page.
+        "200 (body fails schema)": Treated as a failure. Show the alert with Retry.
+        "400": VALIDATION_ERROR. Not expected, because the UI normalizes page and tagId before sending. Shown as the generic failure alert with Retry.
+        "401": UNAUTHORIZED. The API client refreshes the token once and retries (AB-1010). If refresh is rejected the session is cleared and the user is sent to /login.
+        "404": NOT_FOUND for the tagId (unknown or owned by someone else). Show the alert "That tag no longer exists" with a "Show all notes" button that clears tagId.
+        "500": INTERNAL_ERROR. Show the failure alert with Retry.
+        "network failure": NETWORK_ERROR. Show the failure alert with Retry.
+  /tags:
+    get:
+      operationId: listTags
+      auth: bearer
+      response: TagListResponse from `@todo/shared` (`items` of tag with `id`, `name`, `color`, `createdAt`, `noteCount`; ordered by name, not paginated).
+      onStatus:
+        "200": Render one filter button per tag with its name and noteCount, after the "All notes" button.
+        "401": UNAUTHORIZED. Same refresh behaviour as above.
+        "500": INTERNAL_ERROR. The filter group shows "Couldn't load tags" with Retry. The notes list is unaffected.
+        "network failure": NETWORK_ERROR. Same as 500.
