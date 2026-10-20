@@ -37,3 +37,12 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - `contentText` is derived server-side by `extractText` (`src/notes/content-text.ts`) on create and whenever `content` is patched; lists return a 200-char `excerpt`, never `content`.
 - Request bodies are capped at 1 MB; larger ones fail as 400 `VALIDATION_ERROR` via the error handler.
 - Notes tests use `registerAndLogin`, `createNote`, `setDeletedAt` from `src/notes/test-helpers.ts` (age is simulated by writing `deletedAt` through Prisma).
+
+## Tags (AB-1005)
+
+- `/tags` (behind `authenticate`): `POST /` (201), `GET /` (`{ items }` with `noteCount`, name asc), `PATCH /:id`, `DELETE /:id` (204, hard delete, FK cascade drops `NoteTag` rows). Attach/detach are `PUT|DELETE /notes/:id/tags/:tagId` (204, idempotent) on the notes router and delegate to the tags service.
+- Name is trimmed, 1 to 50 chars, unique per user and case-sensitive (`@@unique([userId, name])`); a Prisma `P2002` becomes 409 `TAG_NAME_TAKEN`. Color is `#RRGGBB`, default `#6b7280`.
+- Missing, foreign and (for notes) soft-deleted resources are all 404 `NOT_FOUND`. Attach/detach check the active note and the tag in one transaction; attach uses `createMany({ skipDuplicates })`.
+- Soft-deleted notes keep their tag links (restore brings tags back) and do not count toward `noteCount`.
+- Note responses and list summaries carry `tags` (`{ id, name, color }`, name asc); trash summaries do not. `GET /notes?tagId=` 404s for a tag the caller does not own.
+- Tests use `createTag` and `attachTag` from `src/notes/test-helpers.ts`.

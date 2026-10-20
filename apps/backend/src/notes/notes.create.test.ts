@@ -81,4 +81,10 @@ describe("notes: create note", () => {
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
     expect(await t.prisma.note.count({ where: { userId: user.userId } })).toBe(before);
   });
+
+  it("New note has no tags", async () => {
+    const res = await post({ title: "Fresh" });
+    expect(res.status).toBe(201);
+    expect(res.body.tags).toEqual([]);
+  });
 });

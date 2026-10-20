@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
   createNoteRequestSchema,
+  createTagRequestSchema,
   emailSchema,
   errorCodeSchema,
   forgotPasswordRequestSchema,
   healthSchema,
+  noteListQuerySchema,
   pageQuerySchema,
   parseEnv,
   registerRequestSchema,
   resetPasswordRequestSchema,
   updateNoteRequestSchema,
+  updateTagRequestSchema,
   zodIssuesToDetails,
 } from "./index.js";
 
@@ -123,5 +126,33 @@ describe("shared note schemas", () => {
 
   it("[design] NOT_FOUND is a known error code", () => {
     expect(errorCodeSchema.options).toContain("NOT_FOUND");
+  });
+
+  it("[design] TAG_NAME_TAKEN is a known error code", () => {
+    expect(errorCodeSchema.options).toContain("TAG_NAME_TAKEN");
+  });
+
+  it("[design] tag name is trimmed and bounded to 1..50", () => {
+    expect(createTagRequestSchema.parse({ name: "  Work  " }).name).toBe("Work");
+    expect(createTagRequestSchema.safeParse({ name: "   " }).success).toBe(false);
+    expect(createTagRequestSchema.safeParse({ name: "a".repeat(50) }).success).toBe(true);
+    expect(createTagRequestSchema.safeParse({ name: "a".repeat(51) }).success).toBe(false);
+  });
+
+  it("[design] tag color must be #RRGGBB and defaults to gray", () => {
+    expect(createTagRequestSchema.parse({ name: "a" }).color).toBe("#6b7280");
+    expect(createTagRequestSchema.safeParse({ name: "a", color: "#ff0000" }).success).toBe(true);
+    expect(createTagRequestSchema.safeParse({ name: "a", color: "red" }).success).toBe(false);
+    expect(createTagRequestSchema.safeParse({ name: "a", color: "#12345" }).success).toBe(false);
+  });
+
+  it("[design] an empty tag patch is rejected", () => {
+    expect(updateTagRequestSchema.safeParse({}).success).toBe(false);
+    expect(updateTagRequestSchema.safeParse({ color: "#000000" }).success).toBe(true);
+  });
+
+  it("[design] tagId filter must be a uuid", () => {
+    expect(noteListQuerySchema.safeParse({ tagId: "not-a-uuid" }).success).toBe(false);
+    expect(noteListQuerySchema.parse({})).toEqual({ page: 1, limit: 20 });
   });
 });

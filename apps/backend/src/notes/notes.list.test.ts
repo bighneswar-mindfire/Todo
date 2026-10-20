@@ -1,7 +1,17 @@
+import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildTestApp, cleanupUsers, type TestApp } from "../auth/test-helpers.js";
-import { DOC, auth, createNote, registerAndLogin, setDeletedAt, type TestUser } from "./test-helpers.js";
+import {
+  DOC,
+  attachTag,
+  auth,
+  createNote,
+  createTag,
+  registerAndLogin,
+  setDeletedAt,
+  type TestUser,
+} from "./test-helpers.js";
 
 describe("notes: list notes", () => {
   let t: TestApp;
@@ -66,5 +76,70 @@ describe("notes: list notes", () => {
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe("VALIDATION_ERROR");
     }
+  });
+
+  it("Summaries include tags", async () => {
+    const user = await registerAndLogin(t.app);
+    const tagged = await createNote(t.app, user, { title: "tagged" });
+    const plain = await createNote(t.app, user, { title: "plain" });
+    const b = await createTag(t.app, user, { name: "b-tag", color: "#000001" });
+    const a = await createTag(t.app, user, { name: "a-tag", color: "#000002" });
+    await attachTag(t.app, user, tagged.id, b.id);
+    await attachTag(t.app, user, tagged.id, a.id);
+
+    const res = await list(user);
+    const byId = new Map(res.body.items.map((i: { id: string }) => [i.id, i]));
+    expect((byId.get(tagged.id) as { tags: unknown }).tags).toEqual([
+      { id: a.id, name: "a-tag", color: "#000002" },
+      { id: b.id, name: "b-tag", color: "#000001" },
+    ]);
+    expect((byId.get(plain.id) as { tags: unknown }).tags).toEqual([]);
+  });
+
+  it("Filter by tag", async () => {
+    const user = await registerAndLogin(t.app);
+    const n1 = await createNote(t.app, user);
+    const n2 = await createNote(t.app, user);
+    await createNote(t.app, user);
+    const work = await createTag(t.app, user, { name: "Work" });
+    await attachTag(t.app, user, n1.id, work.id);
+    await attachTag(t.app, user, n2.id, work.id);
+
+    const res = await list(user, `?tagId=${work.id}`);
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(2);
+    expect(res.body.items.map((i: { id: string }) => i.id).sort()).toEqual([n1.id, n2.id].sort());
+  });
+
+  it("Tag filter excludes deleted notes", async () => {
+    const user = await registerAndLogin(t.app);
+    const n1 = await createNote(t.app, user);
+    const n2 = await createNote(t.app, user);
+    const work = await createTag(t.app, user, { name: "Work" });
+    await attachTag(t.app, user, n1.id, work.id);
+    await attachTag(t.app, user, n2.id, work.id);
+    await setDeletedAt(t.prisma, n1.id, 1);
+
+    const res = await list(user, `?tagId=${work.id}`);
+    expect(res.body.total).toBe(1);
+    expect(res.body.items.map((i: { id: string }) => i.id)).toEqual([n2.id]);
+  });
+
+  it("Tag filter with other user's tag", async () => {
+    const alice = await registerAndLogin(t.app);
+    const bob = await registerAndLogin(t.app);
+    const tag = await createTag(t.app, bob);
+    for (const id of [tag.id, randomUUID()]) {
+      const res = await list(alice, `?tagId=${id}`);
+      expect(res.status).toBe(404);
+      expect(res.body.error.code).toBe("NOT_FOUND");
+    }
+  });
+
+  it("Malformed tag filter rejected", async () => {
+    const user = await registerAndLogin(t.app);
+    const res = await list(user, "?tagId=not-a-uuid");
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
   });
 });

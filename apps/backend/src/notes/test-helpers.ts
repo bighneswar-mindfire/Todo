@@ -38,6 +38,23 @@ export async function createNote(
   return res.body;
 }
 
+export async function createTag(
+  app: Express,
+  user: TestUser,
+  body: { name?: string; color?: string } = {},
+): Promise<{ id: string; name: string; color: string; [k: string]: unknown }> {
+  const res = await request(app)
+    .post("/tags")
+    .set(auth(user))
+    .send({ name: `tag-${Math.random().toString(36).slice(2, 10)}`, ...body })
+    .expect(201);
+  return res.body;
+}
+
+export async function attachTag(app: Express, user: TestUser, noteId: string, tagId: string): Promise<void> {
+  await request(app).put(`/notes/${noteId}/tags/${tagId}`).set(auth(user)).expect(204);
+}
+
 /** Soft deletes through Prisma with an arbitrary age, to simulate the 30-day window. */
 export async function setDeletedAt(prisma: PrismaClient, id: string, daysAgo: number): Promise<void> {
   await prisma.note.update({ where: { id }, data: { deletedAt: new Date(Date.now() - daysAgo * 86_400_000) } });
