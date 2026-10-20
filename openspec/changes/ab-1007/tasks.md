@@ -51,6 +51,6 @@ Requirement: Highlight respects scope, filters and pagination
 
 - [x] 5.1 Add the "Search highlight (AB-1007)" note to `apps/backend/CLAUDE.md` (Haiku)
 - [x] 5.2 Run `pnpm test --coverage`; confirm the Definition of Done thresholds hold
-- [ ] 5.3 Manual check: register, create a note, `GET /search?q=run`, confirm `highlight` in the JSON
+- [x] 5.3 Manual check: register, create a note, `GET /search?q=run`, confirm `highlight` in the JSON
 - [x] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
-- [ ] 5.5 Commit `feat(search): add highlighted title and snippet to search results AB#1007` (asks before pushing; `/review AB-1007` in a fresh terminal comes next)
+- [x] 5.5 Commit `feat(search): add highlighted title and snippet to search results AB#1007` (asks before pushing; `/review AB-1007` in a fresh terminal comes next)
