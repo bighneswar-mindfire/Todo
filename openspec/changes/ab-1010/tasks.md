@@ -1,4 +1,4 @@
-﻿## Conventions
+## Conventions
 
 - Shell: prefix PATH for Node 22 / pnpm 10 on every command (`$env:Path = "$env:APPDATA\fnm\node-versions\v22.23.3\installation;" + $env:Path`).
 - Model per task: Haiku = boilerplate, Sonnet = implementation. No Opus task (design.md is approved).
@@ -52,31 +52,31 @@
 
 ## 3. App shell: providers, router, guards, form helpers
 
-- [ ] 3.1 Verify react-router 8.5.0 imports (`createBrowserRouter`, `createMemoryRouter`, `Navigate`, `Outlet`, `Link`, `useNavigate`, `useLocation` from `react-router`; `RouterProvider` from `react-router/dom`) and `zodResolver` `schemaOptions.error` with Context7 before coding (Sonnet)
-- [ ] 3.2 Create `src/lib/query-client.ts` (retry policy per D6) and `src/components/AppProviders.tsx` (`QueryClientProvider`; `useEffect` subscribing to the session store and calling `queryClient.clear()` on signed-in to signed-out, with cleanup) (Sonnet)
-- [ ] 3.3 [PARALLEL] Create `src/lib/form-errors.ts` (Zod 4 error map to friendly copy; `applyApiError(error, setError)` mapping `details`, `EMAIL_TAKEN`, form-level codes) (Sonnet)
-- [ ] 3.4 [PARALLEL] Create `src/components/FormField.tsx` (label, input, error, `aria-invalid`, `aria-describedby`) and `src/components/FormAlert.tsx` (`role="alert"`) (Haiku)
-- [ ] 3.5 Create `src/routes/guards.tsx` (`RequireAuth`, `RedirectIfAuthed`), `src/routes/NotFound.tsx`, and `src/routes/router.tsx` exporting `routes` and `createAppRouter()`; replace `App.tsx` with `RouterProvider` inside `AppProviders`, update `main.tsx` and the existing `App.test.tsx` (Sonnet)
-- [ ] 3.6 Create placeholder page modules so routes compile (replaced in section 4) (Haiku)
+- [x] 3.1 Verify react-router 8.5.0 imports (`createBrowserRouter`, `createMemoryRouter`, `Navigate`, `Outlet`, `Link`, `useNavigate`, `useLocation` from `react-router`; `RouterProvider` from `react-router/dom`) and `zodResolver` `schemaOptions.error` with Context7 before coding (Sonnet)
+- [x] 3.2 Create `src/lib/query-client.ts` (retry policy per D6) and `src/components/AppProviders.tsx` (`QueryClientProvider`; `useEffect` subscribing to the session store and calling `queryClient.clear()` on signed-in to signed-out, with cleanup) (Sonnet)
+- [x] 3.3 [PARALLEL] Create `src/lib/form-errors.ts` (Zod 4 error map to friendly copy; `applyApiError(error, setError)` mapping `details`, `EMAIL_TAKEN`, form-level codes) (Sonnet)
+- [x] 3.4 [PARALLEL] Create `src/components/FormField.tsx` (label, input, error, `aria-invalid`, `aria-describedby`) and `src/components/FormAlert.tsx` (`role="alert"`) (Haiku)
+- [x] 3.5 Create `src/routes/guards.tsx` (`RequireAuth`, `RedirectIfAuthed`), `src/routes/NotFound.tsx`, and `src/routes/router.tsx` exporting `routes` and `createAppRouter()`; replace `App.tsx` with `RouterProvider` inside `AppProviders`, update `main.tsx` and the existing `App.test.tsx` (Sonnet)
+- [x] 3.6 Create placeholder page modules so routes compile (replaced in section 4) (Haiku)
 
 `src/routes/guards.test.tsx` - Requirement: Route protection
-- [ ] 3.7 Test "Signed-out visitor redirected to login"
-- [ ] 3.8 Test "Return to requested page after login" (needs 4.2; written here, runs green after section 4)
-- [ ] 3.9 Test "Signed-in user skips auth pages"
-- [ ] 3.10 Test "Unknown route"
+- [x] 3.7 Test "Signed-out visitor redirected to login"
+- [x] 3.8 Test "Return to requested page after login" (needs 4.2; written here, runs green after section 4)
+- [x] 3.9 Test "Signed-in user skips auth pages"
+- [x] 3.10 Test "Unknown route"
 
 `src/config/api-proxy.test.ts` and `src/foundation.test.tsx` - Requirement: Foundation and accessibility baseline
-- [ ] 3.11 Test "Dev proxy strips the prefix" (on `apiProxy["/api"].rewrite` and the object used by `vite.config.ts`)
-- [ ] 3.12 Test "Providers mounted" (a probe component using `useMutation`, `useQueryClient` and `useSession`)
-- [ ] 3.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test` (3.8 may be marked pending until section 4; it must be green at 4.x)
+- [x] 3.11 Test "Dev proxy strips the prefix" (on `apiProxy["/api"].rewrite` and the object used by `vite.config.ts`)
+- [x] 3.12 Test "Providers mounted" (a probe component using `useMutation`, `useQueryClient` and `useSession`)
+- [x] 3.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test` (3.8 may be marked pending until section 4; it must be green at 4.x)
 
 ## 4. Pages
 
-- [ ] 4.1 [PARALLEL] Create `src/pages/RegisterPage.tsx`: RHF + `zodResolver(registerRequestSchema)`, `useMutation(register)`, navigate to `/login` with notice state, inline and form errors, pending-disabled submit (Sonnet)
-- [ ] 4.2 [PARALLEL] Create `src/pages/LoginPage.tsx`: `loginRequestSchema`, `setSession` on success, navigate to `state.from` or `/`, generic `INVALID_CREDENTIALS` alert, notice banner from navigation state (Sonnet)
-- [ ] 4.3 [PARALLEL] Create `src/pages/ForgotPasswordPage.tsx`: `forgotPasswordRequestSchema`, generic confirmation, navigate to `/reset-password` with `{ email }` state, console hint text (Sonnet)
-- [ ] 4.4 [PARALLEL] Create `src/pages/ResetPasswordPage.tsx`: `resetPasswordRequestSchema`, email prefilled from state, `INVALID_OTP` alert "Invalid or expired code" keeping fields, navigate to `/login` with notice (Sonnet)
-- [ ] 4.5 [PARALLEL] Create `src/pages/HomePage.tsx`: shows `session.user.email`, Log out button calling `logout` (best effort) then `clearSession()` and navigating to `/login` (Sonnet)
+- [x] 4.1 [PARALLEL] Create `src/pages/RegisterPage.tsx`: RHF + `zodResolver(registerRequestSchema)`, `useMutation(register)`, navigate to `/login` with notice state, inline and form errors, pending-disabled submit (Sonnet)
+- [x] 4.2 [PARALLEL] Create `src/pages/LoginPage.tsx`: `loginRequestSchema`, `setSession` on success, navigate to `state.from` or `/`, generic `INVALID_CREDENTIALS` alert, notice banner from navigation state (Sonnet)
+- [x] 4.3 [PARALLEL] Create `src/pages/ForgotPasswordPage.tsx`: `forgotPasswordRequestSchema`, generic confirmation, navigate to `/reset-password` with `{ email }` state, console hint text (Sonnet)
+- [x] 4.4 [PARALLEL] Create `src/pages/ResetPasswordPage.tsx`: `resetPasswordRequestSchema`, email prefilled from state, `INVALID_OTP` alert "Invalid or expired code" keeping fields, navigate to `/login` with notice (Sonnet)
+- [x] 4.5 [PARALLEL] Create `src/pages/HomePage.tsx`: shows `session.user.email`, Log out button calling `logout` (best effort) then `clearSession()` and navigating to `/login` (Sonnet)
 
 `src/pages/RegisterPage.test.tsx` - Requirement: Registration screen
 - [ ] 4.6 Test "Successful registration"
