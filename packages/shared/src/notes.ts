@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { tagRefSchema } from "./tags.js";
 
 export const TRASH_RETENTION_DAYS = 30;
 export const NOTE_EXCERPT_LENGTH = 200;
@@ -31,16 +32,19 @@ export const pageQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
+export const noteListQuerySchema = pageQuerySchema.extend({ tagId: z.uuid().optional() });
+
 export const noteSchema = z.object({
   id: z.uuid(),
   title: z.string(),
   content: tipTapDocSchema,
+  tags: z.array(tagRefSchema),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
 });
 
-export const noteSummarySchema = z.object({
+const noteSummaryBase = z.object({
   id: z.uuid(),
   title: z.string(),
   excerpt: z.string().max(NOTE_EXCERPT_LENGTH),
@@ -48,7 +52,9 @@ export const noteSummarySchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-export const trashNoteSummarySchema = noteSummarySchema.extend({
+export const noteSummarySchema = noteSummaryBase.extend({ tags: z.array(tagRefSchema) });
+
+export const trashNoteSummarySchema = noteSummaryBase.extend({
   deletedAt: z.iso.datetime(),
 });
 
@@ -64,6 +70,7 @@ export type TipTapDoc = z.infer<typeof tipTapDocSchema>;
 export type CreateNoteRequest = z.infer<typeof createNoteRequestSchema>;
 export type UpdateNoteRequest = z.infer<typeof updateNoteRequestSchema>;
 export type PageQuery = z.infer<typeof pageQuerySchema>;
+export type NoteListQuery = z.infer<typeof noteListQuerySchema>;
 export type Note = z.infer<typeof noteSchema>;
 export type NoteSummary = z.infer<typeof noteSummarySchema>;
 export type TrashNoteSummary = z.infer<typeof trashNoteSummarySchema>;

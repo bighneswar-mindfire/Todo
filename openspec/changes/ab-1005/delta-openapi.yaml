@@ -1,0 +1,490 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.5.0
+  description: Delta for AB-1005. Adds user-scoped tags (CRUD), attach/detach on notes, a tagId filter on GET /notes, and a tags array on note responses. All endpoints require a Bearer access token. Unchanged AB-1004 endpoints (createNote, getNote, updateNote, restoreNote, deleteNote, listTrash) keep their documented status codes; only their Note response schema gains `tags`.
+security:
+  - bearerAuth: []
+paths:
+  /tags:
+    post:
+      operationId: createTag
+      summary: Create a tag
+      description: Name is trimmed (1 to 50 chars) and unique per user (case-sensitive). Color defaults to #6b7280.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+      responses:
+        "201":
+          description: Tag created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "400":
+          description: Invalid name or color, or unparseable body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The caller already has a tag with this name (TAG_NAME_TAKEN)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      operationId: listTags
+      summary: List the caller's tags
+      description: Ordered by name ascending, not paginated. noteCount counts active (not soft-deleted) notes only.
+      responses:
+        "200":
+          description: All of the caller's tags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagListResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tags/{id}:
+    parameters:
+      - $ref: "#/components/parameters/TagId"
+    patch:
+      operationId: updateTag
+      summary: Partially update a tag
+      description: At least one of name or color is required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTagRequest"
+      responses:
+        "200":
+          description: The updated tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "400":
+          description: Malformed id, empty patch, invalid name or color, or unparseable body (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Tag does not exist or is owned by another user (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Another of the caller's tags already has this name (TAG_NAME_TAKEN)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTag
+      summary: Delete a tag
+      description: Removes the tag and detaches it from every note. No note is modified or deleted.
+      responses:
+        "204":
+          description: Tag deleted
+        "400":
+          description: id is not a UUID (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Tag does not exist or is owned by another user (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /notes/{id}/tags/{tagId}:
+    parameters:
+      - $ref: "#/components/parameters/NoteId"
+      - $ref: "#/components/parameters/TagIdInPath"
+    put:
+      operationId: attachTag
+      summary: Attach a tag to an active note
+      description: Idempotent. Attaching an already attached tag succeeds.
+      responses:
+        "204":
+          description: Tag is attached to the note
+        "400":
+          description: id or tagId is not a UUID (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Note or tag does not exist, is owned by another user, or the note is soft deleted (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: detachTag
+      summary: Detach a tag from an active note
+      description: Idempotent. Detaching a tag that is not attached succeeds. The tag itself is not deleted.
+      responses:
+        "204":
+          description: Tag is not attached to the note
+        "400":
+          description: id or tagId is not a UUID (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Note or tag does not exist, is owned by another user, or the note is soft deleted (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /notes:
+    get:
+      operationId: listNotes
+      summary: List the caller's active notes (modified)
+      description: Ordered by updatedAt descending. Soft-deleted notes are excluded. New optional tagId filter; summaries now include tags.
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - name: tagId
+          in: query
+          required: false
+          description: Restrict to active notes carrying this tag. The tag must belong to the caller.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A page of note summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoteListResponse"
+        "400":
+          description: Invalid page, limit or tagId (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: tagId does not exist or is owned by another user (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (INTERNAL_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    NoteId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TagId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TagIdInPath:
+      name: tagId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    CreateTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Trimmed before validation
+        color:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+          default: "#6b7280"
+    UpdateTagRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+    TagRef:
+      type: object
+      description: Tag as embedded in note responses
+      required: [id, name, color]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+    Tag:
+      type: object
+      required: [id, name, color, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    TagWithCount:
+      allOf:
+        - $ref: "#/components/schemas/Tag"
+        - type: object
+          required: [noteCount]
+          properties:
+            noteCount:
+              type: integer
+              minimum: 0
+              description: Active (not soft-deleted) notes carrying this tag
+    TagListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagWithCount"
+    TipTapDoc:
+      type: object
+      description: TipTap/ProseMirror JSON document (unchanged from AB-1004)
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: doc
+        content:
+          type: array
+          items:
+            type: object
+      additionalProperties: true
+    Note:
+      type: object
+      description: Modified. Adds tags, ordered by name. Returned by createNote, getNote, updateNote and restoreNote.
+      required: [id, title, content, tags, createdAt, updatedAt, deletedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          $ref: "#/components/schemas/TipTapDoc"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagRef"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: [string, "null"]
+          format: date-time
+    NoteSummary:
+      type: object
+      description: Modified. Adds tags, ordered by name. TrashNoteSummary is unchanged and has no tags.
+      required: [id, title, excerpt, tags, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        excerpt:
+          type: string
+          maxLength: 200
+          description: First 200 characters of contentText
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagRef"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    NoteListResponse:
+      type: object
+      required: [items, page, limit, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/NoteSummary"
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Extends the AB-1004 enum with TAG_NAME_TAKEN
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_TAKEN
+                - INVALID_CREDENTIALS
+                - INVALID_REFRESH_TOKEN
+                - INVALID_OTP
+                - UNAUTHORIZED
+                - NOT_FOUND
+                - TAG_NAME_TAKEN
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              description: Present on VALIDATION_ERROR; one entry per invalid field
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
