@@ -1,28 +1,19 @@
 import type { Express } from "express";
 import request from "supertest";
+import type { ShareLink } from "@todo/shared";
 import { auth, type TestUser } from "../notes/test-helpers.js";
-
-export interface CreatedShare {
-  id: string;
-  noteId: string;
-  token: string;
-  expiresAt: string | null;
-  revokedAt: string | null;
-  viewCount: number;
-  createdAt: string;
-}
 
 export async function createShare(
   app: Express,
   user: TestUser,
   noteId: string,
   body: { expiresAt?: string } = {},
-): Promise<CreatedShare> {
+): Promise<ShareLink> {
   const res = await request(app).post(`/notes/${noteId}/shares`).set(auth(user)).send(body).expect(201);
   return res.body;
 }
 
-export async function listShares(app: Express, user: TestUser, noteId: string): Promise<CreatedShare[]> {
+export async function listShares(app: Express, user: TestUser, noteId: string): Promise<ShareLink[]> {
   const res = await request(app).get(`/notes/${noteId}/shares`).set(auth(user)).expect(200);
   return res.body.items;
 }

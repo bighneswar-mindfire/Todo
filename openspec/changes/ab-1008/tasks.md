@@ -7,7 +7,7 @@
 
 ## 1. Shared types
 
-- [x] 1.1 Create `packages/shared/src/sharing.ts`: `createShareLinkRequestSchema` (strict, optional future `expiresAt`), `shareIdParamsSchema`, `sharedTokenParamSchema`, `shareLinkSchema`, `shareLinkListResponseSchema`, `sharedNoteSchema` and inferred types; export from `index.ts` (Haiku)
+- [x] 1.1 Create `packages/shared/src/sharing.ts`: `createShareLinkRequestSchema` (strict, optional future `expiresAt`), `noteShareParamsSchema`, `sharedTokenParamSchema`, `shareLinkSchema`, `shareLinkListResponseSchema`, `sharedNoteSchema` and inferred types; export from `index.ts` (Haiku)
 - [x] 1.2 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 2. Service
@@ -74,4 +74,4 @@
 - [x] 4.2 Run `pnpm test --coverage`; confirm the Definition of Done thresholds hold
 - [x] 4.3 Manual check: create a link, open `GET /shared/{token}` twice, confirm `viewCount` 2 in the list, revoke, confirm 404 (exercised end to end by the Supertest scenarios, not by a separate manual run)
 - [x] 4.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
-- [ ] 4.5 Commit `feat(sharing): add public share links with atomic view count AB#1008` (asks before pushing; `/review AB-1008` in a fresh terminal comes next)
+- [x] 4.5 Commit `feat(sharing): add public share links with atomic view count AB#1008` (asks before pushing; `/review AB-1008` in a fresh terminal comes next)
