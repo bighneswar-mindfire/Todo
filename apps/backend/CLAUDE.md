@@ -53,3 +53,11 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - Marks are private sentinels (U+E000/U+E001), stripped from the source text in SQL with `translate`, so note text cannot forge one. Output order is fixed: escape `& < > " '` first, then swap sentinels for `<mark>`/`</mark>`. Never swap before escaping.
 - Do not switch the snippet to `MaxFragments` mode: it strips HTML-like tags and short leading words from the note text.
 - Snippet is up to two ~100-character windows, hard-capped at 300 characters of rendered HTML. Title-only matches fall back to the escaped `excerpt`.
+
+## Sharing (AB-1008)
+
+- Owner routes (on the notes router, behind `authenticate`): `POST|GET /notes/:id/shares`, `DELETE /notes/:id/shares/:shareId` (204, sets `revokedAt` only, row kept). Public, unauthenticated: `GET /shared/:token` (`sharing.routes.ts`, mounted at `/shared`).
+- The view count is one `UPDATE "ShareLink" ... FROM "Note" ... RETURNING` in `sharing.service.ts` (`getShared`): it checks not revoked, not expired (DB `now()`), note not soft deleted, and increments in the same statement. Never split it into a read then a write.
+- Every public failure (unknown, revoked, expired, deleted note) is the same 404 `NOT_FOUND`; a malformed token is 400. The 200 sets `Cache-Control: no-store` and `Referrer-Policy: no-referrer` and returns only `title`, `content`, `updatedAt`.
+- Token = 32 `randomBytes`, base64url (43 chars), stored plaintext so the owner can list it. Never log it. Deleting a note keeps its links; they resume on restore.
+- Sharing tests use `createShare`, `listShares`, `openShared` from `src/sharing/test-helpers.ts`.

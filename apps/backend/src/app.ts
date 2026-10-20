@@ -12,6 +12,8 @@ import { createNotesRouter } from "./notes/notes.routes.js";
 import { createNotesService } from "./notes/notes.service.js";
 import { createSearchRouter } from "./search/search.routes.js";
 import { createSearchService } from "./search/search.service.js";
+import { createSharedRouter } from "./sharing/sharing.routes.js";
+import { createSharingService } from "./sharing/sharing.service.js";
 import { createTagsRouter } from "./tags/tags.routes.js";
 import { createTagsService } from "./tags/tags.service.js";
 
@@ -46,7 +48,12 @@ export function createApp({ ping, prisma, hasher, jwt, otpSender }: AppDeps): Ex
 
   const tagsService = createTagsService({ prisma });
   app.use("/tags", createTagsRouter(tagsService, createAuthenticate(jwt)));
-  app.use("/notes", createNotesRouter(createNotesService({ prisma }), tagsService, createAuthenticate(jwt)));
+  const sharingService = createSharingService({ prisma });
+  app.use(
+    "/notes",
+    createNotesRouter(createNotesService({ prisma }), tagsService, sharingService, createAuthenticate(jwt)),
+  );
+  app.use("/shared", createSharedRouter(sharingService));
 
   app.use("/search", createSearchRouter(createSearchService({ prisma }), createAuthenticate(jwt)));
 
