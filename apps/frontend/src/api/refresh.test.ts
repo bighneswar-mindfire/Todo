@@ -75,7 +75,7 @@ describe("silent token refresh", () => {
     expect(useSession.getState().session).toBeNull();
   });
 
-  it("keeps the session when the refresh call itself cannot reach the server", async () => {
+  it("Unreachable refresh keeps the session", async () => {
     signIn();
     routeNotes();
     route("POST /auth/refresh", () => {
@@ -88,13 +88,14 @@ describe("silent token refresh", () => {
     expect(useSession.getState().session).not.toBeNull();
   });
 
-  it("keeps the session when the refresh endpoint answers 5xx", async () => {
+  it("Refresh server error keeps the session", async () => {
     signIn();
     routeNotes();
     route("POST /auth/refresh", () => errorResponse(500, "INTERNAL_ERROR", "boom"));
 
-    await request("/notes", { auth: "bearer" }).catch(() => undefined);
+    const error = (await request("/notes", { auth: "bearer" }).catch((e: unknown) => e)) as ApiError;
 
+    expect(error.status).toBe(500);
     expect(useSession.getState().session).not.toBeNull();
   });
 

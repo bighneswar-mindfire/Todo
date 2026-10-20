@@ -47,7 +47,7 @@ The frontend SHALL keep `accessToken`, `refreshToken` and `user` in a Zustand st
 - **THEN** the store is empty and `localStorage` holds no tokens
 
 ### Requirement: Silent token refresh
-When an authenticated request returns 401, the client SHALL call `POST /auth/refresh` with the stored refresh token, store the new token pair and retry the original request exactly once. Concurrent 401s SHALL share a single in-flight refresh call. If the refresh fails, or the retry returns 401 again, the client SHALL clear the session and the app SHALL navigate to `/login`.
+When an authenticated request returns 401, the client SHALL call `POST /auth/refresh` with the stored refresh token, store the new token pair and retry the original request exactly once. Concurrent 401s SHALL share a single in-flight refresh call. If the server rejects the refresh (4xx) or the retry returns 401 again, the client SHALL clear the session and the app SHALL navigate to `/login`. A refresh that fails without a server rejection (network error or 5xx) SHALL keep the session.
 
 #### Scenario: Expired access token refreshed transparently
 - **WHEN** an authenticated request returns 401 and `/auth/refresh` returns 200
@@ -60,6 +60,14 @@ When an authenticated request returns 401, the client SHALL call `POST /auth/ref
 #### Scenario: Failed refresh signs the user out
 - **WHEN** an authenticated request returns 401 and `/auth/refresh` returns 401 `INVALID_REFRESH_TOKEN`
 - **THEN** the session is cleared and the app is on `/login`
+
+#### Scenario: Unreachable refresh keeps the session
+- **WHEN** an authenticated request returns 401 and the `/auth/refresh` call fails with a network error
+- **THEN** the session is kept and the caller receives an `ApiError` with code `NETWORK_ERROR`
+
+#### Scenario: Refresh server error keeps the session
+- **WHEN** an authenticated request returns 401 and `/auth/refresh` returns 500
+- **THEN** the session is kept and the caller receives an `ApiError` with status 500
 
 #### Scenario: Retry is not repeated
 - **WHEN** the retried request returns 401 again after a successful refresh
@@ -105,7 +113,7 @@ The `/register` page SHALL let a visitor create an account with an email and pas
 
 #### Scenario: Email already taken
 - **WHEN** the API answers 409 `EMAIL_TAKEN`
-- **THEN** an inline error "email already registered" is shown on the email field and the visitor stays on `/register`
+- **THEN** an inline error "Email already registered" is shown on the email field and the visitor stays on `/register`
 
 #### Scenario: Server validation details shown per field
 - **WHEN** the API answers 400 `VALIDATION_ERROR` with a `details` entry for `password`

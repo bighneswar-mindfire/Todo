@@ -3,7 +3,7 @@
 - Shell: prefix PATH for Node 22 / pnpm 10 on every command (`$env:Path = "$env:APPDATA\fnm\node-versions\v22.23.3\installation;" + $env:Path`).
 - Model per task: Haiku = boilerplate, Sonnet = implementation. No Opus task (design.md is approved).
 - No task is estimated over 45 minutes, so no subagent is needed. `[PARALLEL]` marks tasks that touch separate files and can run in separate worktrees.
-- Test files hold one test per scenario, titled exactly as the scenario. 47 scenarios, 47 test tasks (15 in section 2, 6 in section 3, 26 in section 4).
+- Test files hold one test per scenario, titled exactly as the scenario. 49 scenarios, 49 test tasks (17 in section 2, 6 in section 3, 26 in section 4; the two refresh-keeps-session scenarios were added in section 6 after review R3).
 - Frontend tests stub `fetch` through `src/test/fake-api.ts` (no MSW). Each test resets the session store, `localStorage` and the fake API.
 - `@todo/shared` is consumed from `dist/`: run `pnpm --filter @todo/shared build` after any shared change before frontend checks.
 - Exact version pins from design.md D11. Verify any API not yet confirmed (react-hook-form `zodResolver` `schemaOptions.error`, Zustand custom `PersistStorage`) with Context7 before coding.
@@ -123,3 +123,13 @@
 - [x] 5.2 Manual smoke with the `run` skill: start Postgres and backend, `pnpm --filter @todo/frontend dev`, register, log in, reload (session persists), forgot/reset using the OTP from the backend console, log out; note results in the PR description (Sonnet)
 - [x] 5.3 Scenario audit: confirm every one of the 47 scenario titles in `specs/frontend-auth/spec.md` has exactly one test with that exact name (grep script or manual list) (Haiku)
 - [x] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`
+
+## 6. Review fix R3 (refresh failure without server rejection)
+
+- [x] 6.1 Amend `specs/frontend-auth/spec.md` (silent refresh requirement and two new scenarios; "Email already registered" capitalisation) and `delta-openapi.yaml` (`/auth/refresh` 5xx or network row). Needs human approval before re-review (Haiku)
+- [x] 6.2 Rename the existing tests to the new scenario titles and assert the status in the 5xx case (Haiku)
+
+`src/api/refresh.test.ts` - Requirement: Silent token refresh
+- [x] 6.3 Test "Unreachable refresh keeps the session"
+- [x] 6.4 Test "Refresh server error keeps the session"
+- [x] 6.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`

@@ -35,8 +35,9 @@ x-frontend-consumes:
       trigger: Called by the API client when an authenticated request returns 401. Single-flight, at most once per failed request.
       onStatus:
         "200": Store the rotated token pair and retry the original request once.
-        "400": VALIDATION_ERROR. Treated as a failed refresh.
+        "400": VALIDATION_ERROR. Treated as a rejected refresh: clear the session and navigate to /login.
         "401": INVALID_REFRESH_TOKEN. Clear the session and navigate to /login.
+        "5xx / network failure": INTERNAL_ERROR or NETWORK_ERROR. The server did not reject the token, so keep the session and fail the original request with that error. The user is not signed out by a flaky connection.
   /auth/logout:
     post:
       operationId: logout
