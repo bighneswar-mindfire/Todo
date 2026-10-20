@@ -75,6 +75,55 @@ describe("silent token refresh", () => {
     expect(useSession.getState().session).toBeNull();
   });
 
+  it("keeps the session when the refresh call itself cannot reach the server", async () => {
+    signIn();
+    routeNotes();
+    route("POST /auth/refresh", () => {
+      throw new TypeError("Failed to fetch");
+    });
+
+    const error = (await request("/notes", { auth: "bearer" }).catch((e: unknown) => e)) as ApiError;
+
+    expect(error.code).toBe("NETWORK_ERROR");
+    expect(useSession.getState().session).not.toBeNull();
+  });
+
+  it("keeps the session when the refresh endpoint answers 5xx", async () => {
+    signIn();
+    routeNotes();
+    route("POST /auth/refresh", () => errorResponse(500, "INTERNAL_ERROR", "boom"));
+
+    await request("/notes", { auth: "bearer" }).catch(() => undefined);
+
+    expect(useSession.getState().session).not.toBeNull();
+  });
+
+  it("does not refresh when signed out", async () => {
+    routeNotes();
+
+    const error = (await request("/notes", { auth: "bearer" }).catch((e: unknown) => e)) as ApiError;
+
+    expect(error.status).toBe(401);
+    expect(callsTo("POST /auth/refresh")).toHaveLength(0);
+  });
+
+  it("retries without refreshing when another call already replaced the token", async () => {
+    signIn({ accessToken: "access-1" });
+    let first = true;
+    route("GET /notes", (req) => {
+      if (first) {
+        first = false;
+        // Simulate a concurrent refresh finishing while this request was in flight.
+        useSession.getState().setTokens(NEW_TOKENS);
+        return errorResponse(401, "UNAUTHORIZED", "expired");
+      }
+      return req.headers.get("Authorization") === "Bearer access-2" ? json(200, { ok: true }) : errorResponse(401, "UNAUTHORIZED", "x");
+    });
+
+    await expect(request("/notes", { auth: "bearer" })).resolves.toEqual({ ok: true });
+    expect(callsTo("POST /auth/refresh")).toHaveLength(0);
+  });
+
   it("Public endpoints never trigger refresh", async () => {
     useSession.getState().setSession(makeSession());
     route("POST /auth/login", () => errorResponse(401, "INVALID_CREDENTIALS", "nope"));

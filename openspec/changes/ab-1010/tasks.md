@@ -79,47 +79,47 @@
 - [x] 4.5 [PARALLEL] Create `src/pages/HomePage.tsx`: shows `session.user.email`, Log out button calling `logout` (best effort) then `clearSession()` and navigating to `/login` (Sonnet)
 
 `src/pages/RegisterPage.test.tsx` - Requirement: Registration screen
-- [ ] 4.6 Test "Successful registration"
-- [ ] 4.7 Test "Invalid email blocked on the client"
-- [ ] 4.8 Test "Short password blocked on the client"
-- [ ] 4.9 Test "Email already taken"
-- [ ] 4.10 Test "Server validation details shown per field"
-- [ ] 4.11 Test "Submit disabled while pending"
+- [x] 4.6 Test "Successful registration"
+- [x] 4.7 Test "Invalid email blocked on the client"
+- [x] 4.8 Test "Short password blocked on the client"
+- [x] 4.9 Test "Email already taken"
+- [x] 4.10 Test "Server validation details shown per field"
+- [x] 4.11 Test "Submit disabled while pending"
 
 `src/pages/LoginPage.test.tsx` - Requirement: Login screen
-- [ ] 4.12 Test "Successful login"
-- [ ] 4.13 Test "Wrong credentials"
-- [ ] 4.14 Test "Same message for unknown email"
-- [ ] 4.15 Test "Empty fields blocked on the client"
-- [ ] 4.16 Test "Unexpected server error"
-- [ ] 4.17 Test "Notice after registration"
+- [x] 4.12 Test "Successful login"
+- [x] 4.13 Test "Wrong credentials"
+- [x] 4.14 Test "Same message for unknown email"
+- [x] 4.15 Test "Empty fields blocked on the client"
+- [x] 4.16 Test "Unexpected server error"
+- [x] 4.17 Test "Notice after registration"
 
 `src/pages/ForgotPasswordPage.test.tsx` - Requirement: Forgot password screen
-- [ ] 4.18 Test "Request accepted"
-- [ ] 4.19 Test "Same outcome for unknown email"
-- [ ] 4.20 Test "Malformed email blocked"
-- [ ] 4.21 Test "Console hint visible"
+- [x] 4.18 Test "Request accepted"
+- [x] 4.19 Test "Same outcome for unknown email"
+- [x] 4.20 Test "Malformed email blocked"
+- [x] 4.21 Test "Console hint visible"
 
 `src/pages/ResetPasswordPage.test.tsx` - Requirement: Reset password screen
-- [ ] 4.22 Test "Successful reset"
-- [ ] 4.23 Test "Non-numeric OTP blocked"
-- [ ] 4.24 Test "Short new password blocked"
-- [ ] 4.25 Test "Invalid or expired OTP"
-- [ ] 4.26 Test "Email prefilled from previous step"
+- [x] 4.22 Test "Successful reset"
+- [x] 4.23 Test "Non-numeric OTP blocked"
+- [x] 4.24 Test "Short new password blocked"
+- [x] 4.25 Test "Invalid or expired OTP"
+- [x] 4.26 Test "Email prefilled from previous step"
 
 `src/pages/HomePage.test.tsx` - Requirement: Logout
-- [ ] 4.27 Test "Logout revokes and clears" (also asserts query cache cleared)
-- [ ] 4.28 Test "Logout succeeds locally when the API fails"
-- [ ] 4.29 Test "Home shows the signed-in user"
+- [x] 4.27 Test "Logout revokes and clears" (also asserts query cache cleared)
+- [x] 4.28 Test "Logout succeeds locally when the API fails"
+- [x] 4.29 Test "Home shows the signed-in user"
 
 `src/foundation.test.tsx` (continued) - Requirement: Foundation and accessibility baseline
-- [ ] 4.30 Test "Labelled inputs" (all four auth pages, inputs found by label text)
-- [ ] 4.31 Test "Errors announced" (form-level error rendered with `role="alert"`)
-- [ ] 4.32 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (thresholds 80%); 3.8 is now green
+- [x] 4.30 Test "Labelled inputs" (all four auth pages, inputs found by label text)
+- [x] 4.31 Test "Errors announced" (form-level error rendered with `role="alert"`)
+- [x] 4.32 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (thresholds 80%); 3.8 is now green
 
 ## 5. Docs and end-to-end sanity
 
 - [ ] 5.1 Update `apps/frontend/CLAUDE.md`: structure, `/api` proxy and `VITE_API_BASE`, session store and refresh rules, test helpers (Haiku)
 - [ ] 5.2 Manual smoke with the `run` skill: start Postgres and backend, `pnpm --filter @todo/frontend dev`, register, log in, reload (session persists), forgot/reset using the OTP from the backend console, log out; note results in the PR description (Sonnet)
-- [ ] 5.3 Scenario audit: confirm every one of the 47 scenario titles in `specs/frontend-auth/spec.md` has exactly one test with that exact name (grep script or manual list) (Haiku)
+- [x] 5.3 Scenario audit: confirm every one of the 47 scenario titles in `specs/frontend-auth/spec.md` has exactly one test with that exact name (grep script or manual list) (Haiku)
 - [ ] 5.4 Final checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage`

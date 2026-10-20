@@ -34,6 +34,14 @@ describe("route protection", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
+  it("ignores a scheme-relative return path after login", async () => {
+    signIn();
+    const { router } = renderApp({ pathname: "/login", state: { from: { pathname: "//evil.example", search: "", hash: "" } } });
+
+    expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/");
+  });
+
   it("Unknown route", async () => {
     renderApp("/nope/at/all");
 

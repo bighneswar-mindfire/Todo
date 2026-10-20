@@ -35,6 +35,46 @@ describe("session store", () => {
     }
   });
 
+  it("keeps working in memory when localStorage is unavailable", async () => {
+    const broken = {
+      getItem: () => {
+        throw new Error("blocked");
+      },
+      setItem: () => {
+        throw new Error("blocked");
+      },
+      removeItem: () => {
+        throw new Error("blocked");
+      },
+    };
+    vi.stubGlobal("localStorage", broken);
+    vi.resetModules();
+    const fresh = await import("./session");
+
+    fresh.useSession.getState().setSession(makeSession());
+    expect(fresh.useSession.getState().session).not.toBeNull();
+    fresh.useSession.getState().clearSession();
+    expect(fresh.useSession.getState().session).toBeNull();
+  });
+
+  it("follows a login or logout made in another tab", async () => {
+    const session = makeSession({ accessToken: "from-other-tab" });
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ state: { session }, version: 1 }));
+
+    window.dispatchEvent(new StorageEvent("storage", { key: SESSION_STORAGE_KEY }));
+    await vi.waitFor(() => expect(useSession.getState().session).toEqual(session));
+
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ state: { session: null }, version: 1 }));
+    window.dispatchEvent(new StorageEvent("storage", { key: SESSION_STORAGE_KEY }));
+    await vi.waitFor(() => expect(useSession.getState().session).toBeNull());
+  });
+
+  it("ignores a token rotation when signed out", () => {
+    useSession.getState().setTokens({ accessToken: "a", refreshToken: "b" });
+
+    expect(useSession.getState().session).toBeNull();
+  });
+
   it("Clear session", () => {
     useSession.getState().setSession(makeSession({ accessToken: "secret-access", refreshToken: "secret-refresh" }));
 

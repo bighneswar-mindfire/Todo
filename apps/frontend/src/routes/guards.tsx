@@ -4,7 +4,8 @@ import { selectIsAuthenticated, useSession } from "@/stores/session";
 /** Where to go after signing in: the page the visitor originally asked for, else "/". */
 function destinationAfterLogin(state: unknown): string {
   const from = (state as { from?: { pathname?: unknown; search?: unknown; hash?: unknown } } | null)?.from;
-  if (typeof from?.pathname !== "string" || !from.pathname.startsWith("/")) return "/";
+  // Same-origin paths only: "//host" would be read as a scheme-relative URL.
+  if (typeof from?.pathname !== "string" || !from.pathname.startsWith("/") || from.pathname.startsWith("//")) return "/";
   const search = typeof from.search === "string" ? from.search : "";
   const hash = typeof from.hash === "string" ? from.hash : "";
   return from.pathname + search + hash;
