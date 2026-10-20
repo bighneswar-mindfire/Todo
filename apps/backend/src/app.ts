@@ -16,6 +16,7 @@ import { createSharedRouter } from "./sharing/sharing.routes.js";
 import { createSharingService } from "./sharing/sharing.service.js";
 import { createTagsRouter } from "./tags/tags.routes.js";
 import { createTagsService } from "./tags/tags.service.js";
+import { createVersionsService } from "./versions/versions.service.js";
 
 export interface AppDeps {
   ping: Ping;
@@ -49,9 +50,11 @@ export function createApp({ ping, prisma, hasher, jwt, otpSender }: AppDeps): Ex
   const tagsService = createTagsService({ prisma });
   app.use("/tags", createTagsRouter(tagsService, createAuthenticate(jwt)));
   const sharingService = createSharingService({ prisma });
+  const notesService = createNotesService({ prisma });
+  const versionsService = createVersionsService({ prisma, notes: notesService });
   app.use(
     "/notes",
-    createNotesRouter(createNotesService({ prisma }), tagsService, sharingService, createAuthenticate(jwt)),
+    createNotesRouter(notesService, tagsService, sharingService, versionsService, createAuthenticate(jwt)),
   );
   app.use("/shared", createSharedRouter(sharingService));
 

@@ -69,4 +69,39 @@ describe("notes: update note", () => {
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe("NOT_FOUND");
   });
+
+  it("Update records a new version", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { title: "old", content: DOC("keep") });
+    await request(t.app).patch(`/notes/${note.id}`).set(auth(user)).send({ title: "new" }).expect(200);
+    const versions = await t.prisma.noteVersion.findMany({
+      where: { noteId: note.id },
+      orderBy: { versionNumber: "asc" },
+    });
+    expect(versions.map((v) => v.versionNumber)).toEqual([1, 2]);
+    expect(versions[1]!.title).toBe("new");
+    expect(versions[1]!.content).toEqual(DOC("keep"));
+  });
+
+  it("Unchanged patch records no version", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { title: "same", content: DOC("same") });
+    const res = await request(t.app)
+      .patch(`/notes/${note.id}`)
+      .set(auth(user))
+      .send({ title: "same", content: DOC("same") });
+    expect(res.status).toBe(200);
+    expect(await t.prisma.noteVersion.count({ where: { noteId: note.id } })).toBe(1);
+  });
+
+  it("First edit of a pre-existing note starts its history", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { title: "old" });
+    await t.prisma.noteVersion.deleteMany({ where: { noteId: note.id } });
+    await request(t.app).patch(`/notes/${note.id}`).set(auth(user)).send({ title: "edited" }).expect(200);
+    const versions = await t.prisma.noteVersion.findMany({ where: { noteId: note.id } });
+    expect(versions).toHaveLength(1);
+    expect(versions[0]!.versionNumber).toBe(1);
+    expect(versions[0]!.title).toBe("edited");
+  });
 });
