@@ -31,11 +31,11 @@
 
 ## 3. Components
 
-- [ ] 3.1 [PARALLEL] Create `src/components/notes/TagChip.tsx` (`<span>` with `backgroundColor` and `textColorFor`) (Haiku)
-- [ ] 3.2 [PARALLEL] Create `src/components/notes/PaginationBar.tsx`: `<nav aria-label="Pagination">`, **Previous**, "Page X of Y" from the response, **Next**, disabled at the bounds; renders nothing when Y <= 1; takes an `onPageChange` callback (Sonnet)
-- [ ] 3.3 Create `src/components/notes/NoteListItem.tsx`: `<li>` with title in a heading, excerpt only when non-empty, `TagChip`s, `<time dateTime={updatedAt}>` formatted by a module-level `Intl.DateTimeFormat` (Sonnet)
-- [ ] 3.4 Create `src/components/notes/TagFilter.tsx`: `role="group"` labelled "Filter by tag", **All notes** and one `aria-pressed` button per tag showing name and `noteCount`; tags error shows `role="alert"` "Couldn't load tags" with **Retry** (Sonnet)
-- [ ] 3.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.1 [PARALLEL] Create `src/components/notes/TagChip.tsx` (`<span>` with `backgroundColor` and `textColorFor`) (Haiku)
+- [x] 3.2 [PARALLEL] Create `src/components/notes/PaginationBar.tsx`: `<nav aria-label="Pagination">`, **Previous**, "Page X of Y" from the response, **Next**, disabled at the bounds; renders nothing when Y <= 1; takes an `onPageChange` callback (Sonnet)
+- [x] 3.3 Create `src/components/notes/NoteListItem.tsx`: `<li>` with title in a heading, excerpt only when non-empty, `TagChip`s, `<time dateTime={updatedAt}>` formatted by a module-level `Intl.DateTimeFormat` (Sonnet)
+- [x] 3.4 Create `src/components/notes/TagFilter.tsx`: `role="group"` labelled "Filter by tag", **All notes** and one `aria-pressed` button per tag showing name and `noteCount`; tags error shows `role="alert"` "Couldn't load tags" with **Retry** (Sonnet)
+- [x] 3.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Page, route and page tests
 
