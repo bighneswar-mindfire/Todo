@@ -1,0 +1,297 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.8.0
+  description: Delta for AB-1008. Adds owner-managed share links (create, list, revoke) and a public read-only endpoint with an atomic view count. Owner endpoints require a Bearer access token; GET /shared/{token} is public. No new error code.
+paths:
+  /notes/{id}/shares:
+    post:
+      operationId: createShareLink
+      summary: Create a public share link for an active note
+      description: |
+        Generates a new unguessable token (32 random bytes, base64url, 43 characters). A note may have several links.
+        The body is optional. expiresAt, when given, must be strictly in the future; omitted means the link never expires.
+        The token is a bearer secret: it is returned here and by the list endpoint to the owner only.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/NoteId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShareLinkRequest"
+      responses:
+        "201":
+          description: Link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLink"
+        "400":
+          description: Malformed note id, or expiresAt not an ISO datetime or not in the future (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Note does not exist, is owned by another user, or is soft deleted (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    get:
+      operationId: listShareLinks
+      summary: List all share links of an active note
+      description: Active, expired and revoked links are all returned, newest first, each with its current viewCount.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/NoteId"
+      responses:
+        "200":
+          description: The note's share links (possibly empty)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLinkList"
+        "400":
+          description: Malformed note id (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Note does not exist, is owned by another user, or is soft deleted (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /notes/{id}/shares/{shareId}:
+    delete:
+      operationId: revokeShareLink
+      summary: Revoke a share link
+      description: |
+        Sets revokedAt to now. The row is kept, so viewCount stays visible in the list. The link stops resolving immediately.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/NoteId"
+        - name: shareId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Link revoked
+        "400":
+          description: Malformed note id or share id (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing, invalid or expired access token (UNAUTHORIZED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Note or link does not exist, belongs to another user or another note, the note is soft deleted, or the link is already revoked (NOT_FOUND). revokedAt is unchanged.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /shared/{token}:
+    get:
+      operationId: getSharedNote
+      summary: Read a shared note anonymously (read-only)
+      description: |
+        No authentication. Validates the link and increments its viewCount in one atomic SQL statement, so N concurrent
+        successful opens add exactly N and a link that is not live is never counted.
+        A link is live when it is not revoked, expiresAt is null or in the future, and its note is not soft deleted.
+        Unknown, revoked, expired and deleted-note links all return the same 404 body.
+        Responses are sent with Cache-Control no-store and Referrer-Policy no-referrer.
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: 43 base64url characters (A-Z a-z 0-9 - _)
+          schema:
+            type: string
+            pattern: "^[A-Za-z0-9_-]{43}$"
+      responses:
+        "200":
+          description: The shared note, read-only
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+            Referrer-Policy:
+              schema:
+                type: string
+                const: no-referrer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedNote"
+        "400":
+          description: Token is not 43 base64url characters (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Unknown, revoked or expired link, or its note is soft deleted (NOT_FOUND). Not counted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    NoteId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    InternalError:
+      description: Unexpected server error (INTERNAL_ERROR)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    CreateShareLinkRequest:
+      type: object
+      description: Optional body. An empty object or no body creates a non-expiring link.
+      additionalProperties: false
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+          description: Must be strictly in the future
+    ShareLink:
+      type: object
+      required: [id, noteId, token, expiresAt, revokedAt, viewCount, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        noteId:
+          type: string
+          format: uuid
+        token:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{43}$"
+          description: Secret. Anyone holding it can read the note until the link is revoked or expires.
+        expiresAt:
+          type: [string, "null"]
+          format: date-time
+        revokedAt:
+          type: [string, "null"]
+          format: date-time
+        viewCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+    ShareLinkList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          description: Ordered by createdAt descending
+          items:
+            $ref: "#/components/schemas/ShareLink"
+    SharedNote:
+      type: object
+      description: Only these three fields. No id, owner, tags, viewCount or link details.
+      required: [title, content, updatedAt]
+      properties:
+        title:
+          type: string
+        content:
+          type: object
+          description: TipTap JSON document
+          required: [type]
+          properties:
+            type:
+              type: string
+              const: doc
+            content:
+              type: array
+              items:
+                type: object
+          additionalProperties: true
+        updatedAt:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Unchanged from AB-1007. No new error code.
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_TAKEN
+                - INVALID_CREDENTIALS
+                - INVALID_REFRESH_TOKEN
+                - INVALID_OTP
+                - UNAUTHORIZED
+                - NOT_FOUND
+                - TAG_NAME_TAKEN
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              description: Present on VALIDATION_ERROR; one entry per invalid field
+              items:
+                type: object
+                required: [field, message]
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

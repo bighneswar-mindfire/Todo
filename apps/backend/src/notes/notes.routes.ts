@@ -1,19 +1,23 @@
 import { Router, type RequestHandler } from "express";
 import {
   createNoteRequestSchema,
+  createShareLinkRequestSchema,
   noteIdParamSchema,
   noteListQuerySchema,
+  noteShareParamsSchema,
   noteTagParamsSchema,
   pageQuerySchema,
   updateNoteRequestSchema,
 } from "@todo/shared";
 import { parseBody, parseParams, parseQuery } from "../http/parse.js";
+import type { SharingService } from "../sharing/sharing.service.js";
 import type { TagsService } from "../tags/tags.service.js";
 import type { NotesService } from "./notes.service.js";
 
 export function createNotesRouter(
   service: NotesService,
   tags: TagsService,
+  sharing: SharingService,
   authenticate: RequestHandler,
 ): Router {
   const router = Router();
@@ -64,6 +68,23 @@ export function createNotesRouter(
   router.delete("/:id/tags/:tagId", async (req, res) => {
     const { id, tagId } = parseParams(noteTagParamsSchema, req.params);
     await tags.detach(req.auth!.userId, id, tagId);
+    res.status(204).end();
+  });
+
+  router.post("/:id/shares", async (req, res) => {
+    const { id } = parseParams(noteIdParamSchema, req.params);
+    const link = await sharing.create(req.auth!.userId, id, parseBody(createShareLinkRequestSchema, req.body));
+    res.status(201).json(link);
+  });
+
+  router.get("/:id/shares", async (req, res) => {
+    const { id } = parseParams(noteIdParamSchema, req.params);
+    res.status(200).json(await sharing.list(req.auth!.userId, id));
+  });
+
+  router.delete("/:id/shares/:shareId", async (req, res) => {
+    const { id, shareId } = parseParams(noteShareParamsSchema, req.params);
+    await sharing.revoke(req.auth!.userId, id, shareId);
     res.status(204).end();
   });
 
