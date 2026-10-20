@@ -46,3 +46,10 @@ Express 5 + TypeScript (ESM) + Prisma 7.
 - Soft-deleted notes keep their tag links (restore brings tags back) and do not count toward `noteCount`.
 - Note responses and list summaries carry `tags` (`{ id, name, color }`, name asc); trash summaries do not. `GET /notes?tagId=` 404s for a tag the caller does not own.
 - Tests use `createTag` and `attachTag` from `src/notes/test-helpers.ts`.
+
+## Search highlight (AB-1007)
+
+- `GET /search` items carry `highlight: { title, snippet }`. `search.service.ts` runs one extra `ts_headline(..., HighlightAll=true)` query for the page's ids only; `highlight.ts` (`buildHighlight`) cuts the snippet window and renders it.
+- Marks are private sentinels (U+E000/U+E001), stripped from the source text in SQL with `translate`, so note text cannot forge one. Output order is fixed: escape `& < > " '` first, then swap sentinels for `<mark>`/`</mark>`. Never swap before escaping.
+- Do not switch the snippet to `MaxFragments` mode: it strips HTML-like tags and short leading words from the note text.
+- Snippet is up to two ~100-character windows, hard-capped at 300 characters of rendered HTML. Title-only matches fall back to the escaped `excerpt`.
