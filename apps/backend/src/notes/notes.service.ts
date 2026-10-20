@@ -1,12 +1,10 @@
 import {
-  NOTE_EXCERPT_LENGTH,
   TRASH_RETENTION_DAYS,
   type CreateNoteRequest,
   type Note,
   type NoteListResponse,
   type NoteListQuery,
   type PageQuery,
-  type TagRef,
   type TipTapDoc,
   type TrashListResponse,
   type UpdateNoteRequest,
@@ -14,6 +12,7 @@ import {
 import { AppError } from "../errors.js";
 import type { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import { extractText } from "./content-text.js";
+import { excerpt, flattenTags, tagsInclude, type TagLinks } from "./summary.js";
 
 export interface NotesServiceDeps {
   prisma: PrismaClient;
@@ -39,17 +38,6 @@ function toJson(doc: TipTapDoc): Prisma.InputJsonValue {
   return doc as Prisma.InputJsonValue;
 }
 
-const tagsInclude = {
-  orderBy: { tag: { name: "asc" } },
-  select: { tag: { select: { id: true, name: true, color: true } } },
-} as const;
-
-type TagLinks = { tag: TagRef }[];
-
-function flattenTags(links: TagLinks): TagRef[] {
-  return links.map((l) => l.tag);
-}
-
 function toNote(row: {
   id: string;
   title: string;
@@ -68,10 +56,6 @@ function toNote(row: {
     updatedAt: row.updatedAt.toISOString(),
     deletedAt: row.deletedAt ? row.deletedAt.toISOString() : null,
   };
-}
-
-function excerpt(contentText: string): string {
-  return contentText.slice(0, NOTE_EXCERPT_LENGTH);
 }
 
 function restoreCutoff(): Date {
