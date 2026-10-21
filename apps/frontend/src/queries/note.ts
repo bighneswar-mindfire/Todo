@@ -17,13 +17,13 @@ export function useNote(id: string | undefined) {
   });
 }
 
+/** Lists and tag counts go stale; the detail query is excluded so a freshly seeded note is not refetched. */
 function useInvalidateLists() {
   const queryClient = useQueryClient();
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: notesKeys.all, refetchType: "active" }),
-      queryClient.invalidateQueries({ queryKey: notesKeys.tags }),
-    ]);
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: notesKeys.lists });
+    void queryClient.invalidateQueries({ queryKey: notesKeys.tags });
+  };
 }
 
 export type SaveNoteInput =
@@ -39,9 +39,9 @@ export function useSaveNote() {
       input.id === undefined
         ? createNote({ title: input.title, content: input.content })
         : updateNote(input.id, input.changes),
-    onSuccess: async (note) => {
+    onSuccess: (note) => {
       queryClient.setQueryData(noteKeys.detail(note.id), note);
-      await invalidateLists();
+      invalidateLists();
     },
   });
 }
@@ -51,9 +51,9 @@ export function useDeleteNote() {
   const invalidateLists = useInvalidateLists();
   return useMutation({
     mutationFn: (id: string) => deleteNote(id),
-    onSuccess: async (_data, id) => {
+    onSuccess: (_data, id) => {
       queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
-      await invalidateLists();
+      invalidateLists();
     },
   });
 }
@@ -65,13 +65,13 @@ export function useToggleNoteTag(noteId: string) {
   return useMutation({
     mutationFn: ({ tag, attach }: { tag: TagRef; attach: boolean }) =>
       attach ? attachTag(noteId, tag.id) : detachTag(noteId, tag.id),
-    onSuccess: async (_data, { tag, attach }) => {
+    onSuccess: (_data, { tag, attach }) => {
       queryClient.setQueryData<Note>(noteKeys.detail(noteId), (note) => {
         if (!note) return note;
         const others = note.tags.filter((t) => t.id !== tag.id);
         return { ...note, tags: attach ? [...others, { id: tag.id, name: tag.name, color: tag.color }] : others };
       });
-      await invalidateLists();
+      invalidateLists();
     },
   });
 }

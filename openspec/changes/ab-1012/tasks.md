@@ -46,69 +46,69 @@
 
 ## 3. Editor page: routes, load states, create, edit, guard
 
-- [ ] 3.1 Create `src/components/editor/DiscardChangesDialog.tsx` (**Stay** / **Discard changes**) on the shared dialog (Haiku)
-- [ ] 3.2 Create `src/pages/NoteEditorPage.tsx`: reads `:id`, renders `<NoteEditor key={id ?? "new"}>`; load states (D10), header with back link and one `h1` (Sonnet)
-- [ ] 3.3 Implement the `NoteEditor` body: title input (label "Title", `maxLength` 200), baseline/dirty state (D3), "Unsaved changes" / "Saved" indicators, Save button, `FormAlert` for failures (Sonnet)
-- [ ] 3.4 Implement save (D4): title validation with the shared title rule, diff payload, create then seed cache and `navigate(..., { replace: true })`, in-flight guard, Ctrl/Cmd+S listener, server title error mapping, 404 to not-found (Sonnet)
-- [ ] 3.5 Implement the guard (D5): `useBlocker` with `dirtyRef`/`bypassRef`, `beforeunload` while dirty (Sonnet)
-- [ ] 3.6 Add routes `/notes/new` and `/notes/:id` under `RequireAuth` in `src/routes/router.tsx` (Haiku)
+- [x] 3.1 Create `src/components/editor/DiscardChangesDialog.tsx` (**Stay** / **Discard changes**) on the shared dialog (Haiku)
+- [x] 3.2 Create `src/pages/NoteEditorPage.tsx`: reads `:id`, renders `<NoteEditor key={id ?? "new"}>`; load states (D10), header with back link and one `h1` (Sonnet)
+- [x] 3.3 Implement the `NoteEditor` body: title input (label "Title", `maxLength` 200), baseline/dirty state (D3), "Unsaved changes" / "Saved" indicators, Save button, `FormAlert` for failures (Sonnet)
+- [x] 3.4 Implement save (D4): title validation with the shared title rule, diff payload, create then seed cache and `navigate(..., { replace: true })`, in-flight guard, Ctrl/Cmd+S listener, server title error mapping, 404 to not-found (Sonnet)
+- [x] 3.5 Implement the guard (D5): `useBlocker` with `dirtyRef`/`bypassRef`, `beforeunload` while dirty (Sonnet)
+- [x] 3.6 Add routes `/notes/new` and `/notes/:id` under `RequireAuth` in `src/routes/router.tsx` (Haiku)
 
 `src/pages/NoteEditorPage.test.tsx` - Requirement: Editor routes
-- [ ] 3.7 Test "Unauthenticated visit is redirected"
-- [ ] 3.8 Test "New note starts empty"
-- [ ] 3.9 Test "Existing note is loaded"
-- [ ] 3.10 Test "Back link returns to the list"
+- [x] 3.7 Test "Unauthenticated visit is redirected"
+- [x] 3.8 Test "New note starts empty"
+- [x] 3.9 Test "Existing note is loaded"
+- [x] 3.10 Test "Back link returns to the list"
 
 Requirement: Rich-text editing
-- [ ] 3.11 Test "Stored content round-trips"
+- [x] 3.11 Test "Stored content round-trips"
 
 Requirement: Creating a note
-- [ ] 3.12 Test "Save is disabled without a title"
-- [ ] 3.13 Test "Create sends trimmed title and content"
-- [ ] 3.14 Test "Create moves to the edit URL"
-- [ ] 3.15 Test "Create refreshes the list"
+- [x] 3.12 Test "Save is disabled without a title"
+- [x] 3.13 Test "Create sends trimmed title and content"
+- [x] 3.14 Test "Create moves to the edit URL"
+- [x] 3.15 Test "Create refreshes the list"
 
 Requirement: Editing a note
-- [ ] 3.16 Test "Save is disabled when nothing changed"
-- [ ] 3.17 Test "Editing enables Save and shows the dirty marker"
-- [ ] 3.18 Test "Only the title is sent when only the title changed"
-- [ ] 3.19 Test "Only the content is sent when only the content changed"
-- [ ] 3.20 Test "Successful save resets the baseline"
-- [ ] 3.21 Test "Reverting an edit clears the dirty state"
-- [ ] 3.22 Test "Keyboard shortcut saves"
-- [ ] 3.23 Test "Save refreshes the list"
+- [x] 3.16 Test "Save is disabled when nothing changed"
+- [x] 3.17 Test "Editing enables Save and shows the dirty marker"
+- [x] 3.18 Test "Only the title is sent when only the title changed"
+- [x] 3.19 Test "Only the content is sent when only the content changed"
+- [x] 3.20 Test "Successful save resets the baseline"
+- [x] 3.21 Test "Reverting an edit clears the dirty state"
+- [x] 3.22 Test "Keyboard shortcut saves"
+- [x] 3.23 Test "Save refreshes the list"
 
 Requirement: Title validation
-- [ ] 3.24 Test "Blank title is rejected locally"
-- [ ] 3.25 Test "Server title error is shown"
+- [x] 3.24 Test "Blank title is rejected locally"
+- [x] 3.25 Test "Server title error is shown"
 
 Requirement: Unsaved-changes guard
-- [ ] 3.26 Test "Clean page leaves without a prompt"
-- [ ] 3.27 Test "Dirty page asks before leaving"
-- [ ] 3.28 Test "Stay keeps the edits"
-- [ ] 3.29 Test "Discard leaves the page"
-- [ ] 3.30 Test "Browser unload is guarded only when dirty"
-- [ ] 3.31 Test "Saving then navigating does not prompt"
+- [x] 3.26 Test "Clean page leaves without a prompt"
+- [x] 3.27 Test "Dirty page asks before leaving"
+- [x] 3.28 Test "Stay keeps the edits"
+- [x] 3.29 Test "Discard leaves the page"
+- [x] 3.30 Test "Browser unload is guarded only when dirty"
+- [x] 3.31 Test "Saving then navigating does not prompt"
 
 Requirement: Save failures
-- [ ] 3.32 Test "Server error keeps edits"
-- [ ] 3.33 Test "Network failure keeps edits"
-- [ ] 3.34 Test "Retrying after failure succeeds"
-- [ ] 3.35 Test "Double click sends one request"
-- [ ] 3.36 Test "Note disappears while editing"
+- [x] 3.32 Test "Server error keeps edits"
+- [x] 3.33 Test "Network failure keeps edits"
+- [x] 3.34 Test "Retrying after failure succeeds"
+- [x] 3.35 Test "Double click sends one request"
+- [x] 3.36 Test "Note disappears while editing"
 
 Requirement: Load states
-- [ ] 3.37 Test "Loading state"
-- [ ] 3.38 Test "Missing note"
-- [ ] 3.39 Test "Malformed id is not found"
-- [ ] 3.40 Test "Load failure can be retried"
-- [ ] 3.41 Test "Invalid response body is a failure"
-- [ ] 3.42 Test "Switching notes resets the editor"
+- [x] 3.37 Test "Loading state"
+- [x] 3.38 Test "Missing note"
+- [x] 3.39 Test "Malformed id is not found"
+- [x] 3.40 Test "Load failure can be retried"
+- [x] 3.41 Test "Invalid response body is a failure"
+- [x] 3.42 Test "Switching notes resets the editor"
 
 Requirement: Editor accessibility baseline
-- [ ] 3.43 Test "Controls have accessible names"
+- [x] 3.43 Test "Controls have accessible names"
 
-- [ ] 3.44 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.44 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Tags on a note and delete
 

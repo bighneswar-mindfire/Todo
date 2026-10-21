@@ -4,6 +4,8 @@ import { PAGE_SIZE, type ListParams } from "@/lib/list-params";
 
 export const notesKeys = {
   all: ["notes"] as const,
+  /** Prefix of every list query; invalidating it leaves note detail queries alone. */
+  lists: ["notes", "list"] as const,
   list: (params: ListParams) => ["notes", "list", params] as const,
   tags: ["tags"] as const,
 };
