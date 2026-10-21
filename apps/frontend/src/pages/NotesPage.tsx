@@ -1,18 +1,21 @@
 import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { ApiError } from "@/api/errors";
 import { NoteListItem } from "@/components/notes/NoteListItem";
 import { PaginationBar } from "@/components/notes/PaginationBar";
+import { SearchBox } from "@/components/search/SearchBox";
 import { TagFilter } from "@/components/notes/TagFilter";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { buildListParams, parseListParams } from "@/lib/list-params";
+import { buildSearchParams } from "@/lib/search-params";
 import { useNotesList, useTags } from "@/queries/notes";
 import { useLogout } from "@/queries/session";
 import { useSession } from "@/stores/session";
 
 export function NotesPage() {
   const session = useSession((s) => s.session);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, tagId } = parseListParams(searchParams);
 
@@ -95,6 +98,7 @@ export function NotesPage() {
           </Button>
         </div>
       </header>
+      <SearchBox onSubmit={(q) => void navigate({ pathname: "/search", search: buildSearchParams({ q, page: 1 }).toString() })} />
       <TagFilter
         tags={tags.data?.items}
         tagsFailed={tags.isError}

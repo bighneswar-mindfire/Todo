@@ -101,17 +101,17 @@ Requirement: Tag filter
 ## 5. Notes-list header and freshness
 
 `src/pages/NotesPage.test.tsx` - Requirement: Search entry in the notes-list header
-- [ ] 5.1 Test "Submitting opens the search page"
-- [ ] 5.2 Test "Search button submits"
-- [ ] 5.3 Test "Blank submit does nothing"
-- [ ] 5.4 Test "Typing alone sends no request"
-- [ ] 5.5 Add `SearchBox` in `submit` mode to the `NotesPage` header
+- [x] 5.1 Test "Submitting opens the search page"
+- [x] 5.2 Test "Search button submits"
+- [x] 5.3 Test "Blank submit does nothing"
+- [x] 5.4 Test "Typing alone sends no request"
+- [x] 5.5 Add `SearchBox` in `submit` mode to the `NotesPage` header
 
 `src/queries/search.test.tsx` - Requirement: Results stay fresh
-- [ ] 5.6 Test "Saved edit is reflected"
-- [ ] 5.7 Test "Deleted note is not shown from cache"
-- [ ] 5.8 Invalidate `searchKeys.all` in `useInvalidateLists` (`queries/note.ts`), keeping detail queries excluded
-- [ ] 5.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (>= 80% on new code); `pnpm exec openspec validate ab-1013 --strict`
+- [x] 5.6 Test "Saved edit is reflected"
+- [x] 5.7 Test "Deleted note is not shown from cache"
+- [x] 5.8 Invalidate `searchKeys.all` in `useInvalidateLists` (`queries/note.ts`), keeping detail queries excluded
+- [x] 5.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (>= 80% on new code); `pnpm exec openspec validate ab-1013 --strict`
 
 ## Workflow follow-up
 
