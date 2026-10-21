@@ -5,6 +5,9 @@ import type {
   NoteSummary,
   SearchResponse,
   SearchResult,
+  ShareLink,
+  ShareLinkListResponse,
+  SharedNote,
   TagWithCount,
   TipTapDoc,
 } from "@todo/shared";
@@ -94,6 +97,35 @@ export function makeSearchResult(overrides: Partial<SearchResult> = {}): SearchR
 
 export function searchPage(items: SearchResult[], meta: { page?: number; limit?: number; total?: number } = {}): SearchResponse {
   return { items, page: meta.page ?? 1, limit: meta.limit ?? 20, total: meta.total ?? items.length };
+}
+
+/** A share link as the API returns it: active, never expires, unopened. Tokens are 43 base64url characters. */
+export function makeShareLink(overrides: Partial<ShareLink> = {}): ShareLink {
+  const n = String(counter + 1).padStart(6, "0");
+  return {
+    id: uuid(),
+    noteId: "00000000-0000-4000-8000-0000000000a1",
+    token: `tok${n}`.padEnd(43, "x"),
+    expiresAt: null,
+    revokedAt: null,
+    viewCount: 0,
+    createdAt: "2026-10-20T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+export function shareList(items: ShareLink[]): ShareLinkListResponse {
+  return { items };
+}
+
+/** The public view of a note as returned by `GET /shared/{token}`. */
+export function makeSharedNote(overrides: Partial<SharedNote> = {}): SharedNote {
+  return {
+    title: "Shared title",
+    content: doc(paragraph("Shared text")),
+    updatedAt: "2026-10-03T10:00:00.000Z",
+    ...overrides,
+  };
 }
 
 /** An account with no notes and no tags: enough for tests that merely open `/`. */
