@@ -87,10 +87,10 @@ describe("quality gates", () => {
 });
 
 describe("claude code configuration", () => {
-  it("Reviewer is read-only: the agent grants only Read, Grep and Glob", () => {
+  it("Reviewer is read-only: the agent grants Read, Grep, Glob and git diff/log only", () => {
     const agent = read(".claude/agents/reviewer.md");
-    const tools = /^tools:\s*(.+)$/m.exec(agent)?.[1]?.split(",").map((t) => t.trim());
-    expect(tools).toEqual(["Read", "Grep", "Glob"]);
+    const tools = /^tools:\s*(.+)$/m.exec(agent)?.[1]?.split(/,\s*(?![^(]*\))/).map((t) => t.trim());
+    expect(tools).toEqual(["Read", "Grep", "Glob", "Bash(git diff:*)", "Bash(git log:*)"]);
   });
 
   it("Context7 configured: .mcp.json defines a pinned Context7 server", () => {
@@ -99,11 +99,11 @@ describe("claude code configuration", () => {
     expect(args.some((a) => /^@upstash\/context7-mcp@\d+\.\d+\.\d+$/.test(a))).toBe(true);
   });
 
-  it("Workflow commands exist: spec, plan, tasks, implement, review, pr, parallel", () => {
-    for (const name of ["spec", "plan", "tasks", "implement", "review", "pr", "parallel"]) {
+  it("Workflow commands exist: /opsx:* and /create-pr", () => {
+    for (const name of ["opsx/explore", "opsx/propose", "opsx/update", "opsx/apply", "opsx/sync", "opsx/archive", "create-pr"]) {
       expect(existsSync(join(root, ".claude/commands", `${name}.md`)), name).toBe(true);
     }
-    for (const file of ["CLAUDE.md", "apps/backend/CLAUDE.md", "apps/frontend/CLAUDE.md", "packages/shared/CLAUDE.md"]) {
+    for (const file of ["AGENTS.md", "docs/FRS.md", "docs/SDS.md", "CLAUDE.md", "apps/backend/CLAUDE.md", "apps/frontend/CLAUDE.md", "packages/shared/CLAUDE.md"]) {
       expect(existsSync(join(root, file)), file).toBe(true);
     }
   });
