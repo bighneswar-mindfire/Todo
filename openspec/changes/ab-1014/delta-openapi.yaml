@@ -1,0 +1,59 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.14.0
+  description: |
+    Delta for AB-1014 (frontend share UI). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1008 (share management and `GET /shared/{token}`).
+
+    The frontend consumes the endpoints listed under `x-frontend-consumes`, which also records how the UI must react to each status code. Tests assert these reactions. The error body is always `{ error: { code, message, details? } }`. Requests go through the `/api` base path, unchanged from AB-1010. A 401 on a bearer call follows the AB-1010 refresh flow: one refresh, one retry, and if refresh is rejected the session is cleared and the user is sent to /login. The public endpoint sends no credentials and never refreshes.
+paths: {}
+x-frontend-consumes:
+  /notes/{id}/shares:
+    post:
+      operationId: createShareLink
+      auth: bearer
+      request: CreateShareLinkRequest from `@todo/shared` (optional `expiresAt`, ISO UTC datetime strictly in the future). The UI sends no body field when no expiry is chosen, and never sends a past expiry (it validates with the shared schema first).
+      response: ShareLink from `@todo/shared` (`id`, `noteId`, `token`, `expiresAt`, `revokedAt`, `viewCount`, `createdAt`).
+      onStatus:
+        "201": Show the new link in the list and announce "Link created".
+        "201 (body fails schema)": Treated as a failure. Show the error alert; the expiry input keeps its value.
+        "400": VALIDATION_ERROR. Show the `expiresAt` detail message on the expiry input.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND for a foreign, missing or soft-deleted note. Show "This note is no longer available".
+        "500": INTERNAL_ERROR. Show the error alert; the expiry input keeps its value.
+        "network failure": NETWORK_ERROR. Same as 500.
+    get:
+      operationId: listShareLinks
+      auth: bearer
+      response: ShareLinkListResponse from `@todo/shared` (`items`, newest first, including expired and revoked links).
+      onStatus:
+        "200": Render the rows, or "No share links yet" when `items` is empty.
+        "200 (body fails schema)": Treated as a failure. Show the error alert with Retry.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND. Show "This note is no longer available".
+        "500": INTERNAL_ERROR. Show the error alert with Retry.
+        "network failure": NETWORK_ERROR. Same as 500.
+  /notes/{id}/shares/{shareId}:
+    delete:
+      operationId: revokeShareLink
+      auth: bearer
+      response: No body.
+      onStatus:
+        "204": Mark the link Revoked, keep its view count, announce "Link revoked".
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND (already revoked, foreign, or gone). Treated as success: refetch the list.
+        "500": INTERNAL_ERROR. Keep the link Active and show the error alert.
+        "network failure": NETWORK_ERROR. Same as 500.
+  /shared/{token}:
+    get:
+      operationId: getSharedNote
+      auth: none
+      request: Path token of 43 base64url characters (SHARE_TOKEN_PATTERN). The UI never sends a malformed token; it shows the not-available view instead.
+      response: SharedNote from `@todo/shared` (`title`, `content`, `updatedAt`). The server sends `Cache-Control: no-store` and `Referrer-Policy: no-referrer`. Each 200 increments the link's view count, so the UI sends exactly one request per visit and does not retry automatically.
+      onStatus:
+        "200": Render the note read-only through the editor schema (never as HTML).
+        "200 (body fails schema)": Treated as a failure. Show the error alert with Retry.
+        "400": VALIDATION_ERROR. Show the same not-available view as 404.
+        "404": NOT_FOUND (unknown, revoked, expired, note deleted). Show the not-available view; the three causes are indistinguishable.
+        "500": INTERNAL_ERROR. Show the error alert with Retry.
+        "network failure": NETWORK_ERROR. Same as 500.

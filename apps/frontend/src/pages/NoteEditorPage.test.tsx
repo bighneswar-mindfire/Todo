@@ -8,10 +8,12 @@ import {
   doc,
   makeFullNote,
   makeNote,
+  makeShareLink,
   makeTag,
   notesPage,
   paragraph,
   routeEmptyNotes,
+  shareList,
   signIn,
 } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
@@ -739,3 +741,140 @@ describe("NoteEditorPage delete", () => {
   });
 });
 
+
+const SHARES = `GET /notes/${A}/shares`;
+
+function routeShares() {
+  route(SHARES, () => json(200, shareList([])));
+  route(`POST /notes/${A}/shares`, () => json(201, makeShareLink({ noteId: A })));
+}
+
+const shareButton = () => screen.getByRole("button", { name: "Share" });
+
+describe("NoteEditorPage share entry", () => {
+  it("Share button on an existing note", async () => {
+    await openNote();
+
+    expect(shareButton()).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+
+  it("No Share button on a new note", async () => {
+    await openNewNote();
+
+    expect(screen.queryByRole("button", { name: "Share" })).not.toBeInTheDocument();
+  });
+
+  it("Share button appears after the first save", async () => {
+    route("POST /notes", () => json(201, noteA()));
+    const { router, user } = await openNewNote();
+
+    await user.type(titleInput(), "Groceries");
+    await user.click(saveButton());
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/notes/${A}`));
+
+    expect(await screen.findByRole("button", { name: "Share" })).toBeInTheDocument();
+  });
+
+  it("Opening share leaves the editor untouched", async () => {
+    routeShares();
+    const { user } = await openNote();
+
+    await user.click(shareButton());
+    await screen.findByRole("dialog", { name: "Share this note" });
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(titleInput()).toHaveValue("Groceries");
+    expect(contentBox()).toHaveTextContent("Milk");
+    expect(saveButton()).toBeDisabled();
+    expect(callsTo(`GET /notes/${A}`)).toHaveLength(1);
+    expect(allCalls().filter((c) => c.method !== "GET")).toHaveLength(0);
+  });
+});
+
+describe("NoteEditorPage share dialog", () => {
+  it("Share button opens the dialog", async () => {
+    routeShares();
+    const { user } = await openNote();
+
+    await user.click(shareButton());
+
+    expect(await screen.findByRole("dialog", { name: "Share this note" })).toBeInTheDocument();
+    await waitFor(() => expect(callsTo(SHARES)).toHaveLength(1));
+  });
+
+  it("Escape closes the dialog", async () => {
+    routeShares();
+    const { user } = await openNote();
+    await user.click(shareButton());
+    await screen.findByRole("dialog", { name: "Share this note" });
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("Close button returns focus", async () => {
+    routeShares();
+    const { user } = await openNote();
+    await user.click(shareButton());
+    await screen.findByRole("dialog", { name: "Share this note" });
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(shareButton()).toHaveFocus();
+  });
+
+  it("Reopening refreshes the list", async () => {
+    routeShares();
+    const { user } = await openNote();
+
+    await user.click(shareButton());
+    await screen.findByText("No share links yet");
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(shareButton());
+    await screen.findByText("No share links yet");
+
+    expect(callsTo(SHARES)).toHaveLength(2);
+  });
+});
+
+describe("NoteEditorPage unsaved-edits notice", () => {
+  const NOTICE = "Unsaved changes are not shared. Save the note to update the shared view.";
+
+  it("Notice shown with unsaved changes", async () => {
+    routeShares();
+    const { user } = await openNote();
+    await user.type(titleInput(), " extra");
+
+    await user.click(shareButton());
+
+    expect(await screen.findByText(NOTICE)).toBeInTheDocument();
+  });
+
+  it("No notice for a clean editor", async () => {
+    routeShares();
+    const { user } = await openNote();
+
+    await user.click(shareButton());
+    await screen.findByText("No share links yet");
+
+    expect(screen.queryByText(NOTICE)).not.toBeInTheDocument();
+  });
+
+  it("Sharing does not save or block", async () => {
+    routeShares();
+    const { router, user } = await openNote();
+    await user.type(titleInput(), " extra");
+
+    await user.click(shareButton());
+    await screen.findByText("No share links yet");
+    await user.click(screen.getByRole("button", { name: "Create link" }));
+    await screen.findByText("Link created");
+
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
+    expect(screen.queryByRole("dialog", { name: "Discard unsaved changes?" })).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`/notes/${A}`);
+  });
+});

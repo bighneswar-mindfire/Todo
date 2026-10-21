@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { GENERIC_ERROR } from "@/lib/form-errors";
 import { diffNote, isDirty, contentKey, type NoteSnapshot } from "@/lib/note-diff";
 import { useSaveNote } from "@/queries/note";
+import { ShareDialog } from "@/components/share/ShareDialog";
 import { DeleteNoteDialog } from "./DeleteNoteDialog";
 import { DiscardChangesDialog } from "./DiscardChangesDialog";
 import { NoteTagPicker } from "./NoteTagPicker";
@@ -42,6 +43,7 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
   const [titleError, setTitleError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const contentJson = useMemo(() => (content ? contentKey(content) : null), [content]);
   const dirty = baseline !== null && contentJson !== null && isDirty(baseline, { title, contentJson });
@@ -181,11 +183,20 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
           </span>
         ) : null}
         {note ? (
-          <Button variant="outline" className="ml-auto" onClick={() => setDeleteOpen(true)}>
-            Delete
-          </Button>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" onClick={() => setShareOpen(true)}>
+              Share
+            </Button>
+            <Button variant="outline" onClick={() => setDeleteOpen(true)}>
+              Delete
+            </Button>
+          </div>
         ) : null}
       </div>
+
+      {note ? (
+        <ShareDialog open={shareOpen} noteId={note.id} dirty={dirty} onClose={() => setShareOpen(false)} />
+      ) : null}
 
       {note ? (
         <DeleteNoteDialog
