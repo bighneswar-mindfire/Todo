@@ -1,0 +1,77 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Note, TagRef, UpdateNoteRequest } from "@todo/shared";
+import { attachTag, createNote, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
+import { notesKeys } from "./notes";
+
+export const noteKeys = {
+  detail: (id: string) => ["notes", "detail", id] as const,
+};
+
+export function useNote(id: string | undefined) {
+  return useQuery({
+    queryKey: noteKeys.detail(id ?? ""),
+    queryFn: () => getNote(id as string),
+    enabled: id !== undefined,
+    // A note seeded after create or save must not be refetched straight away.
+    staleTime: 30_000,
+  });
+}
+
+function useInvalidateLists() {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: notesKeys.all, refetchType: "active" }),
+      queryClient.invalidateQueries({ queryKey: notesKeys.tags }),
+    ]);
+}
+
+export type SaveNoteInput =
+  | { id: undefined; title: string; content: NonNullable<UpdateNoteRequest["content"]> }
+  | { id: string; changes: UpdateNoteRequest };
+
+/** Creates (no id) or patches (id) a note, then seeds the detail cache and refreshes the list. */
+export function useSaveNote() {
+  const queryClient = useQueryClient();
+  const invalidateLists = useInvalidateLists();
+  return useMutation({
+    mutationFn: (input: SaveNoteInput): Promise<Note> =>
+      input.id === undefined
+        ? createNote({ title: input.title, content: input.content })
+        : updateNote(input.id, input.changes),
+    onSuccess: async (note) => {
+      queryClient.setQueryData(noteKeys.detail(note.id), note);
+      await invalidateLists();
+    },
+  });
+}
+
+export function useDeleteNote() {
+  const queryClient = useQueryClient();
+  const invalidateLists = useInvalidateLists();
+  return useMutation({
+    mutationFn: (id: string) => deleteNote(id),
+    onSuccess: async (_data, id) => {
+      queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
+      await invalidateLists();
+    },
+  });
+}
+
+/** Attach or detach one tag; the 204 has no body, so the cached note's tags are patched from `tag`. */
+export function useToggleNoteTag(noteId: string) {
+  const queryClient = useQueryClient();
+  const invalidateLists = useInvalidateLists();
+  return useMutation({
+    mutationFn: ({ tag, attach }: { tag: TagRef; attach: boolean }) =>
+      attach ? attachTag(noteId, tag.id) : detachTag(noteId, tag.id),
+    onSuccess: async (_data, { tag, attach }) => {
+      queryClient.setQueryData<Note>(noteKeys.detail(noteId), (note) => {
+        if (!note) return note;
+        const others = note.tags.filter((t) => t.id !== tag.id);
+        return { ...note, tags: attach ? [...others, { id: tag.id, name: tag.name, color: tag.color }] : others };
+      });
+      await invalidateLists();
+    },
+  });
+}
