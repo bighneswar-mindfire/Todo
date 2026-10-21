@@ -15,7 +15,7 @@
 | Propose (proposal, design, tasks, spec delta) | `/opsx:propose ab-1042` then `pnpm exec openspec validate ab-1042 --strict` |
 | **Gate 1: human approves the spec**; revise with | `/opsx:update <what to change>` |
 | Apply (failing test first, one commit per task) | `/opsx:apply ab-1042` |
-| Verify (fresh context, `reviewer` sub-agent on `git diff main...HEAD`) | `/opsx:verify ab-1042` |
+| Verify (fresh session: `reviewer` + `security-auditor` on `git diff main...HEAD`) | `/review ab-1042` |
 | PR (maps each scenario to its test, asks before pushing) | `/create-pr ab-1042` |
 | **Gate 2: human reviews the code against the spec** | |
 | After merge | `/opsx:sync ab-1042` then `/opsx:archive ab-1042` |
