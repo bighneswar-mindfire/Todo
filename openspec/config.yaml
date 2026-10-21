@@ -1,32 +1,37 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+context: |
+  Stack: Node 22, Express 5, TypeScript (ESM), PostgreSQL 16 + Prisma 7 (driver adapter), React 19 + Vite, TanStack Query, Zustand, TipTap, shadcn/ui. pnpm workspaces: apps/backend, apps/frontend, packages/shared, packages/repo-checks.
+  API: REST, no version prefix. Every error is { error: { code, message, details? } }. Other users' resources return 404, not 403. Each change carries a delta-openapi.yaml; status codes must match it.
+  Auth: JWT access token (15 min, HS256) + DB-stored hashed refresh token (7 days). Password reset OTP is logged to the console, no real email.
+  Testing: Vitest + Supertest (backend src/**/*.test.ts), Vitest + Testing Library (frontend src/**/*.test.tsx), Playwright E2E. Every scenario has exactly one test titled like the scenario.
+  Business rules live in docs/FRS.md, design in docs/SDS.md. Out of scope: realtime collaboration, attachments, mobile app, OAuth, folders/nesting, real email.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Link the ticket ID (AB-xxxx) and the FRS section it implements
+    - Include impact and rollback plan
+    - State what is out of scope
+  specs:
+    - Use WHEN/THEN scenarios with SHALL/MUST wording
+    - Always include an authorization-denied and a validation-failure scenario
+    - Invent no business rules that are not in docs/FRS.md
+    - Use ADDED/MODIFIED/REMOVED/RENAMED; for MODIFIED copy the full current requirement and keep its title
+  design:
+    - Define request/response schemas in packages/shared first (contract first)
+    - Check the existing tables and indexes in docs/SDS.md before proposing a schema change
+  tasks:
+    - Write tests before implementation
+    - Keep shared, API and web tasks separate so they can run in parallel
+    - Size each task at about 1 to 2 hours of agent work, one commit per task
+    - Map every spec scenario to exactly one named test task
+    - End each task group with a checkpoint (pnpm build, pnpm lint --max-warnings 0, pnpm test)
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - Failing test first, then code, then checkpoint, then one commit per task
+      - Verify library APIs with Context7 and pin exact versions
+  archive:
+    guidance:
+      - Run only after the PR is merged and the change has been synced
