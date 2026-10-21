@@ -1,5 +1,6 @@
 import { createBrowserRouter, type RouteObject } from "react-router";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { NoteEditorPage } from "@/pages/NoteEditorPage";
 import { NotesPage } from "@/pages/NotesPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
@@ -19,7 +20,11 @@ export const routes: RouteObject[] = [
   },
   {
     Component: RequireAuth,
-    children: [{ path: "/", Component: NotesPage }],
+    children: [
+      { path: "/", Component: NotesPage },
+      { path: "/notes/new", Component: NoteEditorPage },
+      { path: "/notes/:id", Component: NoteEditorPage },
+    ],
   },
   { path: "*", Component: NotFound },
 ];

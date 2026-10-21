@@ -1,4 +1,4 @@
-import { cleanup, screen, within } from "@testing-library/react";
+﻿import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import type { NoteListResponse, NoteSummary, TagWithCount } from "@todo/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useSession } from "@/stores/session";
@@ -439,3 +439,45 @@ describe("logout", () => {
     expect(await screen.findByText("alice@example.com")).toBeInTheDocument();
   });
 });
+
+describe("notes list page editor links", () => {
+  const NOTE_ID = "00000000-0000-4000-8000-0000000000b1";
+
+  it("New note link is shown", async () => {
+    signIn();
+    serveNotes(() => notesPage([titled("Alpha")]));
+    renderApp("/");
+
+    expect(await screen.findByRole("link", { name: "New note" })).toHaveAttribute("href", "/notes/new");
+  });
+
+  it("New note link is shown for an empty account", async () => {
+    signIn();
+    renderApp("/");
+
+    expect(await screen.findByText("No notes yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "New note" })).toHaveAttribute("href", "/notes/new");
+  });
+
+  it("Title links to the editor", async () => {
+    signIn();
+    serveNotes(() => notesPage([titled("Groceries", { id: NOTE_ID })]));
+    renderApp("/");
+
+    const link = await screen.findByRole("link", { name: "Groceries" });
+    expect(link).toHaveAttribute("href", `/notes/${NOTE_ID}`);
+    expect(link.closest("h2")).not.toBeNull();
+  });
+
+  it("Clicking a title opens the editor", async () => {
+    signIn();
+    serveNotes(() => notesPage([titled("Groceries", { id: NOTE_ID })]));
+    route(`GET /notes/${NOTE_ID}`, () => errorResponse(404, "NOT_FOUND"));
+    const { router, user } = renderApp("/");
+
+    await user.click(await screen.findByRole("link", { name: "Groceries" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/notes/${NOTE_ID}`));
+  });
+});
+

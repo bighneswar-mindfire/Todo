@@ -1,4 +1,4 @@
-import type { AuthTokensResponse, NoteListResponse, NoteSummary, TagWithCount } from "@todo/shared";
+import type { AuthTokensResponse, Note, NoteListResponse, NoteSummary, TagWithCount, TipTapDoc } from "@todo/shared";
 import { useSession } from "@/stores/session";
 import { json, route } from "./fake-api";
 
@@ -44,6 +44,28 @@ export function makeNote(overrides: Partial<NoteSummary> = {}): NoteSummary {
     tags: [],
     createdAt: "2026-10-02T10:00:00.000Z",
     updatedAt: "2026-10-03T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+export function paragraph(text: string): NonNullable<TipTapDoc["content"]>[number] {
+  return { type: "paragraph", content: [{ type: "text", text }] };
+}
+
+export function doc(...blocks: NonNullable<TipTapDoc["content"]>): TipTapDoc {
+  return { type: "doc", content: blocks };
+}
+
+/** A complete note as returned by `GET /notes/{id}`. */
+export function makeFullNote(overrides: Partial<Note> = {}): Note {
+  return {
+    id: uuid(),
+    title: "A note",
+    content: doc(paragraph("Some text")),
+    tags: [],
+    createdAt: "2026-10-02T10:00:00.000Z",
+    updatedAt: "2026-10-03T10:00:00.000Z",
+    deletedAt: null,
     ...overrides,
   };
 }
