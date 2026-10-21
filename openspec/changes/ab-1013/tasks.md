@@ -35,68 +35,68 @@
 ## 3. Search page
 
 `src/pages/SearchPage.test.tsx`, Requirement: Search page access
-- [ ] 3.1 Test "Unauthenticated visit is redirected"
-- [ ] 3.2 Test "Rejected refresh ends the session"
+- [x] 3.1 Test "Unauthenticated visit is redirected"
+- [x] 3.2 Test "Rejected refresh ends the session"
 
 Requirement: Query state lives in the URL
-- [ ] 3.3 Test "Input is prefilled from the URL"
-- [ ] 3.4 Test "Bad page falls back to 1"
-- [ ] 3.5 Test "Malformed tag is ignored"
-- [ ] 3.6 Test "Search can be reloaded"
+- [x] 3.3 Test "Input is prefilled from the URL"
+- [x] 3.4 Test "Bad page falls back to 1"
+- [x] 3.5 Test "Malformed tag is ignored"
+- [x] 3.6 Test "Search can be reloaded"
 
 Requirement: Debounced search box
-- [ ] 3.7 Test "Request waits for the debounce"
-- [ ] 3.8 Test "Request is sent after the debounce"
-- [ ] 3.9 Test "Rapid typing sends one request"
-- [ ] 3.10 Test "Query is trimmed"
-- [ ] 3.11 Test "Typing replaces history"
-- [ ] 3.12 Test "New query resets the page"
-- [ ] 3.13 Test "Blank input sends no request"
+- [x] 3.7 Test "Request waits for the debounce"
+- [x] 3.8 Test "Request is sent after the debounce"
+- [x] 3.9 Test "Rapid typing sends one request"
+- [x] 3.10 Test "Query is trimmed"
+- [x] 3.11 Test "Typing replaces history"
+- [x] 3.12 Test "New query resets the page"
+- [x] 3.13 Test "Blank input sends no request"
 
 Requirement: Query validation
-- [ ] 3.14 Test "Over-length query is rejected locally"
-- [ ] 3.15 Test "Exactly 200 characters is searched"
+- [x] 3.14 Test "Over-length query is rejected locally"
+- [x] 3.15 Test "Exactly 200 characters is searched"
 
 Requirement: Result list
-- [ ] 3.16 Test "Results are listed with their details"
-- [ ] 3.17 Test "Tags are shown on each result"
-- [ ] 3.18 Test "API order is kept"
-- [ ] 3.19 Test "Empty snippet is omitted"
-- [ ] 3.20 Test "Rank is not displayed"
-- [ ] 3.21 Test "Result title opens the note"
+- [x] 3.16 Test "Results are listed with their details"
+- [x] 3.17 Test "Tags are shown on each result"
+- [x] 3.18 Test "API order is kept"
+- [x] 3.19 Test "Empty snippet is omitted"
+- [x] 3.20 Test "Rank is not displayed"
+- [x] 3.21 Test "Result title opens the note"
 
 Requirement: Search states
-- [ ] 3.22 Test "Blank query shows a prompt"
-- [ ] 3.23 Test "Loading state"
-- [ ] 3.24 Test "No results"
-- [ ] 3.25 Test "Server error offers retry"
-- [ ] 3.26 Test "Validation error from the server is handled"
-- [ ] 3.27 Test "Network failure offers retry"
-- [ ] 3.28 Test "Previous results stay while loading"
-- [ ] 3.29 Test "Result count is announced"
+- [x] 3.22 Test "Blank query shows a prompt"
+- [x] 3.23 Test "Loading state"
+- [x] 3.24 Test "No results"
+- [x] 3.25 Test "Server error offers retry"
+- [x] 3.26 Test "Validation error from the server is handled"
+- [x] 3.27 Test "Network failure offers retry"
+- [x] 3.28 Test "Previous results stay while loading"
+- [x] 3.29 Test "Result count is announced"
 
-- [ ] 3.30 Implement `src/pages/SearchPage.tsx` (header with `useLogout`, `SearchBox` live, status line, list, states, URL read/write via `search-params`); extract `useLogout` from `NotesPage` without behaviour change
-- [ ] 3.31 Add the `/search` route under `RequireAuth` in `routes/router.tsx`
-- [ ] 3.32 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.30 Implement `src/pages/SearchPage.tsx` (header with `useLogout`, `SearchBox` live, status line, list, states, URL read/write via `search-params`); extract `useLogout` from `NotesPage` without behaviour change
+- [x] 3.31 Add the `/search` route under `RequireAuth` in `routes/router.tsx`
+- [x] 3.32 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Pagination and tag filter
 
 Requirement: Search pagination (in `SearchPage.test.tsx`)
-- [ ] 4.1 Test "Pagination hidden for one page"
-- [ ] 4.2 Test "Next page is requested"
-- [ ] 4.3 Test "Previous is disabled on the first page"
-- [ ] 4.4 Test "Next is disabled on the last page"
-- [ ] 4.5 Test "Page past the end falls back"
+- [x] 4.1 Test "Pagination hidden for one page"
+- [x] 4.2 Test "Next page is requested"
+- [x] 4.3 Test "Previous is disabled on the first page"
+- [x] 4.4 Test "Next is disabled on the last page"
+- [x] 4.5 Test "Page past the end falls back"
 
 Requirement: Tag filter
-- [ ] 4.6 Test "Selecting a tag filters results"
-- [ ] 4.7 Test "Clearing the tag"
-- [ ] 4.8 Test "Active tag is pressed"
-- [ ] 4.9 Test "Changing the tag resets the page"
-- [ ] 4.10 Test "Unknown tag is recoverable"
-- [ ] 4.11 Test "Tag list failure does not block results"
-- [ ] 4.12 Wire `PaginationBar` and `TagFilter` into `SearchPage` (page and tag changes push history; typing replaces)
-- [ ] 4.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 4.6 Test "Selecting a tag filters results"
+- [x] 4.7 Test "Clearing the tag"
+- [x] 4.8 Test "Active tag is pressed"
+- [x] 4.9 Test "Changing the tag resets the page"
+- [x] 4.10 Test "Unknown tag is recoverable"
+- [x] 4.11 Test "Tag list failure does not block results"
+- [x] 4.12 Wire `PaginationBar` and `TagFilter` into `SearchPage` (page and tag changes push history; typing replaces)
+- [x] 4.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 5. Notes-list header and freshness
 
