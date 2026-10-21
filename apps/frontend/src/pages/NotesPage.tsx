@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { logout } from "@/api/auth";
 import { ApiError } from "@/api/errors";
 import { NoteListItem } from "@/components/notes/NoteListItem";
 import { PaginationBar } from "@/components/notes/PaginationBar";
 import { TagFilter } from "@/components/notes/TagFilter";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { buildListParams, parseListParams } from "@/lib/list-params";
 import { useNotesList, useTags } from "@/queries/notes";
 import { useSession } from "@/stores/session";
@@ -93,9 +93,14 @@ export function NotesPage() {
             Signed in as <strong>{session?.user.email}</strong>
           </p>
         </div>
-        <Button variant="outline" disabled={mutation.isPending} onClick={() => mutation.mutate(session?.refreshToken ?? "")}>
-          Log out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to="/notes/new" className={buttonVariants()}>
+            New note
+          </Link>
+          <Button variant="outline" disabled={mutation.isPending} onClick={() => mutation.mutate(session?.refreshToken ?? "")}>
+            Log out
+          </Button>
+        </div>
       </header>
       <TagFilter
         tags={tags.data?.items}

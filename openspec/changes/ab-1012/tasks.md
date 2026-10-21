@@ -144,15 +144,15 @@ Requirement: Editor accessibility baseline
 
 ## 5. List page additions, docs and wrap-up
 
-- [ ] 5.1 [PARALLEL] Edit `src/components/notes/NoteListItem.tsx`: title becomes a `Link` to `/notes/<id>` inside the existing `h2` (Haiku)
-- [ ] 5.2 [PARALLEL] Edit `src/pages/NotesPage.tsx`: **New note** link (`buttonVariants`) to `/notes/new` in the header (Haiku)
-- [ ] 5.3 [PARALLEL] Update `apps/frontend/CLAUDE.md`: AB-1012 section (editor layout, dirty/baseline rule, bypass ref, dialog, test helpers) and drop "Rows are not links yet" (Haiku)
+- [x] 5.1 [PARALLEL] Edit `src/components/notes/NoteListItem.tsx`: title becomes a `Link` to `/notes/<id>` inside the existing `h2` (Haiku)
+- [x] 5.2 [PARALLEL] Edit `src/pages/NotesPage.tsx`: **New note** link (`buttonVariants`) to `/notes/new` in the header (Haiku)
+- [x] 5.3 [PARALLEL] Update `apps/frontend/CLAUDE.md`: AB-1012 section (editor layout, dirty/baseline rule, bypass ref, dialog, test helpers) and drop "Rows are not links yet" (Haiku)
 
 `src/pages/NotesPage.test.tsx` - Requirements: New note entry point, Rows open the editor
-- [ ] 5.4 Test "New note link is shown"
-- [ ] 5.5 Test "New note link is shown for an empty account"
-- [ ] 5.6 Test "Title links to the editor"
-- [ ] 5.7 Test "Clicking a title opens the editor"
+- [x] 5.4 Test "New note link is shown"
+- [x] 5.5 Test "New note link is shown for an empty account"
+- [x] 5.6 Test "Title links to the editor"
+- [x] 5.7 Test "Clicking a title opens the editor"
 
-- [ ] 5.8 Run `pnpm test --coverage`; confirm thresholds hold and all 69 scenarios have one test each
-- [ ] 5.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 5.8 Run `pnpm test --coverage`; confirm thresholds hold and all 69 scenarios have one test each
+- [x] 5.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
