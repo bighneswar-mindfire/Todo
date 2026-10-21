@@ -74,7 +74,7 @@ function localValue(date: Date): string {
 const inDays = (days: number) => localValue(new Date(Date.now() + days * 86_400_000));
 
 describe("ShareDialog link list", () => {
-  it("Loading state", async () => {
+  it("Share list loading state", async () => {
     const gate = deferred<Response>();
     route(LIST, () => gate.promise);
 
@@ -521,7 +521,7 @@ describe("ShareDialog authorization", () => {
     expect(callsTo(LIST)[1]?.headers.get("Authorization")).toBe("Bearer access-2");
   });
 
-  it("Rejected refresh ends the session", async () => {
+  it("Rejected refresh ends the session while sharing", async () => {
     route(LIST, () => errorResponse(401, "UNAUTHORIZED"));
     route("POST /auth/refresh", () => errorResponse(401, "UNAUTHORIZED"));
 

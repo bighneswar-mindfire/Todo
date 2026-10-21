@@ -28,7 +28,7 @@ Activating the **Share** button in the note editor SHALL open a modal dialog tit
 ### Requirement: Share link list
 The dialog SHALL list every link returned by the API in the order returned (newest first). Each row SHALL show the full URL `<origin>/shared/<token>`, a status label, the expiry ("Never expires" or "Expires <date and time>"), the view count and the creation time. While loading it SHALL show "Loading links". With no links it SHALL show "No share links yet".
 
-#### Scenario: Loading state
+#### Scenario: Share list loading state
 - **WHEN** the share dialog is open and the list request is pending
 - **THEN** the text "Loading links" is shown
 
@@ -191,7 +191,7 @@ The share calls SHALL use the bearer session. A 401 SHALL trigger one refresh an
 - **WHEN** the list request answers 401 and the refresh succeeds
 - **THEN** the list request is retried once with the new token and the links are shown
 
-#### Scenario: Rejected refresh ends the session
+#### Scenario: Rejected refresh ends the session while sharing
 - **WHEN** the list request answers 401 and the refresh is rejected
 - **THEN** the session is cleared and the user is on `/login`
 
@@ -237,11 +237,11 @@ The frontend SHALL provide functions for create, list and revoke over the `reque
 - **WHEN** the public-note function is called with a token
 - **THEN** it sends `GET /shared/{token}` without an `Authorization` header and returns the validated note
 
-#### Scenario: Create refreshes the list
+#### Scenario: Create refreshes the share list
 - **WHEN** a link is created
 - **THEN** `GET /notes/{id}/shares` is requested again
 
-#### Scenario: Revoke refreshes the list
+#### Scenario: Revoke refreshes the share list
 - **WHEN** a link is revoked
 - **THEN** `GET /notes/{id}/shares` is requested again
 

@@ -15,7 +15,7 @@ function setup() {
 }
 
 describe("share mutations", () => {
-  it("Create refreshes the list", async () => {
+  it("Create refreshes the share list", async () => {
     signIn();
     const created = makeShareLink();
     route(`GET /notes/${NOTE}/shares`, () => json(200, shareList([])));
@@ -29,7 +29,7 @@ describe("share mutations", () => {
     await waitFor(() => expect(callsTo(`GET /notes/${NOTE}/shares`)).toHaveLength(2));
   });
 
-  it("Revoke refreshes the list", async () => {
+  it("Revoke refreshes the share list", async () => {
     signIn();
     const link = makeShareLink();
     route(`GET /notes/${NOTE}/shares`, () => json(200, shareList([link])));

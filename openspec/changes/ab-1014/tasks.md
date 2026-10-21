@@ -21,8 +21,8 @@
 - [x] 1.8 Implement `src/api/shares.ts` (`createShareLink`, `listShareLinks`, `revokeShareLink`, `getSharedNote`); verify with `pnpm --filter @todo/frontend test api/shares`
 
 `src/queries/shares.test.tsx` - Requirement: Sharing API functions and cache
-- [x] 1.9 Test "Create refreshes the list"
-- [x] 1.10 Test "Revoke refreshes the list"
+- [x] 1.9 Test "Create refreshes the share list"
+- [x] 1.10 Test "Revoke refreshes the share list"
 - [x] 1.11 Implement `src/queries/shares.ts` (`sharesKeys`, `useShareLinks`, `useCreateShareLink`, `useRevokeShareLink` with 404 as success, `useSharedNote` with the one-request options); Unit test that `useSharedNote` does not retry or refetch on focus; verify with `src/queries/shares.test.tsx`
 - [x] 1.12 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
@@ -75,7 +75,7 @@ Requirement: Referrer protection
 ## 3. Share dialog
 
 `src/components/share/ShareDialog.test.tsx` (rendered with props `open`, `noteId`, `dirty`, `onClose`) - Requirement: Share link list
-- [x] 3.1 Test "Loading state"
+- [x] 3.1 Test "Share list loading state"
 - [x] 3.2 Test "Empty list"
 - [x] 3.3 Test "Links are listed in server order"
 - [x] 3.4 Test "Row shows the full URL"
@@ -126,7 +126,7 @@ Requirement: Revoke a share link
 
 Requirement: Authorization and session handling
 - [x] 3.41 Test "Expired access token is refreshed"
-- [x] 3.42 Test "Rejected refresh ends the session"
+- [x] 3.42 Test "Rejected refresh ends the session while sharing"
 - [x] 3.43 Test "Another user's note is not available"
 - [x] 3.44 Implement the "This note is no longer available" state (404 on list or create hides all controls); verify tasks 3.41 to 3.43 pass
 
@@ -140,23 +140,23 @@ Requirement: Share dialog accessibility
 ## 4. Editor integration
 
 `src/pages/NoteEditorPage.test.tsx` - Requirement: Share entry in the editor
-- [ ] 4.1 Test "Share button on an existing note"
-- [ ] 4.2 Test "No Share button on a new note"
-- [ ] 4.3 Test "Share button appears after the first save"
-- [ ] 4.4 Test "Opening share leaves the editor untouched"
+- [x] 4.1 Test "Share button on an existing note"
+- [x] 4.2 Test "No Share button on a new note"
+- [x] 4.3 Test "Share button appears after the first save"
+- [x] 4.4 Test "Opening share leaves the editor untouched"
 
 Requirement: Opening and closing the share dialog
-- [ ] 4.5 Test "Share button opens the dialog"
-- [ ] 4.6 Test "Escape closes the dialog"
-- [ ] 4.7 Test "Close button returns focus"
-- [ ] 4.8 Test "Reopening refreshes the list"
+- [x] 4.5 Test "Share button opens the dialog"
+- [x] 4.6 Test "Escape closes the dialog"
+- [x] 4.7 Test "Close button returns focus"
+- [x] 4.8 Test "Reopening refreshes the list"
 
 Requirement: Unsaved-edits notice
-- [ ] 4.9 Test "Notice shown with unsaved changes"
-- [ ] 4.10 Test "No notice for a clean editor"
-- [ ] 4.11 Test "Sharing does not save or block"
-- [ ] 4.12 Implement in `NoteEditor.tsx`: the **Share** and **Delete** footer group (existing notes only), `ShareDialog` with `dirty` and the **Close** button; the unsaved notice in `ShareDialog`; verify with `pnpm --filter @todo/frontend test NoteEditorPage ShareDialog`
-- [ ] 4.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%)
+- [x] 4.9 Test "Notice shown with unsaved changes"
+- [x] 4.10 Test "No notice for a clean editor"
+- [x] 4.11 Test "Sharing does not save or block"
+- [x] 4.12 Implement in `NoteEditor.tsx`: the **Share** and **Delete** footer group (existing notes only), `ShareDialog` with `dirty` and the **Close** button; the unsaved notice in `ShareDialog`; verify with `pnpm --filter @todo/frontend test NoteEditorPage ShareDialog`
+- [x] 4.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%)
 
 ## 5. Integration and spec check
 
