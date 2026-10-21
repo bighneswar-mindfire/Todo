@@ -31,18 +31,18 @@
 
 ## 2. Dialog, rich-text editor and toolbar
 
-- [ ] 2.1 [PARALLEL] Create `src/components/ui/dialog.tsx`: portal, backdrop, `role="dialog" aria-modal="true" aria-labelledby`, focus first control on open, Tab trap, Escape closes, focus restored to the opener (Sonnet)
-- [ ] 2.2 [PARALLEL] Create `src/components/editor/RichTextEditor.tsx`: `useEditor` with `StarterKit.configure({ link: false, underline: false })`, `editorProps.attributes` (`role="textbox"`, `aria-label="Note content"`, `aria-multiline`), `onUpdate`/`onCreate` callbacks, renders the toolbar plus `EditorContent` (Sonnet)
-- [ ] 2.3 Create `src/components/editor/Toolbar.tsx`: `role="toolbar"` labelled "Formatting", 11 buttons from one config array, `aria-pressed` and Undo/Redo `disabled` from `useEditorState`, `onMouseDown` preventDefault (Sonnet)
-- [ ] 2.4 Unit tests in `src/components/ui/dialog.test.tsx`: Escape closes, Tab wraps inside, focus returns to the opener, labelled by its title (Haiku)
+- [x] 2.1 [PARALLEL] Create `src/components/ui/dialog.tsx`: portal, backdrop, `role="dialog" aria-modal="true" aria-labelledby`, focus first control on open, Tab trap, Escape closes, focus restored to the opener (Sonnet)
+- [x] 2.2 [PARALLEL] Create `src/components/editor/RichTextEditor.tsx`: `useEditor` with `StarterKit.configure({ link: false, underline: false })`, `editorProps.attributes` (`role="textbox"`, `aria-label="Note content"`, `aria-multiline`), `onUpdate`/`onCreate` callbacks, renders the toolbar plus `EditorContent` (Sonnet)
+- [x] 2.3 Create `src/components/editor/Toolbar.tsx`: `role="toolbar"` labelled "Formatting", 11 buttons from one config array, `aria-pressed` and Undo/Redo `disabled` from `useEditorState`, `onMouseDown` preventDefault (Sonnet)
+- [x] 2.4 Unit tests in `src/components/ui/dialog.test.tsx`: Escape closes, Tab wraps inside, focus returns to the opener, labelled by its title (Haiku)
 
 `src/components/editor/RichTextEditor.test.tsx` - Requirement: Rich-text editing
-- [ ] 2.5 Test "Toolbar lists the formatting actions"
-- [ ] 2.6 Test "Bold toggles on the selection"
-- [ ] 2.7 Test "Heading and list blocks can be applied"
-- [ ] 2.8 Test "Undo and redo track history"
+- [x] 2.5 Test "Toolbar lists the formatting actions"
+- [x] 2.6 Test "Bold toggles on the selection"
+- [x] 2.7 Test "Heading and list blocks can be applied"
+- [x] 2.8 Test "Undo and redo track history"
 
-- [ ] 2.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.9 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Editor page: routes, load states, create, edit, guard
 
