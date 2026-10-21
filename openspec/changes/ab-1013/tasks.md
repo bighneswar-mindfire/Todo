@@ -19,18 +19,18 @@
 ## 2. Components
 
 `src/components/search/HighlightedText.test.tsx` - Requirement: Safe highlight rendering
-- [ ] 2.1 Test "Matched words are marked"
-- [ ] 2.2 Test "Several marks are rendered"
-- [ ] 2.3 Test "Entities are shown as characters"
-- [ ] 2.4 Test "Escaped markup stays text"
-- [ ] 2.5 Test "Unexpected markup is not interpreted"
-- [ ] 2.6 Test "Unbalanced marks do not break rendering"
-- [ ] 2.7 Test "Text without marks"
-- [ ] 2.8 Implement `HighlightedText` (renders `parseHighlight` tokens; no `innerHTML`)
-- [ ] 2.9 Extract `src/components/notes/NoteMeta.tsx` (tag chips + `<time>`) from `NoteListItem`; existing notes-list tests stay green (Unit: render test)
-- [ ] 2.10 Implement `SearchResultItem` (highlighted title link to `/notes/<id>`, snippet omitted when empty, `NoteMeta`, no rank)
-- [ ] 2.11 Implement `SearchBox` (landmark, "Search notes" input; `live` mode with debounced `onQuery`, `submit` mode with a **Search** button) (Unit tests for both modes)
-- [ ] 2.12 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.1 Test "Matched words are marked"
+- [x] 2.2 Test "Several marks are rendered"
+- [x] 2.3 Test "Entities are shown as characters"
+- [x] 2.4 Test "Escaped markup stays text"
+- [x] 2.5 Test "Unexpected markup is not interpreted"
+- [x] 2.6 Test "Unbalanced marks do not break rendering"
+- [x] 2.7 Test "Text without marks"
+- [x] 2.8 Implement `HighlightedText` (renders `parseHighlight` tokens; no `innerHTML`)
+- [x] 2.9 Extract `src/components/notes/NoteMeta.tsx` (tag chips + `<time>`) from `NoteListItem`; existing notes-list tests stay green (Unit: render test)
+- [x] 2.10 Implement `SearchResultItem` (highlighted title link to `/notes/<id>`, snippet omitted when empty, `NoteMeta`, no rank)
+- [x] 2.11 Implement `SearchBox` (landmark, "Search notes" input; `live` mode with debounced `onQuery`, `submit` mode with a **Search** button) (Unit tests for both modes)
+- [x] 2.12 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Search page
 

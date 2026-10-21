@@ -1,8 +1,6 @@
 import type { NoteSummary } from "@todo/shared";
 import { Link } from "react-router";
-import { TagChip } from "./TagChip";
-
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+import { NoteMeta } from "./NoteMeta";
 
 export function NoteListItem({ note }: { note: NoteSummary }) {
   return (
@@ -13,14 +11,7 @@ export function NoteListItem({ note }: { note: NoteSummary }) {
         </Link>
       </h2>
       {note.excerpt ? <p className="text-sm text-muted-foreground">{note.excerpt}</p> : null}
-      <div className="flex flex-wrap items-center gap-2">
-        {note.tags.map((tag) => (
-          <TagChip key={tag.id} name={tag.name} color={tag.color} />
-        ))}
-        <time className="ml-auto text-xs text-muted-foreground" dateTime={note.updatedAt}>
-          {dateFormat.format(new Date(note.updatedAt))}
-        </time>
-      </div>
+      <NoteMeta note={note} />
     </li>
   );
 }
