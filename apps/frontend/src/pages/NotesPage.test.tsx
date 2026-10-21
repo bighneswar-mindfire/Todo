@@ -481,3 +481,49 @@ describe("notes list page editor links", () => {
   });
 });
 
+describe("notes list header search", () => {
+  it("Submitting opens the search page", async () => {
+    signIn();
+    route("GET /search", () => json(200, { items: [], page: 1, limit: 20, total: 0 }));
+    const { router, user } = renderApp("/");
+
+    await user.type(await screen.findByLabelText("Search notes"), "budget{Enter}");
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/search"));
+    expect(router.state.location.search).toBe("?q=budget");
+  });
+
+  it("Search button submits", async () => {
+    signIn();
+    route("GET /search", () => json(200, { items: [], page: 1, limit: 20, total: 0 }));
+    const { router, user } = renderApp("/");
+
+    await user.type(await screen.findByLabelText("Search notes"), "budget");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/search"));
+    expect(router.state.location.search).toBe("?q=budget");
+  });
+
+  it("Blank submit does nothing", async () => {
+    signIn();
+    const { router, user } = renderApp("/");
+
+    await user.type(await screen.findByLabelText("Search notes"), "   ");
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    expect(router.state.location.pathname).toBe("/");
+    expect(callsTo("GET /search")).toHaveLength(0);
+  });
+
+  it("Typing alone sends no request", async () => {
+    signIn();
+    const { router, user } = renderApp("/");
+
+    await user.type(await screen.findByLabelText("Search notes"), "budget");
+
+    expect(router.state.location.pathname).toBe("/");
+    expect(callsTo("GET /search")).toHaveLength(0);
+  });
+});
+

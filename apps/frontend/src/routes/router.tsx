@@ -5,6 +5,7 @@ import { NotesPage } from "@/pages/NotesPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
+import { SearchPage } from "@/pages/SearchPage";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
 import { NotFound } from "./NotFound";
 
@@ -22,6 +23,7 @@ export const routes: RouteObject[] = [
     Component: RequireAuth,
     children: [
       { path: "/", Component: NotesPage },
+      { path: "/search", Component: SearchPage },
       { path: "/notes/new", Component: NoteEditorPage },
       { path: "/notes/:id", Component: NoteEditorPage },
     ],

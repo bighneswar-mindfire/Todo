@@ -1,4 +1,13 @@
-import type { AuthTokensResponse, Note, NoteListResponse, NoteSummary, TagWithCount, TipTapDoc } from "@todo/shared";
+import type {
+  AuthTokensResponse,
+  Note,
+  NoteListResponse,
+  NoteSummary,
+  SearchResponse,
+  SearchResult,
+  TagWithCount,
+  TipTapDoc,
+} from "@todo/shared";
 import { useSession } from "@/stores/session";
 import { json, route } from "./fake-api";
 
@@ -71,6 +80,19 @@ export function makeFullNote(overrides: Partial<Note> = {}): Note {
 }
 
 export function notesPage(items: NoteSummary[], meta: { page?: number; limit?: number; total?: number } = {}): NoteListResponse {
+  return { items, page: meta.page ?? 1, limit: meta.limit ?? 20, total: meta.total ?? items.length };
+}
+
+export function makeSearchResult(overrides: Partial<SearchResult> = {}): SearchResult {
+  return {
+    ...makeNote(),
+    rank: 0.5,
+    highlight: { title: "A note", snippet: "Some text" },
+    ...overrides,
+  };
+}
+
+export function searchPage(items: SearchResult[], meta: { page?: number; limit?: number; total?: number } = {}): SearchResponse {
   return { items, page: meta.page ?? 1, limit: meta.limit ?? 20, total: meta.total ?? items.length };
 }
 

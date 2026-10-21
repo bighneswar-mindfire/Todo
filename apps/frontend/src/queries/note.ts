@@ -3,6 +3,7 @@ import type { Note, TagRef, UpdateNoteRequest } from "@todo/shared";
 import { ApiError } from "@/api/errors";
 import { attachTag, createNote, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
 import { notesKeys } from "./notes";
+import { searchKeys } from "./search";
 
 export const noteKeys = {
   detail: (id: string) => ["notes", "detail", id] as const,
@@ -18,12 +19,13 @@ export function useNote(id: string | undefined) {
   });
 }
 
-/** Lists and tag counts go stale; the detail query is excluded so a freshly seeded note is not refetched. */
+/** Lists, searches and tag counts go stale; the detail query is excluded so a freshly seeded note is not refetched. */
 function useInvalidateLists() {
   const queryClient = useQueryClient();
   return () => {
     void queryClient.invalidateQueries({ queryKey: notesKeys.lists });
     void queryClient.invalidateQueries({ queryKey: notesKeys.tags });
+    void queryClient.invalidateQueries({ queryKey: searchKeys.all });
   };
 }
 

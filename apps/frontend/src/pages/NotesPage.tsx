@@ -1,29 +1,25 @@
 import { useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Link, useSearchParams } from "react-router";
-import { logout } from "@/api/auth";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { ApiError } from "@/api/errors";
 import { NoteListItem } from "@/components/notes/NoteListItem";
 import { PaginationBar } from "@/components/notes/PaginationBar";
+import { SearchBox } from "@/components/search/SearchBox";
 import { TagFilter } from "@/components/notes/TagFilter";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { buildListParams, parseListParams } from "@/lib/list-params";
+import { buildSearchParams } from "@/lib/search-params";
 import { useNotesList, useTags } from "@/queries/notes";
+import { useLogout } from "@/queries/session";
 import { useSession } from "@/stores/session";
 
 export function NotesPage() {
   const session = useSession((s) => s.session);
-  const clearSession = useSession((s) => s.clearSession);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, tagId } = parseListParams(searchParams);
 
-  // Best effort: whatever the server says, the local session ends. RequireAuth then
-  // redirects to /login and AppProviders clears the query cache.
-  const mutation = useMutation({
-    mutationFn: (refreshToken: string) => logout(refreshToken),
-    onSettled: () => clearSession(),
-  });
+  const { logout, isPending: loggingOut } = useLogout();
 
   const notes = useNotesList({ page, tagId });
   const tags = useTags();
@@ -97,11 +93,12 @@ export function NotesPage() {
           <Link to="/notes/new" className={buttonVariants()}>
             New note
           </Link>
-          <Button variant="outline" disabled={mutation.isPending} onClick={() => mutation.mutate(session?.refreshToken ?? "")}>
+          <Button variant="outline" disabled={loggingOut} onClick={logout}>
             Log out
           </Button>
         </div>
       </header>
+      <SearchBox onSubmit={(q) => void navigate({ pathname: "/search", search: buildSearchParams({ q, page: 1 }).toString() })} />
       <TagFilter
         tags={tags.data?.items}
         tagsFailed={tags.isError}
