@@ -6,6 +6,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { SearchPage } from "@/pages/SearchPage";
+import { SharedNotePage } from "@/pages/SharedNotePage";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
 import { NotFound } from "./NotFound";
 
@@ -28,6 +29,8 @@ export const routes: RouteObject[] = [
       { path: "/notes/:id", Component: NoteEditorPage },
     ],
   },
+  // Public: no guard, so visitors and logged-in users alike can open a share link.
+  { path: "/shared/:token", Component: SharedNotePage },
   { path: "*", Component: NotFound },
 ];
 

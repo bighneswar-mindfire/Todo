@@ -29,48 +29,48 @@
 ## 2. Public shared page
 
 `src/pages/SharedNotePage.test.tsx` - Requirement: Public route
-- [ ] 2.1 Test "Visitor opens the page without logging in"
-- [ ] 2.2 Test "Logged-in user is not redirected"
-- [ ] 2.3 Test "No credentials are sent"
+- [x] 2.1 Test "Visitor opens the page without logging in"
+- [x] 2.2 Test "Logged-in user is not redirected"
+- [x] 2.3 Test "No credentials are sent"
 
 Requirement: Shared note display
-- [ ] 2.4 Test "Title and content are shown"
-- [ ] 2.5 Test "Formatting is rendered"
-- [ ] 2.6 Test "Last updated time is shown"
-- [ ] 2.7 Test "Content cannot be edited"
-- [ ] 2.8 Test "Nothing else about the note or owner is shown"
-- [ ] 2.9 Test "Page has a main landmark"
+- [x] 2.4 Test "Title and content are shown"
+- [x] 2.5 Test "Formatting is rendered"
+- [x] 2.6 Test "Last updated time is shown"
+- [x] 2.7 Test "Content cannot be edited"
+- [x] 2.8 Test "Nothing else about the note or owner is shown"
+- [x] 2.9 Test "Page has a main landmark"
 
 Requirement: Safe rendering
-- [ ] 2.10 Test "HTML-like text stays text"
-- [ ] 2.11 Test "Script-like title stays text"
-- [ ] 2.12 Test "Links in content are not clickable"
-- [ ] 2.13 Test "Unrenderable content shows the error view"
+- [x] 2.10 Test "HTML-like text stays text"
+- [x] 2.11 Test "Script-like title stays text"
+- [x] 2.12 Test "Links in content are not clickable"
+- [x] 2.13 Test "Unrenderable content shows the error view"
 
 Requirement: Dead links look the same
-- [ ] 2.14 Test "Unknown, revoked and expired links look identical"
-- [ ] 2.15 Test "Malformed token sends no request"
-- [ ] 2.16 Test "Validation error is the same view"
-- [ ] 2.17 Test "Not-available view hides the token"
+- [x] 2.14 Test "Unknown, revoked and expired links look identical"
+- [x] 2.15 Test "Malformed token sends no request"
+- [x] 2.16 Test "Validation error is the same view"
+- [x] 2.17 Test "Not-available view hides the token"
 
 Requirement: Loading and retryable errors
-- [ ] 2.18 Test "Shared note loading state"
-- [ ] 2.19 Test "Server error is retryable"
-- [ ] 2.20 Test "Network error is retryable"
-- [ ] 2.21 Test "Malformed body is retryable"
-- [ ] 2.22 Test "Retry loads the note"
+- [x] 2.18 Test "Shared note loading state"
+- [x] 2.19 Test "Server error is retryable"
+- [x] 2.20 Test "Network error is retryable"
+- [x] 2.21 Test "Malformed body is retryable"
+- [x] 2.22 Test "Retry loads the note"
 
 Requirement: One request per visit
-- [ ] 2.23 Test "One visit sends one request"
-- [ ] 2.24 Test "Window focus does not refetch"
-- [ ] 2.25 Test "Failures are not retried automatically"
+- [x] 2.23 Test "One visit sends one request"
+- [x] 2.24 Test "Window focus does not refetch"
+- [x] 2.25 Test "Failures are not retried automatically"
 
 Requirement: Referrer protection
-- [ ] 2.26 Test "Referrer policy is set while open"
-- [ ] 2.27 Test "Referrer policy is removed on leaving"
+- [x] 2.26 Test "Referrer policy is set while open"
+- [x] 2.27 Test "Referrer policy is removed on leaving"
 
-- [ ] 2.28 Implement `components/share/ReadOnlyNote.tsx` (non-editable TipTap, StarterKit without `link` and `underline`, content check, error boundary fallback), `components/share/SharedNotAvailable.tsx` (no props), `pages/SharedNotePage.tsx` (token check, `main` landmark, `h1`, Last updated, referrer meta effect) and the public `/shared/:token` route outside both guards in `routes/router.tsx`; verify with `pnpm --filter @todo/frontend test SharedNotePage`
-- [ ] 2.29 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.28 Implement `components/share/ReadOnlyNote.tsx` (non-editable TipTap, StarterKit without `link` and `underline`, content check, error boundary fallback), `components/share/SharedNotAvailable.tsx` (no props), `pages/SharedNotePage.tsx` (token check, `main` landmark, `h1`, Last updated, referrer meta effect) and the public `/shared/:token` route outside both guards in `routes/router.tsx`; verify with `pnpm --filter @todo/frontend test SharedNotePage`
+- [x] 2.29 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Share dialog
 
