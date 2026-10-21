@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -9,6 +10,8 @@ interface DialogProps {
   /** Called on Escape. Buttons inside the dialog decide what else closes it. */
   onClose: () => void;
   children: ReactNode;
+  /** Extra classes for the panel, e.g. a wider `max-w-*`. */
+  className?: string;
 }
 
 /** Hand-copied, dependency-free modal: portal, backdrop, focus trap, Escape, focus restore. */
@@ -16,7 +19,7 @@ export function Dialog({ open, ...props }: DialogProps) {
   return open ? <DialogPanel {...props} /> : null;
 }
 
-function DialogPanel({ title, onClose, children }: Omit<DialogProps, "open">) {
+function DialogPanel({ title, onClose, children, className }: Omit<DialogProps, "open">) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -65,7 +68,7 @@ function DialogPanel({ title, onClose, children }: Omit<DialogProps, "open">) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg"
+        className={cn("w-full max-w-md rounded-lg border bg-background p-6 shadow-lg", className)}
       >
         <h2 id={titleId} className="text-lg font-semibold">
           {title}

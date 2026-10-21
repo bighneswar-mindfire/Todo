@@ -13,3 +13,15 @@ export function linkStatus(link: Pick<ShareLink, "revokedAt" | "expiresAt">, now
 export function shareUrl(token: string, origin: string = window.location.origin): string {
   return `${origin}/shared/${token}`;
 }
+
+const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+const dateTimeWithSeconds = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" });
+
+export function formatDateTime(iso: string): string {
+  return dateTime.format(new Date(iso));
+}
+
+/** Includes seconds so two links created in the same minute still get different button names. */
+export function formatDateTimePrecise(iso: string): string {
+  return dateTimeWithSeconds.format(new Date(iso));
+}

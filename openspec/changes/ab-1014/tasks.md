@@ -75,67 +75,67 @@ Requirement: Referrer protection
 ## 3. Share dialog
 
 `src/components/share/ShareDialog.test.tsx` (rendered with props `open`, `noteId`, `dirty`, `onClose`) - Requirement: Share link list
-- [ ] 3.1 Test "Loading state"
-- [ ] 3.2 Test "Empty list"
-- [ ] 3.3 Test "Links are listed in server order"
-- [ ] 3.4 Test "Row shows the full URL"
-- [ ] 3.5 Test "Row shows view count"
-- [ ] 3.6 Test "Never-expiring link"
-- [ ] 3.7 Test "Link with an expiry"
-- [ ] 3.8 Test "List request fails"
-- [ ] 3.9 Test "Retry reloads the list"
-- [ ] 3.10 Test "Malformed list response is an error"
+- [x] 3.1 Test "Loading state"
+- [x] 3.2 Test "Empty list"
+- [x] 3.3 Test "Links are listed in server order"
+- [x] 3.4 Test "Row shows the full URL"
+- [x] 3.5 Test "Row shows view count"
+- [x] 3.6 Test "Never-expiring link"
+- [x] 3.7 Test "Link with an expiry"
+- [x] 3.8 Test "List request fails"
+- [x] 3.9 Test "Retry reloads the list"
+- [x] 3.10 Test "Malformed list response is an error"
 
 Requirement: Link status
-- [ ] 3.11 Test "Active link without expiry"
-- [ ] 3.12 Test "Active link with a future expiry"
-- [ ] 3.13 Test "Expired link"
-- [ ] 3.14 Test "Revoked link"
-- [ ] 3.15 Test "Revoked wins over expired"
-- [ ] 3.16 Implement `ShareDialog` shell, list states, `ShareLinkRow` (URL, status label, expiry, views, created time) and the polite status region; verify tasks 3.1 to 3.15 pass
+- [x] 3.11 Test "Active link without expiry"
+- [x] 3.12 Test "Active link with a future expiry"
+- [x] 3.13 Test "Expired link"
+- [x] 3.14 Test "Revoked link"
+- [x] 3.15 Test "Revoked wins over expired"
+- [x] 3.16 Implement `ShareDialog` shell, list states, `ShareLinkRow` (URL, status label, expiry, views, created time) and the polite status region; verify tasks 3.1 to 3.15 pass
 
 Requirement: Create a share link
-- [ ] 3.17 Test "Create without expiry"
-- [ ] 3.18 Test "Create with expiry"
-- [ ] 3.19 Test "Past expiry is rejected in the browser"
-- [ ] 3.20 Test "Server validation error is shown on the input"
-- [ ] 3.21 Test "Successful create is announced"
-- [ ] 3.22 Test "Input is cleared after success"
-- [ ] 3.23 Test "Several links can be created"
-- [ ] 3.24 Test "Double activation sends one request"
-- [ ] 3.25 Test "Create failure keeps the input"
-- [ ] 3.26 Test "Note gone while creating"
-- [ ] 3.27 Implement `CreateShareForm` (local-time to ISO UTC, shared-schema check, in-flight guard, server detail mapping); verify tasks 3.17 to 3.26 pass
+- [x] 3.17 Test "Create without expiry"
+- [x] 3.18 Test "Create with expiry"
+- [x] 3.19 Test "Past expiry is rejected in the browser"
+- [x] 3.20 Test "Server validation error is shown on the input"
+- [x] 3.21 Test "Successful create is announced"
+- [x] 3.22 Test "Input is cleared after success"
+- [x] 3.23 Test "Several links can be created"
+- [x] 3.24 Test "Double activation sends one request"
+- [x] 3.25 Test "Create failure keeps the input"
+- [x] 3.26 Test "Note gone while creating"
+- [x] 3.27 Implement `CreateShareForm` (local-time to ISO UTC, shared-schema check, in-flight guard, server detail mapping); verify tasks 3.17 to 3.26 pass
 
 Requirement: Copy a share link
-- [ ] 3.28 Test "Copy writes the URL"
-- [ ] 3.29 Test "Clipboard failure is reported"
-- [ ] 3.30 Test "No Copy on expired links"
-- [ ] 3.31 Test "No Copy on revoked links"
-- [ ] 3.32 Implement the **Copy** button (clipboard write in try/catch, "Copied" announcement, manual-copy message); verify tasks 3.28 to 3.31 pass
+- [x] 3.28 Test "Copy writes the URL"
+- [x] 3.29 Test "Clipboard failure is reported"
+- [x] 3.30 Test "No Copy on expired links"
+- [x] 3.31 Test "No Copy on revoked links"
+- [x] 3.32 Implement the **Copy** button (clipboard write in try/catch, "Copied" announcement, manual-copy message); verify tasks 3.28 to 3.31 pass
 
 Requirement: Revoke a share link
-- [ ] 3.33 Test "Revoke asks for confirmation"
-- [ ] 3.34 Test "Cancel keeps the link active"
-- [ ] 3.35 Test "Confirmed revoke marks the row revoked"
-- [ ] 3.36 Test "Only active rows offer revoke"
-- [ ] 3.37 Test "Revoke of an already revoked link counts as success"
-- [ ] 3.38 Test "Revoke failure keeps the link active"
-- [ ] 3.39 Test "Double confirm sends one request"
-- [ ] 3.40 Implement the inline revoke confirm (`confirmingId`, in-flight guard, 404 as success); verify tasks 3.33 to 3.39 pass
+- [x] 3.33 Test "Revoke asks for confirmation"
+- [x] 3.34 Test "Cancel keeps the link active"
+- [x] 3.35 Test "Confirmed revoke marks the row revoked"
+- [x] 3.36 Test "Only active rows offer revoke"
+- [x] 3.37 Test "Revoke of an already revoked link counts as success"
+- [x] 3.38 Test "Revoke failure keeps the link active"
+- [x] 3.39 Test "Double confirm sends one request"
+- [x] 3.40 Implement the inline revoke confirm (`confirmingId`, in-flight guard, 404 as success); verify tasks 3.33 to 3.39 pass
 
 Requirement: Authorization and session handling
-- [ ] 3.41 Test "Expired access token is refreshed"
-- [ ] 3.42 Test "Rejected refresh ends the session"
-- [ ] 3.43 Test "Another user's note is not available"
-- [ ] 3.44 Implement the "This note is no longer available" state (404 on list or create hides all controls); verify tasks 3.41 to 3.43 pass
+- [x] 3.41 Test "Expired access token is refreshed"
+- [x] 3.42 Test "Rejected refresh ends the session"
+- [x] 3.43 Test "Another user's note is not available"
+- [x] 3.44 Implement the "This note is no longer available" state (404 on list or create hides all controls); verify tasks 3.41 to 3.43 pass
 
 Requirement: Share dialog accessibility
-- [ ] 3.45 Test "Dialog is labelled and modal"
-- [ ] 3.46 Test "Row buttons identify their link"
-- [ ] 3.47 Test "Expiry input has a label"
-- [ ] 3.48 Make 3.45 to 3.47 pass (per-row `aria-label`s with the creation time, input label); verify with `pnpm --filter @todo/frontend test ShareDialog`
-- [ ] 3.49 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.45 Test "Dialog is labelled and modal"
+- [x] 3.46 Test "Row buttons identify their link"
+- [x] 3.47 Test "Expiry input has a label"
+- [x] 3.48 Make 3.45 to 3.47 pass (per-row `aria-label`s with the creation time, input label); verify with `pnpm --filter @todo/frontend test ShareDialog`
+- [x] 3.49 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Editor integration
 

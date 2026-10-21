@@ -109,7 +109,8 @@ export function makeShareLink(overrides: Partial<ShareLink> = {}): ShareLink {
     expiresAt: null,
     revokedAt: null,
     viewCount: 0,
-    createdAt: "2026-10-20T10:00:00.000Z",
+    // One second apart, so two links never share a creation time (row button names differ).
+    createdAt: new Date(Date.UTC(2026, 9, 20, 10, 0, 0) + counter * 1000).toISOString(),
     ...overrides,
   };
 }
