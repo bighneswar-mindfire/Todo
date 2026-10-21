@@ -161,8 +161,8 @@ Requirement: Unsaved-edits notice
 ## 5. Integration and spec check
 
 - [ ] 5.1 Manual smoke through the Vite proxy with the backend up: create a link, open `/shared/<token>` in a private window, check the view count in the dialog after reopening, revoke, and confirm the link now shows the not-available view; record the outcome in the PR
-- [ ] 5.2 Verify scenario coverage: every scenario title in the three spec deltas appears as exactly one test title (`pnpm test` passes and the repo-checks conformance test is green)
-- [ ] 5.3 Run `pnpm exec openspec validate ab-1014 --strict` and confirm it passes
+- [x] 5.2 Verify scenario coverage: every scenario title in the three spec deltas appears as exactly one test title (`pnpm test` passes and the repo-checks conformance test is green)
+- [x] 5.3 Run `pnpm exec openspec validate ab-1014 --strict` and confirm it passes
 
 ## Workflow follow-up
 
