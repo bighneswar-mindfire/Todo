@@ -26,6 +26,8 @@ export function SearchBox(props: SearchBoxProps) {
   const debounced = useDebouncedCallback((q: string) => onQuery?.(q), SEARCH_DEBOUNCE_MS);
 
   // The URL changed from outside (Back, a header submit): show it, unless it is just the trimmed text.
+  // This is React's "adjust state while rendering" pattern: `seenValue` remembers the last prop we saw, so
+  // typing "red " (URL: "red") keeps its trailing space and only a real outside change replaces the text.
   if (props.value !== seenValue) {
     setSeenValue(props.value);
     if (props.value !== undefined && props.value !== text.trim()) setText(props.value);
