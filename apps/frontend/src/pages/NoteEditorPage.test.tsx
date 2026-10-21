@@ -1,9 +1,19 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import type { Editor } from "@tiptap/react";
-import type { Note } from "@todo/shared";
+import type { Note, TagWithCount } from "@todo/shared";
 import { describe, expect, it } from "vitest";
-import { allCalls, callsTo, errorResponse, json, route } from "@/test/fake-api";
-import { deferred, doc, makeFullNote, makeNote, notesPage, paragraph, routeEmptyNotes, signIn } from "@/test/fixtures";
+import { allCalls, callsTo, empty, errorResponse, json, route } from "@/test/fake-api";
+import {
+  deferred,
+  doc,
+  makeFullNote,
+  makeNote,
+  makeTag,
+  notesPage,
+  paragraph,
+  routeEmptyNotes,
+  signIn,
+} from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 
 const A = "00000000-0000-4000-8000-0000000000a1";
@@ -14,18 +24,18 @@ function noteA(overrides: Partial<Note> = {}): Note {
 }
 
 /** Sign in, serve `note` at `GET /notes/{id}` and render its editor page. */
-async function openNote(note: Note = noteA()) {
+async function openNote(note: Note = noteA(), tags: TagWithCount[] = []) {
   signIn();
   route(`GET /notes/${note.id}`, () => json(200, note));
-  route("GET /tags", () => json(200, { items: [] }));
+  route("GET /tags", () => json(200, { items: tags }));
   const app = renderApp(`/notes/${note.id}`);
   await screen.findByRole("textbox", { name: "Note content" });
   return app;
 }
 
-async function openNewNote() {
+async function openNewNote(tags: TagWithCount[] = []) {
   signIn();
-  route("GET /tags", () => json(200, { items: [] }));
+  route("GET /tags", () => json(200, { items: tags }));
   const app = renderApp("/notes/new");
   await screen.findByRole("textbox", { name: "Note content" });
   return app;
@@ -524,3 +534,208 @@ describe("NoteEditorPage accessibility", () => {
     }
   });
 });
+
+const work = makeTag({ name: "Work", color: "#3366ff" });
+const home = makeTag({ name: "Home", color: "#33aa55" });
+const workRef = { id: work.id, name: work.name, color: work.color };
+
+describe("NoteEditorPage tags", () => {
+  it("Attached tags are pressed", async () => {
+    await openNote(noteA({ tags: [workRef] }), [work, home]);
+
+    expect(await screen.findByRole("button", { name: "Work" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Home" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("Pressing a tag attaches it", async () => {
+    route(`PUT /notes/${A}/tags/${home.id}`, () => empty(204));
+    const { user } = await openNote(noteA(), [work, home]);
+
+    await user.click(await screen.findByRole("button", { name: "Home" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Home" })).toHaveAttribute("aria-pressed", "true"));
+    expect(callsTo(`PUT /notes/${A}/tags/${home.id}`)).toHaveLength(1);
+  });
+
+  it("Pressing an attached tag detaches it", async () => {
+    route(`DELETE /notes/${A}/tags/${work.id}`, () => empty(204));
+    const { user } = await openNote(noteA({ tags: [workRef] }), [work, home]);
+
+    await user.click(await screen.findByRole("button", { name: "Work" }));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Work" })).toHaveAttribute("aria-pressed", "false"));
+    expect(callsTo(`DELETE /notes/${A}/tags/${work.id}`)).toHaveLength(1);
+  });
+
+  it("Tag change keeps the state clean", async () => {
+    route(`PUT /notes/${A}/tags/${home.id}`, () => empty(204));
+    const { user } = await openNote(noteA(), [work, home]);
+
+    await user.click(await screen.findByRole("button", { name: "Home" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Home" })).toHaveAttribute("aria-pressed", "true"));
+
+    expect(saveButton()).toBeDisabled();
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
+  });
+
+  it("Tag change keeps unsaved edits", async () => {
+    route(`PUT /notes/${A}/tags/${home.id}`, () => empty(204));
+    const { user } = await openNote(noteA(), [work, home]);
+    await user.type(titleInput(), "!");
+
+    await user.click(await screen.findByRole("button", { name: "Home" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Home" })).toHaveAttribute("aria-pressed", "true"));
+
+    expect(titleInput()).toHaveValue("Groceries!");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+  });
+
+  it("Failed tag change leaves the button alone", async () => {
+    route(`PUT /notes/${A}/tags/${home.id}`, () => errorResponse(500, "INTERNAL_ERROR", "Tag update failed"));
+    const { user } = await openNote(noteA(), [work, home]);
+
+    await user.click(await screen.findByRole("button", { name: "Home" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Tag update failed");
+    expect(screen.getByRole("button", { name: "Home" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("Tag deleted elsewhere", async () => {
+    route(`PUT /notes/${A}/tags/${home.id}`, () => errorResponse(404, "NOT_FOUND"));
+    const { user } = await openNote(noteA(), [work, home]);
+
+    await user.click(await screen.findByRole("button", { name: "Home" }));
+
+    expect(await screen.findByText("That tag no longer exists")).toBeInTheDocument();
+    await waitFor(() => expect(callsTo("GET /tags").length).toBeGreaterThanOrEqual(2));
+  });
+
+  it("New note cannot take tags yet", async () => {
+    await openNewNote([work, home]);
+
+    expect(screen.getByText("Save the note to add tags")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Work" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Home" })).toBeDisabled();
+  });
+
+  it("No tags exist", async () => {
+    await openNote(noteA(), []);
+
+    expect(await screen.findByText("No tags yet")).toBeInTheDocument();
+  });
+
+  it("Tags load failure is isolated", async () => {
+    signIn();
+    route(`GET /notes/${A}`, () => json(200, noteA()));
+    route("GET /tags", () => errorResponse(500, "INTERNAL_ERROR"));
+    const { user } = renderApp(`/notes/${A}`);
+    await screen.findByRole("textbox", { name: "Note content" });
+
+    expect(await screen.findByText("Couldn't load tags")).toBeInTheDocument();
+    await user.type(titleInput(), "!");
+    expect(titleInput()).toHaveValue("Groceries!");
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => expect(callsTo("GET /tags").length).toBeGreaterThanOrEqual(2));
+  });
+});
+
+describe("NoteEditorPage delete", () => {
+  async function openDeleteDialog(app: Awaited<ReturnType<typeof openNote>>) {
+    await app.user.click(screen.getByRole("button", { name: "Delete" }));
+    return screen.findByRole("dialog", { name: "Delete this note?" });
+  }
+
+  it("Delete asks for confirmation", async () => {
+    const app = await openNote();
+
+    const dialog = await openDeleteDialog(app);
+
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Delete note" })).toBeInTheDocument();
+    expect(callsTo(`DELETE /notes/${A}`)).toHaveLength(0);
+  });
+
+  it("Cancel keeps the note", async () => {
+    const app = await openNote();
+    const dialog = await openDeleteDialog(app);
+    await app.user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await openDeleteDialog(app);
+    await app.user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(callsTo(`DELETE /notes/${A}`)).toHaveLength(0);
+  });
+
+  it("Confirming deletes and returns to the list", async () => {
+    routeEmptyNotes();
+    route(`DELETE /notes/${A}`, () => empty(204));
+    const app = await openNote();
+    const dialog = await openDeleteDialog(app);
+
+    await app.user.click(within(dialog).getByRole("button", { name: "Delete note" }));
+
+    await waitFor(() => expect(app.router.state.location.pathname).toBe("/"));
+    expect(await screen.findByText("No notes yet")).toBeInTheDocument();
+    expect(callsTo(`DELETE /notes/${A}`)).toHaveLength(1);
+  });
+
+  it("Delete works with unsaved edits", async () => {
+    routeEmptyNotes();
+    route(`DELETE /notes/${A}`, () => empty(204));
+    const app = await openNote();
+    await app.user.type(titleInput(), "!");
+    const dialog = await openDeleteDialog(app);
+
+    await app.user.click(within(dialog).getByRole("button", { name: "Delete note" }));
+
+    await waitFor(() => expect(app.router.state.location.pathname).toBe("/"));
+    await screen.findByRole("heading", { name: "Notes", level: 1 });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("Delete failure keeps the dialog", async () => {
+    route(`DELETE /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR", "Could not delete"));
+    const app = await openNote();
+    const dialog = await openDeleteDialog(app);
+
+    await app.user.click(within(dialog).getByRole("button", { name: "Delete note" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Could not delete");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Delete note" })).toBeEnabled();
+  });
+
+  it("Already-deleted note", async () => {
+    routeEmptyNotes();
+    route(`DELETE /notes/${A}`, () => errorResponse(404, "NOT_FOUND"));
+    const app = await openNote();
+    const dialog = await openDeleteDialog(app);
+
+    await app.user.click(within(dialog).getByRole("button", { name: "Delete note" }));
+
+    await waitFor(() => expect(app.router.state.location.pathname).toBe("/"));
+  });
+
+  it("No delete on a new note", async () => {
+    await openNewNote();
+
+    expect(screen.queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+  });
+
+  it("Dialog returns focus", async () => {
+    const app = await openNote();
+    const opener = screen.getByRole("button", { name: "Delete" });
+    const dialog = await openDeleteDialog(app);
+    expect(within(dialog).getByRole("button", { name: "Cancel" })).toHaveFocus();
+
+    await app.user.keyboard("{Escape}");
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(opener).toHaveFocus();
+  });
+});
+

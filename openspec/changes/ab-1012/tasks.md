@@ -112,35 +112,35 @@ Requirement: Editor accessibility baseline
 
 ## 4. Tags on a note and delete
 
-- [ ] 4.1 [PARALLEL] Create `src/components/editor/NoteTagPicker.tsx` (D7): group labelled "Tags", `aria-pressed` toggles coloured with `textColorFor`, per-button pending, disabled state for new notes, empty and failure states (Sonnet)
-- [ ] 4.2 [PARALLEL] Create `src/components/editor/DeleteNoteDialog.tsx` (D9): title "Delete this note?", **Cancel** / **Delete note**, failure alert, 404 counts as success (Sonnet)
-- [ ] 4.3 Wire both into `NoteEditor`: picker below the title, **Delete** button (saved notes only) that opens the dialog, bypass + invalidate + navigate to `/` on delete (Sonnet)
+- [x] 4.1 [PARALLEL] Create `src/components/editor/NoteTagPicker.tsx` (D7): group labelled "Tags", `aria-pressed` toggles coloured with `textColorFor`, per-button pending, disabled state for new notes, empty and failure states (Sonnet)
+- [x] 4.2 [PARALLEL] Create `src/components/editor/DeleteNoteDialog.tsx` (D9): title "Delete this note?", **Cancel** / **Delete note**, failure alert, 404 counts as success (Sonnet)
+- [x] 4.3 Wire both into `NoteEditor`: picker below the title, **Delete** button (saved notes only) that opens the dialog, bypass + invalidate + navigate to `/` on delete (Sonnet)
 
 `src/pages/NoteEditorPage.test.tsx` - Requirement: Tags on a note
-- [ ] 4.4 Test "Attached tags are pressed"
-- [ ] 4.5 Test "Pressing a tag attaches it"
-- [ ] 4.6 Test "Pressing an attached tag detaches it"
-- [ ] 4.7 Test "Tag change keeps the state clean"
-- [ ] 4.8 Test "Tag change keeps unsaved edits"
-- [ ] 4.9 Test "Failed tag change leaves the button alone"
-- [ ] 4.10 Test "Tag deleted elsewhere"
-- [ ] 4.11 Test "New note cannot take tags yet"
-- [ ] 4.12 Test "No tags exist"
-- [ ] 4.13 Test "Tags load failure is isolated"
+- [x] 4.4 Test "Attached tags are pressed"
+- [x] 4.5 Test "Pressing a tag attaches it"
+- [x] 4.6 Test "Pressing an attached tag detaches it"
+- [x] 4.7 Test "Tag change keeps the state clean"
+- [x] 4.8 Test "Tag change keeps unsaved edits"
+- [x] 4.9 Test "Failed tag change leaves the button alone"
+- [x] 4.10 Test "Tag deleted elsewhere"
+- [x] 4.11 Test "New note cannot take tags yet"
+- [x] 4.12 Test "No tags exist"
+- [x] 4.13 Test "Tags load failure is isolated"
 
 Requirement: Deleting a note
-- [ ] 4.14 Test "Delete asks for confirmation"
-- [ ] 4.15 Test "Cancel keeps the note"
-- [ ] 4.16 Test "Confirming deletes and returns to the list"
-- [ ] 4.17 Test "Delete works with unsaved edits"
-- [ ] 4.18 Test "Delete failure keeps the dialog"
-- [ ] 4.19 Test "Already-deleted note"
-- [ ] 4.20 Test "No delete on a new note"
+- [x] 4.14 Test "Delete asks for confirmation"
+- [x] 4.15 Test "Cancel keeps the note"
+- [x] 4.16 Test "Confirming deletes and returns to the list"
+- [x] 4.17 Test "Delete works with unsaved edits"
+- [x] 4.18 Test "Delete failure keeps the dialog"
+- [x] 4.19 Test "Already-deleted note"
+- [x] 4.20 Test "No delete on a new note"
 
 Requirement: Editor accessibility baseline
-- [ ] 4.21 Test "Dialog returns focus"
+- [x] 4.21 Test "Dialog returns focus"
 
-- [ ] 4.22 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 4.22 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 5. List page additions, docs and wrap-up
 

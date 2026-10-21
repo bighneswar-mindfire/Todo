@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { GENERIC_ERROR } from "@/lib/form-errors";
 import { diffNote, isDirty, contentKey, type NoteSnapshot } from "@/lib/note-diff";
 import { useSaveNote } from "@/queries/note";
+import { DeleteNoteDialog } from "./DeleteNoteDialog";
 import { DiscardChangesDialog } from "./DiscardChangesDialog";
+import { NoteTagPicker } from "./NoteTagPicker";
 import { RichTextEditor } from "./RichTextEditor";
 
 const EMPTY_DOC: TipTapDoc = { type: "doc", content: [] };
@@ -39,6 +41,7 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
   const [saved, setSaved] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const contentJson = useMemo(() => (content ? contentKey(content) : null), [content]);
   const dirty = baseline !== null && contentJson !== null && isDirty(baseline, { title, contentJson });
@@ -163,6 +166,8 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
         }}
       />
 
+      <NoteTagPicker noteId={note?.id} attached={note?.tags ?? []} />
+
       <FormAlert message={saveError} />
 
       <div className="flex items-center gap-3">
@@ -175,7 +180,24 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
             Saved
           </span>
         ) : null}
+        {note ? (
+          <Button variant="outline" className="ml-auto" onClick={() => setDeleteOpen(true)}>
+            Delete
+          </Button>
+        ) : null}
       </div>
+
+      {note ? (
+        <DeleteNoteDialog
+          open={deleteOpen}
+          noteId={note.id}
+          onClose={() => setDeleteOpen(false)}
+          onDeleted={() => {
+            bypassRef.current = true;
+            void navigate("/");
+          }}
+        />
+      ) : null}
 
       <DiscardChangesDialog
         open={blocker.state === "blocked"}

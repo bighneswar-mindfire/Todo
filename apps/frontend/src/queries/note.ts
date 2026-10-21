@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Note, TagRef, UpdateNoteRequest } from "@todo/shared";
+import { ApiError } from "@/api/errors";
 import { attachTag, createNote, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
 import { notesKeys } from "./notes";
 
@@ -50,7 +51,11 @@ export function useDeleteNote() {
   const queryClient = useQueryClient();
   const invalidateLists = useInvalidateLists();
   return useMutation({
-    mutationFn: (id: string) => deleteNote(id),
+    // A 404 means the note is already gone, which is what the user wanted.
+    mutationFn: (id: string) =>
+      deleteNote(id).catch((error: unknown) => {
+        if (!(error instanceof ApiError && error.status === 404)) throw error;
+      }),
     onSuccess: (_data, id) => {
       queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
       invalidateLists();
