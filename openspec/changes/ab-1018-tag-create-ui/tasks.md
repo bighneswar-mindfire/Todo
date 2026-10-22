@@ -40,18 +40,18 @@ Requirement: Tag form accessibility
 ## 3. Create and attach
 
 `src/components/editor/NewTagForm.test.tsx` - Requirement: Create and attach a tag
-- [ ] 3.1 Test "Creating a tag adds it and attaches it"
-- [ ] 3.2 Test "Name is trimmed before sending"
-- [ ] 3.3 Test "Chosen colour is sent"
-- [ ] 3.4 Test "Creating refreshes tags and lists"
-- [ ] 3.5 Test "Created tag keeps unsaved edits"
-- [ ] 3.6 Test "Created tag on a clean note keeps the state clean"
-- [ ] 3.7 Test "Double submit sends one request"
-- [ ] 3.7a Test "Enter submits" (Requirement: Tag form accessibility)
-- [ ] 3.8 Extract `patchNoteTags` from `useToggleNoteTag` in `src/queries/note.ts` (behaviour unchanged; verify with the existing `useToggleNoteTag` and editor tag tests staying green), then implement `AttachAfterCreateError` and `useCreateNoteTag` (create, then attach, patch the note, invalidate the tags query and the lists)
-- [ ] 3.9 Submit handler in `NewTagForm` and `NoteTagPicker`: `zodResolver` form, in-flight guard (ref plus `isPending`), close the form and restore focus on success; verify the 3.1 to 3.7 tests pass
-- [ ] 3.10 Unit test: cancelling while the create is in flight still applies the result to the caches (the tag appears pressed); verify it passes
-- [ ] 3.11 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.1 Test "Creating a tag adds it and attaches it"
+- [x] 3.2 Test "Name is trimmed before sending"
+- [x] 3.3 Test "Chosen colour is sent"
+- [x] 3.4 Test "Creating refreshes tags and lists"
+- [x] 3.5 Test "Created tag keeps unsaved edits"
+- [x] 3.6 Test "Created tag on a clean note keeps the state clean"
+- [x] 3.7 Test "Double submit sends one request"
+- [x] 3.7a Test "Enter submits" (Requirement: Tag form accessibility)
+- [x] 3.8 Extract `patchNoteTags` from `useToggleNoteTag` in `src/queries/note.ts` (behaviour unchanged; verify with the existing `useToggleNoteTag` and editor tag tests staying green), then implement `AttachAfterCreateError` and `useCreateNoteTag` (create, then attach, patch the note, invalidate the tags query and the lists)
+- [x] 3.9 Submit handler in `NewTagForm` and `NoteTagPicker`: `zodResolver` form, in-flight guard (ref plus `isPending`), close the form and restore focus on success; verify the 3.1 to 3.7 tests pass
+- [x] 3.10 Unit test: cancelling while the create is in flight still applies the result to the caches (the tag appears pressed); verify it passes
+- [x] 3.11 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Validation
 

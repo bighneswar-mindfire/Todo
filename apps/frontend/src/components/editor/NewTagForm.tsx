@@ -1,21 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { createTagRequestSchema, DEFAULT_TAG_COLOR, type CreateTagRequest } from "@todo/shared";
+import { FormAlert } from "@/components/FormAlert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { friendlyZodMessage } from "@/lib/form-errors";
+import { applyApiError, friendlyZodMessage } from "@/lib/form-errors";
+import { AttachAfterCreateError, type useCreateNoteTag } from "@/queries/note";
 
 /** What the fields hold: the schema's input side, where `color` is optional because the schema defaults it. */
 type NewTagFormInput = typeof createTagRequestSchema._zod.input;
 
 interface NewTagFormProps {
+  create: ReturnType<typeof useCreateNoteTag>;
   onClose: () => void;
 }
 
 /** Inline form for a new tag, shown inside the editor's Tags group. */
-export function NewTagForm({ onClose }: NewTagFormProps) {
+export function NewTagForm({ create, onClose }: NewTagFormProps) {
+  const [formError, setFormError] = useState<string | null>(null);
+  const submitting = useRef(false);
   const form = useForm<NewTagFormInput, unknown, CreateTagRequest>({
     resolver: zodResolver(createTagRequestSchema, { error: friendlyZodMessage }),
     defaultValues: { name: "", color: DEFAULT_TAG_COLOR },
@@ -27,7 +32,23 @@ export function NewTagForm({ onClose }: NewTagFormProps) {
     setFocus("name");
   }, [setFocus]);
 
-  const onSubmit = form.handleSubmit(() => undefined);
+  const onSubmit = form.handleSubmit((values) => {
+    // `isPending` covers a create started by an earlier, since closed, form; the ref covers this tick.
+    if (create.isPending || submitting.current) return;
+    submitting.current = true;
+    setFormError(null);
+    create.mutate(values, {
+      onSuccess: onClose,
+      onError: (error) => {
+        // The tag exists and the picker reports it; only the form's own failures stay here.
+        if (error instanceof AttachAfterCreateError) onClose();
+        else setFormError(applyApiError(error, form.setError, []));
+      },
+      onSettled: () => {
+        submitting.current = false;
+      },
+    });
+  });
 
   return (
     <form
@@ -42,6 +63,9 @@ export function NewTagForm({ onClose }: NewTagFormProps) {
       }}
       className="flex w-full flex-wrap items-end gap-2"
     >
+      <div className="w-full">
+        <FormAlert message={formError} />
+      </div>
       <div className="grid gap-2">
         <Label htmlFor="new-tag-name">Tag name</Label>
         <Input
@@ -61,7 +85,7 @@ export function NewTagForm({ onClose }: NewTagFormProps) {
         <Label htmlFor="new-tag-colour">Tag colour</Label>
         <Input id="new-tag-colour" type="color" defaultValue={DEFAULT_TAG_COLOR} className="w-14 p-1" {...form.register("color")} />
       </div>
-      <Button type="submit" size="sm">
+      <Button type="submit" size="sm" disabled={create.isPending}>
         Create tag
       </Button>
       <Button type="button" variant="outline" size="sm" onClick={onClose}>

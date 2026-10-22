@@ -5,11 +5,12 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { GENERIC_ERROR } from "@/lib/form-errors";
 import { textColorFor } from "@/lib/tag-color";
-import { useToggleNoteTag } from "@/queries/note";
+import { useCreateNoteTag, useToggleNoteTag } from "@/queries/note";
 import { useTags } from "@/queries/notes";
 import { NewTagForm } from "./NewTagForm";
 
 const TAG_GONE = "That tag no longer exists";
+const NOT_ATTACHED = "Tag created, but it could not be added to this note. Press it to try again";
 
 /** Toggle buttons for the tags of a saved note. Attaching never touches the note's unsaved edits. */
 export function NoteTagPicker({ noteId, attached }: { noteId: string | undefined; attached: TagRef[] }) {
@@ -43,6 +44,7 @@ function SavedNoteTags({
 }) {
   const toggle = useToggleNoteTag(noteId);
   const [error, setError] = useState<string | null>(null);
+  const create = useCreateNoteTag(noteId, () => setError(NOT_ATTACHED));
   const pendingTagId = toggle.isPending ? toggle.variables.tag.id : undefined;
   const [creating, setCreating] = useState(false);
   const newTagButton = useRef<HTMLButtonElement>(null);
@@ -110,9 +112,13 @@ function SavedNoteTags({
         );
       })}
       {creating ? (
-        <NewTagForm onClose={closeForm} />
+        <NewTagForm create={create} onClose={closeForm} />
       ) : (
-        <Button ref={newTagButton} variant="outline" size="sm" onClick={() => setCreating(true)}>
+        <Button ref={newTagButton} variant="outline" size="sm" onClick={() => {
+            setError(null);
+            setCreating(true);
+          }}
+        >
           New tag
         </Button>
       )}

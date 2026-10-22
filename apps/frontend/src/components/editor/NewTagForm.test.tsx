@@ -1,8 +1,9 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { Note, TagWithCount } from "@todo/shared";
 import { describe, expect, it } from "vitest";
-import { allCalls, callsTo, json, route } from "@/test/fake-api";
-import { doc, makeFullNote, makeTag, paragraph, signIn } from "@/test/fixtures";
+import { allCalls, callsTo, empty, json, route } from "@/test/fake-api";
+import { notesKeys } from "@/queries/notes";
+import { deferred, doc, makeFullNote, makeNote, makeTag, notesPage, paragraph, signIn } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 
 const A = "00000000-0000-4000-8000-0000000000a1";
@@ -81,6 +82,150 @@ describe("New tag form", () => {
   });
 });
 
+const titleInput = () => screen.getByLabelText("Title");
+const createButton = () => screen.getByRole("button", { name: "Create tag" });
+
+function tagResponse(tag: TagWithCount): Response {
+  return json(201, { id: tag.id, name: tag.name, color: tag.color, createdAt: tag.createdAt });
+}
+
+/** Serve `POST /tags` and the attach call; `GET /tags` then lists whatever has been created. */
+function serveCreate() {
+  const tags: TagWithCount[] = [];
+  let created: TagWithCount | undefined;
+  route("GET /tags", () => json(200, { items: tags }));
+  route("POST /tags", (req) => {
+    const body = req.body as { name: string; color: string };
+    created = makeTag({ name: body.name, color: body.color });
+    tags.push(created);
+    route(`PUT /notes/${A}/tags/${created.id}`, () => empty(204));
+    return tagResponse(created);
+  });
+  return { created: () => created as TagWithCount };
+}
+
+async function createTagNamed(user: ReturnType<typeof renderApp>["user"], name: string) {
+  await user.click(newTagButton());
+  await user.type(nameInput(), name);
+  await user.click(createButton());
+}
+
+describe("Create and attach a tag", () => {
+  it("Creating a tag adds it and attaches it", async () => {
+    const { user } = await openNote(noteA(), []);
+    const api = serveCreate();
+
+    await createTagNamed(user, "Work");
+
+    const button = await screen.findByRole("button", { name: "Work" });
+    await waitFor(() => expect(button).toHaveAttribute("aria-pressed", "true"));
+    expect(callsTo("POST /tags")[0]?.body).toEqual({ name: "Work", color: "#6b7280" });
+    expect(callsTo(`PUT /notes/${A}/tags/${api.created().id}`)).toHaveLength(1);
+    expect(screen.queryByRole("form", { name: "New tag" })).not.toBeInTheDocument();
+    await waitFor(() => expect(newTagButton()).toHaveFocus());
+  });
+
+  it("Name is trimmed before sending", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+
+    await createTagNamed(user, "  Work  ");
+
+    await waitFor(() => expect(callsTo("POST /tags")).toHaveLength(1));
+    expect((callsTo("POST /tags")[0]?.body as { name: string }).name).toBe("Work");
+  });
+
+  it("Chosen colour is sent", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+    await user.click(newTagButton());
+    await user.type(nameInput(), "Urgent");
+    fireEvent.change(colourInput(), { target: { value: "#ff0000" } });
+
+    await user.click(createButton());
+
+    await waitFor(() => expect(callsTo("POST /tags")).toHaveLength(1));
+    expect(callsTo("POST /tags")[0]?.body).toEqual({ name: "Urgent", color: "#ff0000" });
+  });
+
+  it("Creating refreshes tags and lists", async () => {
+    const { client, user } = await openNote(noteA(), []);
+    serveCreate();
+    const listKey = [...notesKeys.lists, { page: 1 }];
+    client.setQueryData(listKey, notesPage([makeNote({ id: A, title: "Groceries" })]));
+    const tagRequests = callsTo("GET /tags").length;
+
+    await createTagNamed(user, "Work");
+
+    await waitFor(() => expect(client.getQueryState(listKey)?.isInvalidated).toBe(true));
+    await waitFor(() => expect(callsTo("GET /tags").length).toBeGreaterThan(tagRequests));
+  });
+
+  it("Double submit sends one request", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+    const pending = deferred<Response>();
+    route("POST /tags", () => pending.promise);
+    await user.click(newTagButton());
+    await user.type(nameInput(), "Work");
+
+    await user.click(createButton());
+    await user.click(createButton());
+
+    expect(callsTo("POST /tags")).toHaveLength(1);
+    expect(createButton()).toBeDisabled();
+    const tag = makeTag({ name: "Work" });
+    route(`PUT /notes/${A}/tags/${tag.id}`, () => empty(204));
+    pending.resolve(tagResponse(tag));
+    await waitFor(() => expect(screen.queryByRole("form", { name: "New tag" })).not.toBeInTheDocument());
+  });
+
+  it("Unit: cancelling while the create is in flight still applies the result", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+    const pending = deferred<Response>();
+    route("POST /tags", () => pending.promise);
+    await user.click(newTagButton());
+    await user.type(nameInput(), "Work");
+    await user.click(createButton());
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    const tag = makeTag({ name: "Work" });
+    route("GET /tags", () => json(200, { items: [tag] }));
+    route(`PUT /notes/${A}/tags/${tag.id}`, () => empty(204));
+    pending.resolve(tagResponse(tag));
+
+    const button = await screen.findByRole("button", { name: "Work" });
+    await waitFor(() => expect(button).toHaveAttribute("aria-pressed", "true"));
+  });
+});
+
+describe("Creating a tag is not an edit", () => {
+  it("Created tag keeps unsaved edits", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+    await user.type(titleInput(), "!");
+
+    await createTagNamed(user, "Work");
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Work" })).toHaveAttribute("aria-pressed", "true"));
+    expect(titleInput()).toHaveValue("Groceries!");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
+  });
+
+  it("Created tag on a clean note keeps the state clean", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+
+    await createTagNamed(user, "Work");
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Work" })).toHaveAttribute("aria-pressed", "true"));
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
+  });
+});
+
 describe("New tag form accessibility", () => {
   it("Fields have accessible names", async () => {
     const { user } = await openNote();
@@ -102,5 +247,15 @@ describe("New tag form accessibility", () => {
     expect(screen.queryByRole("form", { name: "New tag" })).not.toBeInTheDocument();
     await waitFor(() => expect(newTagButton()).toHaveFocus());
     expect(allCalls()).toHaveLength(before);
+  });
+
+  it("Enter submits", async () => {
+    const { user } = await openNote(noteA(), []);
+    serveCreate();
+    await user.click(newTagButton());
+
+    await user.type(nameInput(), "Work{Enter}");
+
+    await waitFor(() => expect(callsTo("POST /tags")).toHaveLength(1));
   });
 });
