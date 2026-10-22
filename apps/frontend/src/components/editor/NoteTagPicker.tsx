@@ -114,7 +114,11 @@ function SavedNoteTags({
       {creating ? (
         <NewTagForm create={create} onClose={closeForm} />
       ) : (
-        <Button ref={newTagButton} variant="outline" size="sm" onClick={() => {
+        <Button
+          ref={newTagButton}
+          variant="outline"
+          size="sm"
+          onClick={() => {
             setError(null);
             setCreating(true);
           }}

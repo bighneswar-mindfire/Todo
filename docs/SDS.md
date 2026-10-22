@@ -289,6 +289,6 @@ Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archiv
 | Editor autosave (FR-FE-5) | Implemented by change `ab-1012-autosave` (2026-10-22): 1 s debounce, one save in flight, status with Retry, flush on leave, autosaves coalesced into one version (`NoteVersion.coalescible`). |
 | Search UI, share modal (AB-1013, AB-1014) | Implemented |
 | Version drawer (AB-1015) | Implemented: list with Load more, read-only preview, restore as a new version |
-| Tag creation UI (AB-1018, FR-TAG-1, FR-FE-4) | **Gap.** The editor can attach existing tags but not create one; `POST /tags` has no UI. Planned by change `ab-1018-tag-create-ui` (inline New tag form in the editor's Tags group, create then attach; no backend or shared change), awaiting approval. |
+| Tag creation UI (AB-1018, FR-TAG-1, FR-FE-4) | Implemented by change `ab-1018-tag-create-ui`: an inline New tag form in the editor's Tags group creates the tag and attaches it to the open note (partial failure keeps the tag, unpressed, with an alert). No backend or shared change. |
 | E2E (AB-1016) | Not started |
 | Ticket numbering | The archived backend tickets AB-1005 to AB-1007 are tags, search and highlight, whereas the assignment sequence is pagination/sorting, tags, search. The mapping in `FRS.md` section 4 follows the assignment; the gaps above are the net effect of that drift. |
