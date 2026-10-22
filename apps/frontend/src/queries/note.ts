@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Note, TagRef, UpdateNoteRequest } from "@todo/shared";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import type { CreateTagRequest, Note, Tag, TagRef, UpdateNoteRequest } from "@todo/shared";
 import { ApiError } from "@/api/errors";
-import { attachTag, createNote, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
+import { attachTag, createNote, createTag, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
 import { notesKeys } from "./notes";
 import { searchKeys } from "./search";
 
@@ -65,7 +65,16 @@ export function useDeleteNote() {
   });
 }
 
-/** Attach or detach one tag; the 204 has no body, so the cached note's tags are patched from `tag`. */
+/** The 204 of an attach or detach has no body, so the cached note's tags are patched from `tag`. */
+function patchNoteTags(queryClient: QueryClient, noteId: string, tag: TagRef, attach: boolean) {
+  queryClient.setQueryData<Note>(noteKeys.detail(noteId), (note) => {
+    if (!note) return note;
+    const others = note.tags.filter((t) => t.id !== tag.id);
+    return { ...note, tags: attach ? [...others, { id: tag.id, name: tag.name, color: tag.color }] : others };
+  });
+}
+
+/** Attach or detach one tag. */
 export function useToggleNoteTag(noteId: string) {
   const queryClient = useQueryClient();
   const invalidateLists = useInvalidateLists();
@@ -73,12 +82,49 @@ export function useToggleNoteTag(noteId: string) {
     mutationFn: ({ tag, attach }: { tag: TagRef; attach: boolean }) =>
       attach ? attachTag(noteId, tag.id) : detachTag(noteId, tag.id),
     onSuccess: (_data, { tag, attach }) => {
-      queryClient.setQueryData<Note>(noteKeys.detail(noteId), (note) => {
-        if (!note) return note;
-        const others = note.tags.filter((t) => t.id !== tag.id);
-        return { ...note, tags: attach ? [...others, { id: tag.id, name: tag.name, color: tag.color }] : others };
-      });
+      patchNoteTags(queryClient, noteId, tag, attach);
       invalidateLists();
+    },
+  });
+}
+
+/** The tag was created but could not be attached to the note; carries the tag so the UI can say so. */
+export class AttachAfterCreateError extends Error {
+  readonly tag: Tag;
+
+  constructor(tag: Tag, cause: unknown) {
+    super("Tag created but not attached", { cause });
+    this.name = "AttachAfterCreateError";
+    this.tag = tag;
+  }
+}
+
+/**
+ * Create a tag, then attach it to the note. `onAttachFailed` runs when only the second step failed
+ * (the tag exists); it is a hook option, so it still runs if the form that started it has closed.
+ */
+export function useCreateNoteTag(noteId: string, onAttachFailed?: (tag: Tag) => void) {
+  const queryClient = useQueryClient();
+  const invalidateLists = useInvalidateLists();
+  return useMutation({
+    mutationFn: async (input: CreateTagRequest): Promise<Tag> => {
+      const tag = await createTag(input);
+      try {
+        await attachTag(noteId, tag.id);
+      } catch (error) {
+        throw new AttachAfterCreateError(tag, error);
+      }
+      return tag;
+    },
+    onSuccess: (tag) => {
+      patchNoteTags(queryClient, noteId, tag, true);
+      invalidateLists();
+    },
+    onError: (error) => {
+      if (!(error instanceof AttachAfterCreateError)) return;
+      // The tag exists even though the note did not get it: list it, unpressed.
+      void queryClient.invalidateQueries({ queryKey: notesKeys.tags });
+      onAttachFailed?.(error.tag);
     },
   });
 }

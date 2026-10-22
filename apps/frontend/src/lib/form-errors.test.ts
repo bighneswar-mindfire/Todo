@@ -33,4 +33,25 @@ describe("form error mapping", () => {
   it("falls back to a form-level message for validation errors without details", () => {
     expect(applyApiError(new ApiError(400, "VALIDATION_ERROR", "bad"), vi.fn(), ["email"])).toBe(GENERIC_ERROR);
   });
+
+  it("Unit: friendlyZodMessage words a bad tag name", () => {
+    expect(friendlyZodMessage({ code: "too_small", path: ["name"], minimum: 1 })).toBe("Enter a tag name of 1 to 50 characters");
+    expect(friendlyZodMessage({ code: "too_big", path: ["name"] })).toBe("Enter a tag name of 1 to 50 characters");
+  });
+
+  it("Unit: applyApiError puts TAG_NAME_TAKEN on the name field", () => {
+    const setError = vi.fn();
+
+    expect(applyApiError(new ApiError(409, "TAG_NAME_TAKEN", "taken"), setError, [])).toBeNull();
+
+    expect(setError).toHaveBeenCalledWith("name", { type: "server", message: "You already have a tag with that name" });
+  });
+
+  it("Unit: with no fields a validation error with details is generic", () => {
+    const setError = vi.fn();
+    const error = new ApiError(400, "VALIDATION_ERROR", "bad", [{ field: "name", message: "bad name" }]);
+
+    expect(applyApiError(error, setError, [])).toBe(GENERIC_ERROR);
+    expect(setError).not.toHaveBeenCalled();
+  });
 });

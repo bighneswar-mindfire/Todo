@@ -33,6 +33,8 @@ export const tagSchema = tagRefSchema.extend({ createdAt: z.iso.datetime() });
 export const tagWithCountSchema = tagSchema.extend({ noteCount: z.number().int().min(0) });
 export const tagListResponseSchema = z.object({ items: z.array(tagWithCountSchema) });
 
+/** What a form holds before parsing: `color` is optional because the schema defaults it. */
+export type CreateTagRequestInput = z.input<typeof createTagRequestSchema>;
 export type CreateTagRequest = z.infer<typeof createTagRequestSchema>;
 export type UpdateTagRequest = z.infer<typeof updateTagRequestSchema>;
 export type TagRef = z.infer<typeof tagRefSchema>;

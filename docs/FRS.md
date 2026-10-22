@@ -173,6 +173,7 @@ Authenticated users create, organize, search and share rich-text notes. The syst
 | AB-1015 | Version drawer                  | FR-FE-8                           |
 | AB-1016 | E2E                             | FR-E2E-1                          |
 | AB-1017 | Button UI                       | FR-FE-10                          |
+| AB-1018 | Tag creation UI                 | FR-TAG-1, FR-FE-4                 |
 
 ## 5. Acceptance
 

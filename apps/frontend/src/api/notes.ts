@@ -1,12 +1,16 @@
 import {
   createNoteRequestSchema,
+  createTagRequestSchema,
   noteListResponseSchema,
   noteSchema,
   tagListResponseSchema,
+  tagSchema,
   updateNoteRequestSchema,
   type CreateNoteRequest,
+  type CreateTagRequest,
   type Note,
   type NoteListResponse,
+  type Tag,
   type TagListResponse,
   type UpdateNoteRequest,
 } from "@todo/shared";
@@ -26,6 +30,15 @@ export function listNotes({ page, limit, tagId }: ListNotesParams): Promise<Note
 
 export function listTags(): Promise<TagListResponse> {
   return request("/tags", { auth: "bearer", schema: tagListResponseSchema });
+}
+
+export async function createTag(input: CreateTagRequest): Promise<Tag> {
+  return request("/tags", {
+    method: "POST",
+    auth: "bearer",
+    body: createTagRequestSchema.parse(input),
+    schema: tagSchema,
+  });
 }
 
 export function getNote(id: string): Promise<Note> {

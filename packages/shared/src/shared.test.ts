@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   clientErrorCodeSchema,
   createNoteRequestSchema,
@@ -15,6 +15,8 @@ import {
   updateNoteRequestSchema,
   updateTagRequestSchema,
   zodIssuesToDetails,
+  type CreateTagRequest,
+  type CreateTagRequestInput,
 } from "./index.js";
 
 const JWT_SECRET = "s".repeat(32);
@@ -150,6 +152,13 @@ describe("shared note schemas", () => {
     expect(createTagRequestSchema.safeParse({ name: "   " }).success).toBe(false);
     expect(createTagRequestSchema.safeParse({ name: "a".repeat(50) }).success).toBe(true);
     expect(createTagRequestSchema.safeParse({ name: "a".repeat(51) }).success).toBe(false);
+  });
+
+  it("Unit: the tag form input type leaves color optional and the parsed type requires it", () => {
+    expectTypeOf<CreateTagRequestInput>().toEqualTypeOf<{ name: string; color?: string | undefined }>();
+    expectTypeOf<CreateTagRequest>().toEqualTypeOf<{ name: string; color: string }>();
+    const input: CreateTagRequestInput = { name: "a" };
+    expect(createTagRequestSchema.parse(input).color).toBe("#6b7280");
   });
 
   it("[design] tag color must be #RRGGBB and defaults to gray", () => {

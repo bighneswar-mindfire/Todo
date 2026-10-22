@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TagRef } from "@todo/shared";
 import { ApiError } from "@/api/errors";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { GENERIC_ERROR } from "@/lib/form-errors";
 import { textColorFor } from "@/lib/tag-color";
-import { useToggleNoteTag } from "@/queries/note";
+import { useCreateNoteTag, useToggleNoteTag } from "@/queries/note";
 import { useTags } from "@/queries/notes";
+import { NewTagForm } from "./NewTagForm";
 
 const TAG_GONE = "That tag no longer exists";
+const NOT_ATTACHED = "Tag created, but it could not be added to this note. Press it to try again";
 
 /** Toggle buttons for the tags of a saved note. Attaching never touches the note's unsaved edits. */
 export function NoteTagPicker({ noteId, attached }: { noteId: string | undefined; attached: TagRef[] }) {
@@ -22,6 +24,9 @@ export function NoteTagPicker({ noteId, attached }: { noteId: string | undefined
             {tag.name}
           </Button>
         ))}
+        <Button variant="outline" size="sm" disabled>
+          New tag
+        </Button>
       </div>
     );
   }
@@ -39,7 +44,24 @@ function SavedNoteTags({
 }) {
   const toggle = useToggleNoteTag(noteId);
   const [error, setError] = useState<string | null>(null);
+  const create = useCreateNoteTag(noteId, () => setError(NOT_ATTACHED));
   const pendingTagId = toggle.isPending ? toggle.variables.tag.id : undefined;
+  const [creating, setCreating] = useState(false);
+  const newTagButton = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+
+  // Once the form is gone and the button is back, hand focus back to it.
+  useEffect(() => {
+    if (!creating && restoreFocus.current) {
+      restoreFocus.current = false;
+      newTagButton.current?.focus();
+    }
+  }, [creating]);
+
+  function closeForm() {
+    restoreFocus.current = true;
+    setCreating(false);
+  }
 
   function press(tag: TagRef, isAttached: boolean) {
     setError(null);
@@ -89,6 +111,21 @@ function SavedNoteTags({
           </button>
         );
       })}
+      {creating ? (
+        <NewTagForm create={create} onClose={closeForm} />
+      ) : (
+        <Button
+          ref={newTagButton}
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setError(null);
+            setCreating(true);
+          }}
+        >
+          New tag
+        </Button>
+      )}
       {error ? (
         <Alert variant="destructive" role="alert" className="w-full">
           {error}

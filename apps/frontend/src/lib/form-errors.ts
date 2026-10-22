@@ -5,6 +5,8 @@ export const GENERIC_ERROR = "Something went wrong, please try again";
 export const INVALID_CREDENTIALS_MESSAGE = "Invalid email or password";
 export const INVALID_OTP_MESSAGE = "Invalid or expired code";
 export const EMAIL_TAKEN_MESSAGE = "Email already registered";
+export const TAG_NAME_TAKEN_MESSAGE = "You already have a tag with that name";
+export const TAG_NAME_INVALID_MESSAGE = "Enter a tag name of 1 to 50 characters";
 
 interface IssueLike {
   code: string;
@@ -22,6 +24,7 @@ export function friendlyZodMessage(issue: IssueLike): string {
     if (issue.code === "too_small" && Number(issue.minimum) > 1) return "Password must be at least 8 characters";
     return "Password is required";
   }
+  if (field === "name") return TAG_NAME_INVALID_MESSAGE;
   return "Invalid value";
 }
 
@@ -38,6 +41,10 @@ export function applyApiError<T extends FieldValues>(
 
   if (error.code === "EMAIL_TAKEN") {
     setError("email" as Path<T>, { type: "server", message: EMAIL_TAKEN_MESSAGE });
+    return null;
+  }
+  if (error.code === "TAG_NAME_TAKEN") {
+    setError("name" as Path<T>, { type: "server", message: TAG_NAME_TAKEN_MESSAGE });
     return null;
   }
   if (error.code === "INVALID_CREDENTIALS") return INVALID_CREDENTIALS_MESSAGE;
