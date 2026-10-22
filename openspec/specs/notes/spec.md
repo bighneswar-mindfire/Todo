@@ -118,7 +118,7 @@ The system SHALL return one active note owned by the caller, including full `con
 - **THEN** the response is 400 with error code `VALIDATION_ERROR`
 
 ### Requirement: Update note
-The system SHALL let the owner partially update an active note via `PATCH /notes/{id}` with `title` and/or `content`. At least one field SHALL be supplied. Validation rules match creation. When `content` changes, `contentText` SHALL be re-derived. `updatedAt` SHALL advance. When the resulting title or content differs from the note's current title or content, a new version SHALL be recorded in the same transaction (see the `versions` capability); when neither differs, the response SHALL be 200 and no version SHALL be recorded.
+The system SHALL let the owner partially update an active note via `PATCH /notes/{id}` with `title` and/or `content`. At least one of them SHALL be supplied. The request MAY also carry `autosave` (boolean, default false); on its own it is not enough, and a non-boolean value SHALL be rejected. Validation rules match creation. When `content` changes, `contentText` SHALL be re-derived. `updatedAt` SHALL advance. When the resulting title or content differs from the note's current title or content, the change SHALL be recorded in the same transaction (see the `versions` capability); when neither differs, the response SHALL be 200 and nothing SHALL be recorded.
 
 #### Scenario: Update title only
 - **WHEN** the owner patches only `title`
@@ -155,6 +155,26 @@ The system SHALL let the owner partially update an active note via `PATCH /notes
 #### Scenario: First edit of a pre-existing note starts its history
 - **WHEN** the owner edits a note that has no versions because it predates versioning
 - **THEN** the edit is recorded as version 1
+
+#### Scenario: Autosave patch is accepted
+- **WHEN** the owner patches `content` with `autosave` true
+- **THEN** the response is 200 with the new content, and the response body has no `autosave` field
+
+#### Scenario: Autosave flag alone rejected
+- **WHEN** the owner patches with only `{ "autosave": true }`
+- **THEN** the response is 400 with error code `VALIDATION_ERROR`
+
+#### Scenario: Non-boolean autosave rejected
+- **WHEN** the owner patches `title` with `autosave` set to the string "yes"
+- **THEN** the response is 400 with error code `VALIDATION_ERROR` and the note is unchanged
+
+#### Scenario: Autosave cannot touch another user's note
+- **WHEN** a user sends an autosave patch for a note owned by someone else
+- **THEN** the response is 404 with error code `NOT_FOUND` and the note and its versions are unchanged
+
+#### Scenario: Unchanged autosave records nothing
+- **WHEN** the owner sends an autosave patch whose `title` and `content` equal the current ones
+- **THEN** the response is 200 and the note still has the same number of versions
 
 ### Requirement: Soft delete note
 The system SHALL soft delete a note via `DELETE /notes/{id}` by setting `deletedAt` to the current time. It SHALL NOT physically remove the row or its content.
