@@ -13,6 +13,8 @@ import type {
   SharedNote,
   TagWithCount,
   TipTapDoc,
+  TrashListResponse,
+  TrashNoteSummary,
 } from "@todo/shared";
 import { useSession } from "@/stores/session";
 import { json, route } from "./fake-api";
@@ -61,6 +63,23 @@ export function makeNote(overrides: Partial<NoteSummary> = {}): NoteSummary {
     updatedAt: "2026-10-03T10:00:00.000Z",
     ...overrides,
   };
+}
+
+/** A trashed note as listed by `GET /notes/trash`: a summary without tags, plus `deletedAt`. */
+export function makeTrashNote(overrides: Partial<TrashNoteSummary> = {}): TrashNoteSummary {
+  return {
+    id: uuid(),
+    title: "A deleted note",
+    excerpt: "Some text",
+    createdAt: "2026-10-02T10:00:00.000Z",
+    updatedAt: "2026-10-03T10:00:00.000Z",
+    deletedAt: "2026-10-04T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+export function trashPage(items: TrashNoteSummary[], meta: { page?: number; limit?: number; total?: number } = {}): TrashListResponse {
+  return { items, page: meta.page ?? 1, limit: meta.limit ?? 20, total: meta.total ?? items.length };
 }
 
 export function paragraph(text: string): NonNullable<TipTapDoc["content"]>[number] {

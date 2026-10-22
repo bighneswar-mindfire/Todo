@@ -11,14 +11,14 @@
 
 ## 1. API functions, keys and fixture (no UI)
 
-- [ ] 1.1 Unit test then code: add `makeTrashNote(overrides)` to `src/test/fixtures.ts` and parse it with `trashNoteSummarySchema` in `fixtures.test.ts`; verify with `pnpm --filter @todo/frontend test fixtures`
+- [x] 1.1 Unit test then code: add `makeTrashNote(overrides)` to `src/test/fixtures.ts` and parse it with `trashNoteSummarySchema` in `fixtures.test.ts`; verify with `pnpm --filter @todo/frontend test fixtures`
 
 `src/api/notes.test.ts` - Requirement: Trash API functions
-- [ ] 1.2 Test "listTrash builds the query"
-- [ ] 1.3 Test "restoreNote posts to the note"
-- [ ] 1.4 Unit test: both functions reject when the response fails its schema
-- [ ] 1.5 Implement `listTrash` and `restoreNote` in `src/api/notes.ts` and add `trashKeys` to `src/queries/notes.ts`; verify with `pnpm --filter @todo/frontend test api/notes`
-- [ ] 1.6 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 1.2 Test "listTrash builds the query"
+- [x] 1.3 Test "restoreNote posts to the note"
+- [x] 1.4 Unit test: both functions reject when the response fails its schema
+- [x] 1.5 Implement `listTrash` and `restoreNote` in `src/api/notes.ts` and add `trashKeys` to `src/queries/notes.ts`; verify with `pnpm --filter @todo/frontend test api/notes`
+- [x] 1.6 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 2. Trash link on the notes list
 

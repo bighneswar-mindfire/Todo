@@ -5,6 +5,7 @@ import {
   noteSchema,
   tagListResponseSchema,
   tagSchema,
+  trashListResponseSchema,
   updateNoteRequestSchema,
   type CreateNoteRequest,
   type CreateTagRequest,
@@ -12,6 +13,7 @@ import {
   type NoteListResponse,
   type Tag,
   type TagListResponse,
+  type TrashListResponse,
   type UpdateNoteRequest,
 } from "@todo/shared";
 import { request } from "./client";
@@ -26,6 +28,20 @@ export function listNotes({ page, limit, tagId }: ListNotesParams): Promise<Note
   const query = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (tagId) query.set("tagId", tagId);
   return request(`/notes?${query.toString()}`, { auth: "bearer", schema: noteListResponseSchema });
+}
+
+export interface ListTrashParams {
+  page: number;
+  limit: number;
+}
+
+export function listTrash({ page, limit }: ListTrashParams): Promise<TrashListResponse> {
+  const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return request(`/notes/trash?${query.toString()}`, { auth: "bearer", schema: trashListResponseSchema });
+}
+
+export function restoreNote(id: string): Promise<Note> {
+  return request(`/notes/${id}/restore`, { method: "POST", auth: "bearer", schema: noteSchema });
 }
 
 export function listTags(): Promise<TagListResponse> {
