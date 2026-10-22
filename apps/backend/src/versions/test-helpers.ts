@@ -7,7 +7,7 @@ export function patchNote(
   app: Express,
   user: TestUser,
   noteId: string,
-  body: { title?: string; content?: unknown },
+  body: { title?: string; content?: unknown; autosave?: boolean },
 ) {
   return request(app).patch(`/notes/${noteId}`).set(auth(user)).send(body);
 }

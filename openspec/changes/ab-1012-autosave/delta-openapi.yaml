@@ -1,0 +1,151 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.12.1
+  description: |
+    Delta for the AB-1012 autosave change. The only contract change is an optional `autosave` boolean in the `PATCH /notes/{id}` request body. It is additive and defaults to false, so existing clients are unaffected. Status codes and the response body are unchanged; the error body is always `{ error: { code, message, details? } }`.
+
+    Versioning effect (see the `versions` capability): a patch with `autosave: true` updates the newest version in place when that version was created by an autosave less than 5 minutes ago; otherwise it adds a version. A patch without the flag always adds a version when something changed.
+paths:
+  /notes/{id}:
+    patch:
+      operationId: updateNote
+      summary: Partially update an active note owned by the caller
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNoteRequest"
+      responses:
+        "200":
+          description: The updated note. Unchanged values record nothing and still answer 200.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        "400":
+          description: VALIDATION_ERROR. Malformed id, empty patch (including `autosave` alone), invalid title or content, or a non-boolean `autosave`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: UNAUTHORIZED. Missing or invalid access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: NOT_FOUND. Unknown, soft-deleted or someone else's note.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UpdateNoteRequest:
+      type: object
+      additionalProperties: false
+      description: At least one of `title` or `content` is required; `autosave` alone is rejected.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Trimmed before validation.
+        content:
+          $ref: "#/components/schemas/TipTapDoc"
+        autosave:
+          type: boolean
+          default: false
+          description: Marks the save as an autosave so it may be merged into the newest autosave version. Never stored on the note and never returned.
+    TipTapDoc:
+      type: object
+      required: [type]
+      properties:
+        type:
+          const: doc
+        content:
+          type: array
+          items:
+            type: object
+      additionalProperties: true
+    Note:
+      type: object
+      required: [id, title, content, tags, createdAt, updatedAt, deletedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          $ref: "#/components/schemas/TipTapDoc"
+        tags:
+          type: array
+          items:
+            type: object
+            required: [id, name, color]
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              color:
+                type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: [string, "null"]
+          format: date-time
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+x-frontend-consumes:
+  /notes/{id}:
+    patch:
+      onStatus:
+        "200": Autosave or explicit save. Use the returned note as the new baseline for the values that were sent; edits made since stay dirty and are sent in one follow-up save. Show "Saved" when nothing is left.
+        "400": VALIDATION_ERROR. Show the `title` detail under the title input when present, otherwise the save alert. Keep the edits; send nothing more until the next edit or Retry.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND. Show the not-found state and stop saving.
+        "500": INTERNAL_ERROR. Show the alert and "Couldn't save" with Retry. Keep the edits.
+        "network failure": NETWORK_ERROR. Same as 500.

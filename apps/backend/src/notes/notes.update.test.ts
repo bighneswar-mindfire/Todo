@@ -94,6 +94,65 @@ describe("notes: update note", () => {
     expect(await t.prisma.noteVersion.count({ where: { noteId: note.id } })).toBe(1);
   });
 
+  it("Autosave patch is accepted", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { content: DOC("before") });
+    const res = await request(t.app)
+      .patch(`/notes/${note.id}`)
+      .set(auth(user))
+      .send({ content: DOC("after"), autosave: true });
+    expect(res.status).toBe(200);
+    expect(res.body.content).toEqual(DOC("after"));
+    expect(res.body).not.toHaveProperty("autosave");
+  });
+
+  it("Autosave flag alone rejected", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user);
+    const res = await request(t.app).patch(`/notes/${note.id}`).set(auth(user)).send({ autosave: true });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("Non-boolean autosave rejected", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { title: "stay" });
+    const res = await request(t.app)
+      .patch(`/notes/${note.id}`)
+      .set(auth(user))
+      .send({ title: "changed", autosave: "yes" });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    const row = await t.prisma.note.findUniqueOrThrow({ where: { id: note.id } });
+    expect(row.title).toBe("stay");
+  });
+
+  it("Autosave cannot touch another user's note", async () => {
+    const owner = await registerAndLogin(t.app);
+    const other = await registerAndLogin(t.app);
+    const note = await createNote(t.app, owner, { title: "orig" });
+    const res = await request(t.app)
+      .patch(`/notes/${note.id}`)
+      .set(auth(other))
+      .send({ title: "hacked", autosave: true });
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("NOT_FOUND");
+    const row = await t.prisma.note.findUniqueOrThrow({ where: { id: note.id } });
+    expect(row.title).toBe("orig");
+    expect(await t.prisma.noteVersion.count({ where: { noteId: note.id } })).toBe(1);
+  });
+
+  it("Unchanged autosave records nothing", async () => {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { title: "same", content: DOC("same") });
+    const res = await request(t.app)
+      .patch(`/notes/${note.id}`)
+      .set(auth(user))
+      .send({ title: "same", content: DOC("same"), autosave: true });
+    expect(res.status).toBe(200);
+    expect(await t.prisma.noteVersion.count({ where: { noteId: note.id } })).toBe(1);
+  });
+
   it("First edit of a pre-existing note starts its history", async () => {
     const user = await registerAndLogin(t.app);
     const note = await createNote(t.app, user, { title: "old" });

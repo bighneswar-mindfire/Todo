@@ -211,6 +211,7 @@ describe("NoteEditorPage editing", () => {
     const body = callsTo(`PATCH /notes/${A}`)[0]?.body as Record<string, unknown>;
     expect(body).toHaveProperty("title", "Groceries!");
     expect(body).not.toHaveProperty("content");
+    expect(body).not.toHaveProperty("autosave");
   });
 
   it("Only the content is sent when only the content changed", async () => {
@@ -225,6 +226,7 @@ describe("NoteEditorPage editing", () => {
     const body = callsTo(`PATCH /notes/${A}`)[0]?.body as Record<string, unknown>;
     expect(body).toHaveProperty("content");
     expect(body).not.toHaveProperty("title");
+    expect(body).not.toHaveProperty("autosave");
   });
 
   it("Successful save resets the baseline", async () => {
@@ -248,6 +250,7 @@ describe("NoteEditorPage editing", () => {
 
     expect(saveButton()).toBeDisabled();
     expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
   });
 
   it("Keyboard shortcut saves", async () => {
@@ -259,6 +262,7 @@ describe("NoteEditorPage editing", () => {
 
     expect(event.defaultPrevented).toBe(true);
     await waitFor(() => expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(1));
+    expect(callsTo(`PATCH /notes/${A}`)[0]?.body).not.toHaveProperty("autosave");
   });
 
   it("Save refreshes the list", async () => {
@@ -321,6 +325,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Dirty page asks before leaving", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { router, user } = await openNote();
     await user.type(titleInput(), "!");
 
@@ -334,6 +339,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Stay keeps the edits", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { user } = await openNote();
     await user.type(titleInput(), "!");
     await user.click(screen.getByRole("link", { name: "Back to notes" }));
@@ -346,6 +352,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Discard leaves the page", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { router, user } = await openNote();
     await user.type(titleInput(), "!");
     await user.click(screen.getByRole("link", { name: "Back to notes" }));

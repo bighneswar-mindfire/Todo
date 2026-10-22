@@ -50,7 +50,7 @@ Note 1─* ShareLink            Note 1─* NoteVersion
 | Tag | `userId`, `name`, `color` (`#6b7280`) | unique `(userId, name)`; cascade |
 | NoteTag | `noteId`, `tagId` | PK `(noteId, tagId)`; index `tagId`; cascade both sides |
 | ShareLink | `noteId`, `token`, `expiresAt?`, `revokedAt?`, `viewCount` (0) | `token` unique; index `noteId`; cascade |
-| NoteVersion | `noteId`, `versionNumber`, `title`, `content`, `contentText` | unique `(noteId, versionNumber)`; cascade |
+| NoteVersion | `noteId`, `versionNumber`, `title`, `content`, `contentText`, `coalescible` | unique `(noteId, versionNumber)`; cascade. `coalescible` is true only for versions created by an autosave, which a later autosave may update in place (5 minute window) |
 
 Design decisions:
 
@@ -237,7 +237,7 @@ A job (`node-cron` or an in-process interval started in `server.ts`, version pin
 | API client | `src/api/client.ts` attaches the bearer token, validates responses with shared schemas, normalizes errors into `ApiError { code, status, details }`. On 401 it makes one single-flight call to `/auth/refresh` and retries the request once; a failed refresh clears the session and redirects to login (FR-FE-2). |
 | Forms | `react-hook-form` plus the shared Zod schemas; server `details` map to field errors (`lib/form-errors`) |
 | Editor | TipTap with StarterKit and a toolbar; content is the same JSON the API stores |
-| Autosave (FR-FE-5) | Edits mark the form dirty; a debounced mutation (about 1 s idle) sends `PATCH /notes/{id}` with changed fields only; one save in flight at a time, the latest state queued behind it; status badge Saving / Saved / Error with retry; flush on route leave; the unsaved-changes guard blocks navigation while dirty or failed |
+| Autosave (FR-FE-5) | Edits mark the form dirty; a debounced mutation (about 1 s idle) sends `PATCH /notes/{id}` with changed fields only and `autosave: true`; one save in flight at a time, the latest state queued behind it; status badge Saving / Saved / Error with retry; flush on route leave; the unsaved-changes guard blocks navigation while dirty or failed |
 | New note | `POST /notes` on first meaningful input (or explicit save), then the route switches to `/notes/:id` and autosave takes over |
 | Search UI | Debounced (300 ms) input bound to a URL query parameter; results render `highlight.title` and `highlight.snippet` through a sanitizer that allows only `<mark>`; never `dangerouslySetInnerHTML` with raw strings (FR-FE-9) |
 | Share modal | Create link (optional expiry), copy button, table with status (active/expired/revoked), view count, revoke with confirm |
@@ -286,7 +286,7 @@ Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archiv
 | Auth pages, notes list, note editor (frontend) | Implemented |
 | **Note list sorting** (FR-NOTE-9, `sort`/`order` on `GET /notes`) | **Gap.** The shipped contract only orders by `updatedAt desc`; the assignment places sorting in AB-1005. Needs a delta amendment (additive, backward compatible) before frontend sort UI. |
 | **Auto-purge** (FR-VER-6, section 5.7) | **Gap.** No purge code exists; the AB-1009 spec lists it only implicitly. Needs its own spec scenarios (nothing purged inside 30 days; older notes and versions purged). |
-| **Editor autosave** (FR-FE-5) | **Gap.** The AB-1012 editor ships explicit save with an unsaved-changes guard; no debounced autosave found. |
+| Editor autosave (FR-FE-5) | Implemented by change `ab-1012-autosave` (2026-10-22): 1 s debounce, one save in flight, status with Retry, flush on leave, autosaves coalesced into one version (`NoteVersion.coalescible`). |
 | Search UI, share modal (AB-1013, AB-1014) | Implemented |
 | Version drawer (AB-1015) | Implemented: list with Load more, read-only preview, restore as a new version |
 | E2E (AB-1016) | Not started |
