@@ -50,6 +50,18 @@ describe("notes api", () => {
     expect(callsTo("PATCH /notes/n1")[0]?.body).toEqual({ title: "New" });
   });
 
+  it("updateNote sends the autosave flag only when asked", async () => {
+    signIn();
+    route("PATCH /notes/n1", () => json(200, makeFullNote({ title: "New" })));
+
+    await updateNote("n1", { title: "New", autosave: true });
+    await updateNote("n1", { title: "Newer" });
+
+    const [auto, explicit] = callsTo("PATCH /notes/n1");
+    expect(auto?.body).toEqual({ title: "New", autosave: true });
+    expect(explicit?.body).toEqual({ title: "Newer" });
+  });
+
   it("deleteNote accepts 204", async () => {
     signIn();
     route("DELETE /notes/n1", () => empty(204));
