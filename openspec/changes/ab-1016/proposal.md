@@ -6,7 +6,7 @@ Every feature of the notes app is tested in isolation (Vitest + Supertest on the
 
 - Add a Playwright suite (`apps/e2e`, new workspace package `@todo/e2e`) that drives one signed-in user through the whole journey against a real backend, a real frontend and a dedicated PostgreSQL database: register, log in, create a note, edit with autosave, tag, search with highlight, share and open the public link anonymously, revoke, view history and restore a version, delete and restore from trash, log out.
 - Add two small guard scenarios the spec rules require: an unauthenticated visit to a protected page redirects to login (authorization denied) and a rejected registration form shows a validation error (validation failure).
-- Start the stack from Playwright's `webServer` (backend on a fixed port with an E2E-only `DATABASE_URL`, frontend through Vite so `/api` is proxied as in dev). A global setup applies migrations to the `todo_e2e` database.
+- Start the stack from Playwright's `webServer` (backend on a fixed port with an E2E-only `DATABASE_URL`, frontend through Vite so `/api` is proxied as in dev). A preparation step in the API start command applies migrations to the `todo_e2e` database.
 - Add the root script `pnpm test:e2e`. The existing `pnpm test` stays fast and does not run the browser suite.
 - Add one pinned dev dependency, `@playwright/test`, which FR-E2E-1 requires. Browser binaries are installed with `playwright install chromium` (documented, not committed).
 - Update `docs/SDS.md` section 10 and the `apps/frontend/CLAUDE.md` / `AGENTS.md` pointers once the suite exists.
@@ -25,9 +25,9 @@ None. No existing requirement changes; the suite only observes behaviour already
 
 ## Impact
 
-- New: `apps/e2e/` (config, global setup, helpers, spec files), root `package.json` script, `pnpm-lock.yaml`, `pnpm-workspace.yaml` entry through the existing `apps/*` glob, `.gitignore` entries for Playwright output.
+- New: `apps/e2e/` (config, database preparation script, helpers, spec files), root `package.json` script, `pnpm-lock.yaml`, `pnpm-workspace.yaml` entry through the existing `apps/*` glob, `.gitignore` entries for Playwright output.
 - Dependency: `@playwright/test` (exact version, verified with Context7 at apply time).
-- Environment: needs Docker Postgres running (`docker compose up -d`) and ports 3100 (API) and 5174 (web) free. The dev database is never touched.
+- Environment: needs Docker Postgres running (`docker compose up -d`) and ports 3000 (API, fixed by the frontend proxy) and 5180 (web) free. The dev database is never touched.
 - `eslint.config.js` already covers `apps/**`; E2E files must pass `pnpm lint --max-warnings 0` and `tsc`.
 
 ## Out of Scope

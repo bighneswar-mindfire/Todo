@@ -1,9 +1,9 @@
 ## 1. Scaffold the E2E package
 
 - [x] 1.1 Verify `@playwright/test` APIs with Context7, then add `apps/e2e` (`@todo/e2e`, private, ESM, tsconfig extending the base) with the exact-pinned `@playwright/test`, `playwright.config.ts` skeleton, root script `test:e2e`, `.gitignore` entries (`test-results`, `playwright-report`). Verify: `pnpm install` is clean, `pnpm build` 0 errors, `pnpm exec playwright --version` runs, `pnpm lint --max-warnings 0` passes.
-- [ ] 1.2 Write the failing Vitest config tests in `apps/e2e/src/config.test.ts`, one per scenario: "E2E run uses its own database", "Reruns do not collide", "Failure evidence is configured". Verify: the three tests fail for the right reason (`pnpm --filter @todo/e2e test`).
-- [ ] 1.3 Implement `playwright.config.ts` (two `webServer` entries, `reuseExistingServer: false`, retries 0, traces/screenshots on failure, `outputDir`), `src/env.ts` constants, `uniqueEmail()` helper and `globalSetup` (create `todo_e2e` if absent, `migrate:deploy` against it). Verify: the config tests from 1.2 pass and `pnpm test` still passes.
-- [ ] 1.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test` all green.
+- [x] 1.2 Write the failing Vitest config tests in `apps/e2e/src/config.test.ts`, one per scenario: "E2E run uses its own database", "Reruns do not collide", "Failure evidence is configured". Verify: the three tests fail for the right reason (`pnpm --filter @todo/e2e test`).
+- [x] 1.3 Implement `playwright.config.ts` (two `webServer` entries, `reuseExistingServer: false`, retries 0, traces/screenshots on failure, `outputDir`), `src/env.ts` constants, `uniqueEmail()` helper and `src/prepare-db.ts` run from the API start command (create `todo_e2e` if absent, `migrate:deploy` against it). Verify: the config tests from 1.2 pass and `pnpm test` still passes.
+- [x] 1.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test` all green.
 
 ## 2. Journey tests (shared session)
 
