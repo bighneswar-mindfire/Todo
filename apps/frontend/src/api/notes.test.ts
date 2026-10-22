@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { callsTo, empty, json, route } from "@/test/fake-api";
-import { doc, makeFullNote, notesPage, paragraph, signIn } from "@/test/fixtures";
-import { attachTag, createNote, deleteNote, detachTag, getNote, listNotes, updateNote } from "./notes";
+import { doc, makeFullNote, makeTag, notesPage, paragraph, signIn } from "@/test/fixtures";
+import { attachTag, createNote, createTag, deleteNote, detachTag, getNote, listNotes, updateNote } from "./notes";
 
 describe("notes api", () => {
   it("listNotes builds the query", async () => {
@@ -86,5 +86,34 @@ describe("notes api", () => {
     route("GET /notes/n1", () => json(200, { id: "not-a-uuid" }));
 
     await expect(getNote("n1")).rejects.toBeDefined();
+  });
+
+  it("createTag posts the validated body", async () => {
+    signIn({ accessToken: "access-7" });
+    const tag = makeTag({ name: "Work", color: "#ff0000" });
+    const created = { id: tag.id, name: tag.name, color: tag.color, createdAt: tag.createdAt };
+    route("POST /tags", () => json(201, created));
+
+    await expect(createTag({ name: " Work ", color: "#ff0000" })).resolves.toEqual(created);
+
+    const [call] = callsTo("POST /tags");
+    expect(call?.body).toEqual({ name: "Work", color: "#ff0000" });
+    expect(call?.headers.get("Authorization")).toBe("Bearer access-7");
+  });
+
+  it("createTag rejects invalid input without a request", async () => {
+    signIn();
+    route("POST /tags", () => json(201, makeTag()));
+
+    await expect(createTag({ name: "   ", color: "#6b7280" })).rejects.toBeDefined();
+
+    expect(callsTo("POST /tags")).toHaveLength(0);
+  });
+
+  it("createTag rejects a malformed response", async () => {
+    signIn();
+    route("POST /tags", () => json(201, { id: "not-a-uuid" }));
+
+    await expect(createTag({ name: "Work", color: "#6b7280" })).rejects.toBeDefined();
   });
 });

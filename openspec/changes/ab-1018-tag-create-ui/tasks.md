@@ -11,16 +11,16 @@
 
 ## 1. API function and error mapping (no UI)
 
-- [ ] 1.1 Check `makeTag` in `src/test/fixtures.ts` produces a value valid against `tagSchema` (`createdAt` present); add `createdAt` or a `makeCreatedTag(overrides)` helper if not, and verify with a Unit test that parses it with `tagSchema`
+- [x] 1.1 Check `makeTag` in `src/test/fixtures.ts` produces a value valid against `tagSchema` (`createdAt` present); add `createdAt` or a `makeCreatedTag(overrides)` helper if not, and verify with a Unit test that parses it with `tagSchema`
 
 `src/api/notes.test.ts` - Requirement: Tag creation API function
-- [ ] 1.2 Test "createTag posts the validated body"
-- [ ] 1.3 Test "createTag rejects invalid input without a request"
-- [ ] 1.4 Test "createTag rejects a malformed response"
-- [ ] 1.5 Implement `createTag` in `src/api/notes.ts` (parse with `createTagRequestSchema`, `POST /tags`, bearer, response `tagSchema`); verify with `pnpm --filter @todo/frontend test api/notes`
+- [x] 1.2 Test "createTag posts the validated body"
+- [x] 1.3 Test "createTag rejects invalid input without a request"
+- [x] 1.4 Test "createTag rejects a malformed response"
+- [x] 1.5 Implement `createTag` in `src/api/notes.ts` (parse with `createTagRequestSchema`, `POST /tags`, bearer, response `tagSchema`); verify with `pnpm --filter @todo/frontend test api/notes`
 
 `src/lib/form-errors.test.ts`
-- [ ] 1.6 Unit tests then code: `friendlyZodMessage` returns "Enter a tag name of 1 to 50 characters" for a `name` issue (existing branches unchanged), and `applyApiError` maps `TAG_NAME_TAKEN` to a `name` field error "You already have a tag with that name" and still returns null; with `fields = []` a `VALIDATION_ERROR` with details returns the generic message; verify with `pnpm --filter @todo/frontend test form-errors`
+- [x] 1.6 Unit tests then code: `friendlyZodMessage` returns "Enter a tag name of 1 to 50 characters" for a `name` issue (existing branches unchanged), and `applyApiError` maps `TAG_NAME_TAKEN` to a `name` field error "You already have a tag with that name" and still returns null; with `fields = []` a `VALIDATION_ERROR` with details returns the generic message; verify with `pnpm --filter @todo/frontend test form-errors`
 - [ ] 1.7 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 2. New tag form: open, cancel, accessibility

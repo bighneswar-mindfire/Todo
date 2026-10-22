@@ -5,9 +5,10 @@ import {
   shareLinkListResponseSchema,
   shareLinkSchema,
   sharedNoteSchema,
+  tagWithCountSchema,
 } from "@todo/shared";
 import { describe, expect, it } from "vitest";
-import { makeShareLink, makeSharedNote, makeVersion, makeVersionSummary, shareList, versionsPage } from "./fixtures";
+import { makeShareLink, makeSharedNote, makeTag, makeVersion, makeVersionSummary, shareList, versionsPage } from "./fixtures";
 
 describe("share fixtures", () => {
   it("Unit: makeShareLink is valid and tokens differ", () => {
@@ -34,5 +35,12 @@ describe("version fixtures", () => {
     expect(noteVersionListResponseSchema.safeParse(versionsPage([summary], { total: 45 })).success).toBe(true);
     expect(noteVersionSchema.safeParse(makeVersion({ versionNumber: 2 })).success).toBe(true);
     expect(makeVersionSummary({ versionNumber: 1 }).createdAt).not.toBe(summary.createdAt);
+  });
+});
+
+describe("tag fixtures", () => {
+  it("Unit: makeTag is valid against tagWithCountSchema", () => {
+    expect(tagWithCountSchema.safeParse(makeTag()).success).toBe(true);
+    expect(tagWithCountSchema.safeParse(makeTag({ name: "Home", color: "#ff0000" })).success).toBe(true);
   });
 });
