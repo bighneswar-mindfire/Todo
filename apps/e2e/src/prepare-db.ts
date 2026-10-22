@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { E2E_DATABASE_URL, E2E_DB_NAME, MAINTENANCE_DATABASE_URL } from "./env.ts";
 
+// Local script types for the one `pg` call below; not API types, so they stay out of @todo/shared.
 interface PgClient {
   connect(): Promise<void>;
   query(sql: string, values?: unknown[]): Promise<{ rowCount: number | null }>;

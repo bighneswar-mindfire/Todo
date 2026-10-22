@@ -1,6 +1,7 @@
 /** Constants shared by the Playwright config and the database preparation script. */
 export const E2E_DB_NAME = "todo_e2e";
-export const DB_HOST_URL = "postgresql://todo:todo@localhost:5432";
+/** Defaults to the docker-compose Postgres; set E2E_DB_HOST_URL (no database name) to use another server. */
+export const DB_HOST_URL = process.env["E2E_DB_HOST_URL"] ?? "postgresql://todo:todo@localhost:5432";
 export const E2E_DATABASE_URL = `${DB_HOST_URL}/${E2E_DB_NAME}`;
 export const MAINTENANCE_DATABASE_URL = `${DB_HOST_URL}/postgres`;
 

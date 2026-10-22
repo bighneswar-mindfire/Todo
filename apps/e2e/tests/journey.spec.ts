@@ -1,4 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { WEB_URL } from "../src/env.ts";
 import { E2E_PASSWORD, uniqueEmail } from "../src/identity.ts";
 
 const email = uniqueEmail();
@@ -94,7 +95,7 @@ test.describe("full user journey", () => {
     const row = dialog.getByRole("row").filter({ hasText: "Never expires" });
     await expect(row.getByText("Active")).toBeVisible();
     const link = (await row.locator("span.font-mono").textContent()) ?? "";
-    expect(link).toMatch(/\/shared\/[A-Za-z0-9_-]+$/);
+    expect(link).toMatch(new RegExp(`^${WEB_URL}/shared/[A-Za-z0-9_-]+$`));
     shareUrl = link;
   });
 
@@ -104,7 +105,10 @@ test.describe("full user journey", () => {
     await visitor.goto(shareUrl);
     await expect(visitor.getByRole("heading", { name: noteTitle })).toBeVisible();
     await expect(visitor.getByText(noteBody)).toBeVisible();
-    await expect(visitor.getByRole("button", { name: "Save" })).toHaveCount(0);
+    await expect(visitor.getByRole("textbox")).toHaveCount(0);
+    for (const name of ["Save", "Share", "Delete", "History"]) {
+      await expect(visitor.getByRole("button", { name })).toHaveCount(0);
+    }
   });
 
   test("Revoke the share link", async () => {
@@ -125,6 +129,9 @@ test.describe("full user journey", () => {
     await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
     await page.getByRole("button", { name: "History" }).click();
     const drawer = page.getByRole("dialog", { name: "Version history" });
+    const previews = drawer.getByRole("button", { name: /^Preview version \d+/ });
+    await expect(previews.first()).toBeVisible();
+    const versionsBefore = await previews.count();
     await drawer.getByRole("button", { name: /^Preview version 1\b/ }).click();
     await expect(drawer.getByText(noteBody)).toBeVisible();
     await drawer.getByRole("button", { name: "Restore as new version" }).click();
@@ -133,8 +140,9 @@ test.describe("full user journey", () => {
     await expect(page.getByRole("textbox", { name: "Note content" })).toContainText(noteBody);
     await expect(page.getByRole("textbox", { name: "Note content" })).not.toContainText("Second draft body");
     await page.getByRole("button", { name: "History" }).click();
-    await expect(page.getByRole("dialog", { name: "Version history" }).getByRole("button", { name: /^Preview version 4\b/ })).toBeVisible();
-    await page.getByRole("dialog", { name: "Version history" }).getByRole("button", { name: "Close" }).click();
+    const reopened = page.getByRole("dialog", { name: "Version history" });
+    await expect(reopened.getByRole("button", { name: /^Preview version \d+/ })).toHaveCount(versionsBefore + 1);
+    await reopened.getByRole("button", { name: "Close" }).click();
   });
 
   test("Delete and restore from trash", async () => {
