@@ -22,9 +22,9 @@ Test names equal the scenario titles in `specs/`. Every new scenario has exactly
 
 ## 4. Frontend data layer (`apps/frontend`)
 
-- [ ] 4.1 Write failing tests: `api/notes` `updateNote` sends `autosave: true` only when asked and still parses the body with `updateNoteRequestSchema`; `useSaveNote` passes the flag through; `test/fake-api.ts` records the flag. Verify red, then add `autosave?` to `updateNote`, `SaveNoteInput` and `useSaveNote`, and the fake. Verify green.
-- [ ] 4.2 Write failing unit tests for `lib/autosave.ts` with fake timers (fires once 1000 ms after the last edit, restarts on edit, does not arm for a clean or blank-title state, cancel, queued save runs once after the in-flight one, no re-arm after a failure), then implement it. Verify green.
-- [ ] 4.3 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test` green. Commit.
+- [x] 4.1 Write failing tests: `api/notes` `updateNote` sends `autosave: true` only when asked and still parses the body with `updateNoteRequestSchema`; `useSaveNote` passes the flag through; `test/fake-api.ts` records the flag. Verify red, then add `autosave?` to `updateNote`, `SaveNoteInput` and `useSaveNote`, and the fake. Verify green.
+- [x] 4.2 Write failing unit tests for `lib/autosave.ts` with fake timers (fires once 1000 ms after the last edit, restarts on edit, does not arm for a clean or blank-title state, cancel, queued save runs once after the in-flight one, no re-arm after a failure), then implement it. Verify green.
+- [x] 4.3 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test` green. Commit.
 
 ## 5. Editor autosave (`apps/frontend`)
 
