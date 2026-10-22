@@ -21,8 +21,8 @@
 
 ## 4. Guard scenarios
 
-- [ ] 4.1 Add "Unauthenticated visit is redirected to login" and "Registration with an invalid password is rejected" in independent describe blocks with fresh contexts (not serial with the journey). Verify: they pass alone (`-g`) and in the full run.
-- [ ] 4.2 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`, `pnpm test:e2e`.
+- [x] 4.1 Add "Unauthenticated visit is redirected to login" and "Registration with an invalid password is rejected" in independent describe blocks with fresh contexts (not serial with the journey). Verify: they pass alone (`-g`) and in the full run.
+- [x] 4.2 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`, `pnpm test:e2e`.
 
 ## 5. Docs and verification
 
