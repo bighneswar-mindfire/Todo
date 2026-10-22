@@ -56,29 +56,29 @@ Requirement: Tag form accessibility
 ## 4. Validation
 
 `src/components/editor/NewTagForm.test.tsx` - Requirement: Tag name validation
-- [ ] 4.1 Test "Blank name rejected in the browser"
-- [ ] 4.2 Test "Overlong name rejected in the browser"
-- [ ] 4.3 Test "Name of 50 characters is accepted"
-- [ ] 4.4 Test "Duplicate name shows a field error"
-- [ ] 4.5 Test "Same name in another case is sent"
-- [ ] 4.6 Implement the inline name error (`aria-invalid`, `aria-describedby`, `role="alert"`), the 409 mapping through `applyApiError(error, setError, [])` and keeping the typed values; verify the 4.1 to 4.5 tests pass
-- [ ] 4.7 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 4.1 Test "Blank name rejected in the browser"
+- [x] 4.2 Test "Overlong name rejected in the browser"
+- [x] 4.3 Test "Name of 50 characters is accepted"
+- [x] 4.4 Test "Duplicate name shows a field error"
+- [x] 4.5 Test "Same name in another case is sent"
+- [x] 4.6 Implement the inline name error (`aria-invalid`, `aria-describedby`, `role="alert"`), the 409 mapping through `applyApiError(error, setError, [])` and keeping the typed values; verify the 4.1 to 4.5 tests pass
+- [x] 4.7 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 5. Failures, session handling and docs
 
 `src/components/editor/NewTagForm.test.tsx` - Requirement: Tag creation failures
-- [ ] 5.1 Test "Server failure keeps the form"
-- [ ] 5.2 Test "Unexpected validation error from the server"
-- [ ] 5.3 Test "Network failure keeps the form"
-- [ ] 5.4 Test "Attach failure after create"
-- [ ] 5.5 Test "Attach on a deleted note"
+- [x] 5.1 Test "Server failure keeps the form"
+- [x] 5.2 Test "Unexpected validation error from the server"
+- [x] 5.3 Test "Network failure keeps the form"
+- [x] 5.4 Test "Attach failure after create"
+- [x] 5.5 Test "Attach on a deleted note"
 
 Requirement: Session handling for tag creation (patterned on the AB-1010 session tests)
-- [ ] 5.6 Test "Expired session on create"
-- [ ] 5.7 Test "Expired token is refreshed once"
-- [ ] 5.8 Implement the form-level alert for `POST /tags` failures and the partial-failure alert for `AttachAfterCreateError` (close the form, tags refreshed, tag unpressed, retry by pressing it); verify the 5.1 to 5.7 tests pass
-- [ ] 5.9 Document the feature in `apps/frontend/CLAUDE.md` (an "AB-1018 tag creation" section: files, the create-then-attach mutation, the `AttachAfterCreateError` rule, the `TAG_NAME_TAKEN` mapping) and verify the text matches the code by reading the files it names
-- [ ] 5.10 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 5.6 Test "Expired session on create"
+- [x] 5.7 Test "Expired token is refreshed once"
+- [x] 5.8 Implement the form-level alert for `POST /tags` failures and the partial-failure alert for `AttachAfterCreateError` (close the form, tags refreshed, tag unpressed, retry by pressing it); verify the 5.1 to 5.7 tests pass
+- [x] 5.9 Document the feature in `apps/frontend/CLAUDE.md` (an "AB-1018 tag creation" section: files, the create-then-attach mutation, the `AttachAfterCreateError` rule, the `TAG_NAME_TAKEN` mapping) and verify the text matches the code by reading the files it names
+- [x] 5.10 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 6. Integration check
 

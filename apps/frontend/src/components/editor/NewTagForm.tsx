@@ -32,7 +32,7 @@ export function NewTagForm({ create, onClose }: NewTagFormProps) {
     setFocus("name");
   }, [setFocus]);
 
-  const onSubmit = form.handleSubmit((values) => {
+  function submit(values: CreateTagRequest) {
     // `isPending` covers a create started by an earlier, since closed, form; the ref covers this tick.
     if (create.isPending || submitting.current) return;
     submitting.current = true;
@@ -48,13 +48,13 @@ export function NewTagForm({ create, onClose }: NewTagFormProps) {
         submitting.current = false;
       },
     });
-  });
+  }
 
   return (
     <form
       aria-label="New tag"
       noValidate
-      onSubmit={onSubmit}
+      onSubmit={(event) => void form.handleSubmit(submit)(event)}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
