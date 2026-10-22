@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApiError } from "@/api/errors";
+import { isNotFound } from "@/api/errors";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -23,10 +23,6 @@ export function VersionHistoryDrawer({ open, noteId, dirty, onClose, onRestored 
       <VersionHistoryBody noteId={noteId} dirty={dirty} onClose={onClose} onRestored={onRestored} />
     </Dialog>
   );
-}
-
-function isNotFound(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 404;
 }
 
 // Mounted only while the drawer is open, so the list is requested on every opening and dropped on close.

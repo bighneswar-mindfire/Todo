@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { skipToken, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getVersion, listVersions, restoreVersion } from "@/api/versions";
 import { noteKeys, useInvalidateLists } from "./note";
 
@@ -34,8 +34,7 @@ export function useVersionList(noteId: string) {
 export function useVersion(noteId: string, versionNumber: number | null) {
   return useQuery({
     queryKey: versionsKeys.detail(noteId, versionNumber ?? 0),
-    queryFn: () => getVersion(noteId, versionNumber as number),
-    enabled: versionNumber !== null,
+    queryFn: versionNumber === null ? skipToken : () => getVersion(noteId, versionNumber),
     staleTime: Infinity,
   });
 }

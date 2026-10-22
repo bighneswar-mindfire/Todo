@@ -1,12 +1,14 @@
 import { useRef, useState } from "react";
-import { ApiError } from "@/api/errors";
+import { isNotFound } from "@/api/errors";
 import { FormAlert } from "@/components/FormAlert";
 import { ReadOnlyNote } from "@/components/ReadOnlyNote";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { GENERIC_ERROR } from "@/lib/form-errors";
 import { formatDateTime } from "@/lib/share-link";
 import { useRestoreVersion, useVersion } from "@/queries/versions";
+
+// A fixed message: server text is never shown to the user.
+const RESTORE_FAILED = "Couldn't restore this version, please try again";
 
 interface VersionPreviewProps {
   noteId: string;
@@ -16,10 +18,6 @@ interface VersionPreviewProps {
   dirty: boolean;
   onBack: () => void;
   onRestored: (version: number) => void;
-}
-
-function isNotFound(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 404;
 }
 
 export function VersionPreview({ noteId, versionNumber, isCurrent, dirty, onBack, onRestored }: VersionPreviewProps) {
@@ -40,7 +38,7 @@ export function VersionPreview({ noteId, versionNumber, isCurrent, dirty, onBack
       onRestored(versionNumber);
     } catch (failure) {
       if (isNotFound(failure)) setMissing(true);
-      else setError(failure instanceof ApiError ? failure.message : GENERIC_ERROR);
+      else setError(RESTORE_FAILED);
     } finally {
       restoringRef.current = false;
     }

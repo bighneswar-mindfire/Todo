@@ -465,6 +465,18 @@ describe("VersionHistoryDrawer restore", () => {
     expect(screen.getByText("Unsaved changes in the editor will be replaced.")).toBeInTheDocument();
   });
 
+  it("Unit: a failed restore shows fixed text, never the server message", async () => {
+    route(RESTORE(2), () => errorResponse(500, "INTERNAL_ERROR", "db password leaked"));
+    const { user } = await previewVersion(2);
+    await user.click(screen.getByRole("button", { name: "Restore as new version" }));
+
+    await user.click(screen.getByRole("button", { name: "Confirm restore" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Couldn't restore this version, please try again");
+    expect(alert).not.toHaveTextContent("db password leaked");
+  });
+
   it("No warning for a clean editor", async () => {
     const { user } = await previewVersion(2, {}, false);
 
