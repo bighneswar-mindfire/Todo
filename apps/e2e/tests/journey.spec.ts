@@ -5,6 +5,8 @@ const email = uniqueEmail();
 const runId = Date.now().toString(36);
 const noteTitle = `Journey note ${runId}`;
 const noteBody = "Pelican migration notes";
+const autosavedText = " autosaved addition";
+const tagName = `tag-${runId}`;
 
 let context: BrowserContext;
 let page: Page;
@@ -51,5 +53,34 @@ test.describe("full user journey", () => {
     await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
     await page.goto("/");
     await expect(page.getByRole("heading", { name: noteTitle })).toBeVisible();
+  });
+
+  test("Edit with autosave", async () => {
+    await page.getByRole("link", { name: noteTitle }).click();
+    const content = page.getByRole("textbox", { name: "Note content" });
+    await expect(content).toContainText(noteBody);
+    await content.press("Control+End");
+    await content.pressSequentially(autosavedText);
+    await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("textbox", { name: "Note content" })).toContainText(autosavedText.trim());
+  });
+
+  test("Tag a note", async () => {
+    const tags = page.getByRole("group", { name: "Tags" });
+    await tags.getByRole("button", { name: "New tag" }).click();
+    await page.getByLabel("Tag name").fill(tagName);
+    await page.getByRole("button", { name: "Create tag" }).click();
+    await expect(tags.getByRole("button", { name: tagName, pressed: true })).toBeVisible();
+    await page.goto("/");
+    await expect(page.getByRole("listitem").filter({ hasText: noteTitle }).getByText(tagName)).toBeVisible();
+  });
+
+  test("Search with highlight", async () => {
+    await page.getByRole("searchbox", { name: "Search notes" }).fill("pelican");
+    await page.getByRole("button", { name: "Search" }).click();
+    await expect(page).toHaveURL(/\/search\?/);
+    const result = page.getByRole("listitem").filter({ hasText: noteTitle });
+    await expect(result.locator("mark").first()).toHaveText(/pelican/i);
   });
 });

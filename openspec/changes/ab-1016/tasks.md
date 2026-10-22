@@ -8,9 +8,9 @@
 ## 2. Journey tests (shared session)
 
 - [x] 2.1 Write the "Register a new account", "Log in with the registered account" and "Create a note" tests (serial describe, shared context), run `pnpm test:e2e` to see them fail, then fix helpers/locators until they pass against the real stack. Verify: `pnpm test:e2e -g "Register a new account|Log in with the registered account|Create a note"` is green on a clean database and on a second run.
-- [ ] 2.2 Add "Edit with autosave" and "Tag a note" (wait on the saved status, confirm with a reload; create the tag via **New tag**, see the chip in the list). Verify: both pass in a full run.
-- [ ] 2.3 Add "Search with highlight". Verify: the result contains a `mark` element with the searched word; no fixed sleeps in the file (`grep waitForTimeout apps/e2e` is empty).
-- [ ] 2.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`, `pnpm test:e2e` all green.
+- [x] 2.2 Add "Edit with autosave" and "Tag a note" (wait on the saved status, confirm with a reload; create the tag via **New tag**, see the chip in the list). Verify: both pass in a full run.
+- [x] 2.3 Add "Search with highlight". Verify: the result contains a `mark` element with the searched word; no fixed sleeps in the file (`grep waitForTimeout apps/e2e` is empty).
+- [x] 2.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`, `pnpm test:e2e` all green.
 
 ## 3. Journey tests (sharing, history, trash)
 
