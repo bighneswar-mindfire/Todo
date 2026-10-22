@@ -10,15 +10,15 @@ Test names equal the scenario titles in `specs/`. Every new scenario has exactly
 
 ## 2. Database (`apps/backend/prisma`)
 
-- [ ] 2.1 Add `coalescible Boolean @default(false)` to `NoteVersion` in `schema.prisma` and generate one migration. Verify `pnpm --filter @todo/backend migrate:deploy` and `generate` succeed on a fresh database and existing rows read false.
-- [ ] 2.2 Run the `db-change-checker` agent on the migration (data loss, locks, indexes) and record its verdict in the commit message. Verify no blocking finding is left open.
+- [x] 2.1 Add `coalescible Boolean @default(false)` to `NoteVersion` in `schema.prisma` and generate one migration. Verify `pnpm --filter @todo/backend migrate:deploy` and `generate` succeed on a fresh database and existing rows read false.
+- [x] 2.2 Run the `db-change-checker` agent on the migration (data loss, locks, indexes) and record its verdict in the commit message. Verify no blocking finding is left open.
 
 ## 3. Backend coalescing (`apps/backend`)
 
-- [ ] 3.1 Write failing tests in `notes.update.test.ts`, titled as the `notes` scenarios: Autosave patch is accepted, Autosave flag alone rejected, Non-boolean autosave rejected, Autosave cannot touch another user's note, Unchanged autosave records nothing. Verify they fail for the right reason.
-- [ ] 3.2 Write failing tests in `versions.record.test.ts`, titled as the `versions` scenarios: Autosaves in a burst share one version, Autosave after the window adds a version (backdate the version's `createdAt` in the test), Autosave never overwrites an explicit version, Explicit save after an autosave adds a version, Concurrent autosaves share one version, Restore after an autosave adds a version, Autosave on a deleted note is rejected. Verify they fail.
-- [ ] 3.3 Implement D2 in `versions/record-save.ts` (`autosave` input, `AUTOSAVE_COALESCE_WINDOW_MS`, update-in-place or insert with `coalescible`), pass `autosave` from `notes.service.ts` `update` and the PATCH route. Restore and create stay unchanged. Verify 3.1, 3.2 and the existing notes and versions suites pass, including Concurrent saves get consecutive numbers.
-- [ ] 3.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%) green. Commit.
+- [x] 3.1 Write failing tests in `notes.update.test.ts`, titled as the `notes` scenarios: Autosave patch is accepted, Autosave flag alone rejected, Non-boolean autosave rejected, Autosave cannot touch another user's note, Unchanged autosave records nothing. Verify they fail for the right reason.
+- [x] 3.2 Write failing tests in `versions.record.test.ts`, titled as the `versions` scenarios: Autosaves in a burst share one version, Autosave after the window adds a version (backdate the version's `createdAt` in the test), Autosave never overwrites an explicit version, Explicit save after an autosave adds a version, Concurrent autosaves share one version, Restore after an autosave adds a version, Autosave on a deleted note is rejected. Verify they fail.
+- [x] 3.3 Implement D2 in `versions/record-save.ts` (`autosave` input, `AUTOSAVE_COALESCE_WINDOW_MS`, update-in-place or insert with `coalescible`), pass `autosave` from `notes.service.ts` `update` and the PATCH route. Restore and create stay unchanged. Verify 3.1, 3.2 and the existing notes and versions suites pass, including Concurrent saves get consecutive numbers.
+- [x] 3.4 Checkpoint: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%) green. Commit.
 
 ## 4. Frontend data layer (`apps/frontend`)
 

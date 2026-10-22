@@ -139,11 +139,12 @@ export function createNotesService({ prisma }: NotesServiceDeps): NotesService {
       return toNote(row);
     },
 
-    async update(userId, id, { title, content }) {
+    async update(userId, id, { title, content, autosave }) {
       await prisma.$transaction((tx) =>
         saveNoteState(tx, {
           userId,
           noteId: id,
+          autosave: autosave === true,
           next: {
             ...(title !== undefined ? { title } : {}),
             ...(content !== undefined ? { content } : {}),
