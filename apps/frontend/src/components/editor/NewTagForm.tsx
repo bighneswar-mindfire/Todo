@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createTagRequestSchema, DEFAULT_TAG_COLOR, type CreateTagRequest } from "@todo/shared";
+import {
+  createTagRequestSchema,
+  DEFAULT_TAG_COLOR,
+  type CreateTagRequest,
+  type CreateTagRequestInput,
+} from "@todo/shared";
 import { FormAlert } from "@/components/FormAlert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applyApiError, friendlyZodMessage } from "@/lib/form-errors";
 import { AttachAfterCreateError, type useCreateNoteTag } from "@/queries/note";
-
-/** What the fields hold: the schema's input side, where `color` is optional because the schema defaults it. */
-type NewTagFormInput = typeof createTagRequestSchema._zod.input;
 
 interface NewTagFormProps {
   create: ReturnType<typeof useCreateNoteTag>;
@@ -21,7 +23,7 @@ interface NewTagFormProps {
 export function NewTagForm({ create, onClose }: NewTagFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const submitting = useRef(false);
-  const form = useForm<NewTagFormInput, unknown, CreateTagRequest>({
+  const form = useForm<CreateTagRequestInput, unknown, CreateTagRequest>({
     resolver: zodResolver(createTagRequestSchema, { error: friendlyZodMessage }),
     defaultValues: { name: "", color: DEFAULT_TAG_COLOR },
   });

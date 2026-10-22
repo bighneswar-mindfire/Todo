@@ -5,7 +5,7 @@
 - Shell: prefix PATH for Node 22 / pnpm 10 on every command (`$env:Path = "$env:APPDATA\fnm\node-versions\v22.23.3\installation;" + $env:Path`).
 - Tests first: write the failing test, then the code. One test per spec scenario, titled exactly as the scenario (29 scenarios, all in `frontend-tags`). Extra unit tests are labelled "Unit".
 - Tests stub `fetch` with `src/test/fake-api.ts`. Paths in the fake exclude the `/api` prefix.
-- No new dependency, no `packages/shared` change, no backend change (there are no shared or API tasks; everything is web). Verify react-hook-form, `@hookform/resolvers` (`zodResolver` with the Zod 4 `error` option) and TanStack Query v5 (`useMutation`, `invalidateQueries`) with Context7 before use.
+- No new dependency and no backend change. The only `packages/shared` change is the exported `CreateTagRequestInput` type (task 7.1); everything else is web. Verify react-hook-form, `@hookform/resolvers` (`zodResolver` with the Zod 4 `error` option) and TanStack Query v5 (`useMutation`, `invalidateQueries`) with Context7 before use.
 - One task, one commit: `feat(frontend): description AB#1018`. Each group ends with a checkpoint.
 - Branch: `feature/frontend/AB-1018-tag-create-ui` from `main`.
 
@@ -85,6 +85,12 @@ Requirement: Session handling for tag creation (patterned on the AB-1010 session
 - [x] 6.1 Verify scenario coverage: every one of the 29 scenario names in `specs/frontend-tags/spec.md` appears as exactly one test title (`pnpm test` in `packages/repo-checks` for the scenario-to-test mapping, if it covers frontend titles; otherwise a grep) and `pnpm exec openspec validate ab-1018-tag-create-ui --strict` passes
 - [x] 6.2 Definition of done: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%), no new `any`, `@ts-ignore` or `eslint-disable`
 - [x] 6.3 Manual smoke with the `run` skill: start Postgres, backend and frontend; register a user through the Vite proxy with curl, create a note, create a tag through the editor's request sequence with curl (`POST /tags`, `PUT /notes/{id}/tags/{tagId}`), check a duplicate name returns 409 and the list shows the tag with `noteCount` 1. No browser is available here; the browser journey belongs to AB-1016. Record what was checked. Result (2026-10-22): the user ran the smoke test by hand against the running app and reported that everything worked as expected; Claude could not run it because `curl` was denied by the permission layer. Individual responses were not recorded
+
+## 7. Shared form input type (review follow-up)
+
+- [x] 7.1 Unit test then code: export `CreateTagRequestInput = z.input<typeof createTagRequestSchema>` from `packages/shared/src/tags.ts` (re-exported by `src/index.ts`), with a type-level Unit test in `shared.test.ts` (`expectTypeOf` shows `color` is optional) and no schema or behaviour change; verify with `pnpm --filter @todo/shared test` and `pnpm --filter @todo/shared build`
+- [x] 7.2 Replace `NewTagFormInput = typeof createTagRequestSchema._zod.input` in `NewTagForm.tsx` with the shared `CreateTagRequestInput`; verify `grep _zod apps/frontend/src` finds nothing and `pnpm --filter @todo/frontend test NewTagForm` stays green
+- [x] 7.3 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## Workflow follow-up
 
