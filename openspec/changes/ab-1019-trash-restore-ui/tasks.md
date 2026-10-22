@@ -56,37 +56,37 @@ Requirement: Trash loading, empty and error states
 ## 4. Restore
 
 `src/pages/TrashPage.test.tsx` - Requirement: Restore a note
-- [ ] 4.1 Test "Restoring a note removes it from trash"
-- [ ] 4.2 Test "Restoring refreshes notes, tags and search"
-- [ ] 4.3 Test "Restored note is back in the notes list"
-- [ ] 4.4 Test "Restore double press sends one request"
-- [ ] 4.5 Test "Other rows stay usable during a restore"
-- [ ] 4.6 Test "Restoring the last row of a page"
-- [ ] 4.7 Implement `useRestoreNote` in `src/queries/trash.ts` (per-row mutation; `onSuccess` filters the id from cached trash lists, invalidates `trashKeys.all` and, through `useInvalidateLists`, lists, tags and search; sets the note detail cache) and wire **Restore** in `TrashListItem` (ref plus `isPending` guard); verify 4.1 to 4.6 pass
-- [ ] 4.8 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 4.1 Test "Restoring a note removes it from trash"
+- [x] 4.2 Test "Restoring refreshes notes, tags and search"
+- [x] 4.3 Test "Restored note is back in the notes list"
+- [x] 4.4 Test "Restore double press sends one request"
+- [x] 4.5 Test "Other rows stay usable during a restore"
+- [x] 4.6 Test "Restoring the last row of a page"
+- [x] 4.7 Implement `useRestoreNote` in `src/queries/trash.ts` (per-row mutation; `onSuccess` filters the id from cached trash lists, invalidates `trashKeys.all` and, through `useInvalidateLists`, lists, tags and search; sets the note detail cache) and wire **Restore** in `TrashListItem` (ref plus `isPending` guard); verify 4.1 to 4.6 pass
+- [x] 4.8 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 5. Failures, session handling, delete refresh, accessibility
 
 Requirement: Restore failures
-- [ ] 5.1 Test "Restore of a note that is no longer restorable"
-- [ ] 5.2 Test "Server failure keeps the row"
-- [ ] 5.3 Test "Network failure on restore"
-- [ ] 5.4 Test "Malformed restore response"
-- [ ] 5.5 Test "Retry after a failed restore"
-- [ ] 5.6 Unit test: the restore alert clears on page change
-- [ ] 5.7 Implement `onError` (refetch trash through `invalidateQueries(trashKeys.all)`) and the page-level `restoreError` alert with the 404 versus generic messages, cleared on success and page change; verify 5.1 to 5.6 pass
+- [x] 5.1 Test "Restore of a note that is no longer restorable"
+- [x] 5.2 Test "Server failure keeps the row"
+- [x] 5.3 Test "Network failure on restore"
+- [x] 5.4 Test "Malformed restore response"
+- [x] 5.5 Test "Retry after a failed restore"
+- [x] 5.6 Unit test: the restore alert clears on page change
+- [x] 5.7 Implement `onError` (refetch trash through `invalidateQueries(trashKeys.all)`) and the page-level `restoreError` alert with the 404 versus generic messages, cleared on success and page change; verify 5.1 to 5.6 pass
 
 Requirement: Session handling on the trash page (patterned on the AB-1010 session tests)
-- [ ] 5.8 Test "Expired session on the trash list"
-- [ ] 5.9 Test "Expired token is refreshed once for restore"; verify both pass with no new production code (if one fails, fix in `api/client.ts` only after checking AB-1010 specs)
+- [x] 5.8 Test "Expired session on the trash list"
+- [x] 5.9 Test "Expired token is refreshed once for restore"; verify both pass with no new production code (if one fails, fix in `api/client.ts` only after checking AB-1010 specs)
 
 Requirement: Deleting a note refreshes the trash (`src/pages/NoteEditorPage.test.tsx` or `TrashPage.test.tsx`)
-- [ ] 5.10 Test "Deleted note appears in trash"
-- [ ] 5.11 Add `trashKeys.all` invalidation to `useDeleteNote.onSuccess`; verify 5.10 passes and the existing delete tests stay green
+- [x] 5.10 Test "Deleted note appears in trash"
+- [x] 5.11 Add `trashKeys.all` invalidation to `useDeleteNote.onSuccess`; verify 5.10 passes and the existing delete tests stay green
 
 Requirement: Trash page accessibility
-- [ ] 5.12 Test "Restore buttons name their note"; verify (the `aria-label`, list semantics and `role="status"`/`role="alert"` come from 3.14 to 5.7; fix any gap here)
-- [ ] 5.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 5.12 Test "Restore buttons name their note"; verify (the `aria-label`, list semantics and `role="status"`/`role="alert"` come from 3.14 to 5.7; fix any gap here)
+- [x] 5.13 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 6. Docs and integration check
 

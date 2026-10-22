@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import type { CreateTagRequest, Note, Tag, TagRef, UpdateNoteRequest } from "@todo/shared";
 import { ApiError } from "@/api/errors";
 import { attachTag, createNote, createTag, deleteNote, detachTag, getNote, updateNote } from "@/api/notes";
-import { notesKeys } from "./notes";
+import { notesKeys, trashKeys } from "./notes";
 import { searchKeys } from "./search";
 
 export const noteKeys = {
@@ -60,6 +60,7 @@ export function useDeleteNote() {
       }),
     onSuccess: (_data, id) => {
       queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
+      void queryClient.invalidateQueries({ queryKey: trashKeys.all });
       invalidateLists();
     },
   });
