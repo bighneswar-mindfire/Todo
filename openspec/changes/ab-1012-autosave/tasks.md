@@ -39,7 +39,7 @@ Test names equal the scenario titles in `specs/`. Every new scenario has exactly
 
 - [x] 6.1 Update `docs/FRS.md` FR-VER-1 (burst of autosaves within 5 minutes is one version) and `docs/SDS.md` (NoteVersion table `coalescible`, autosave row, section 10 gap marked implemented with the date). Verify the wording matches the specs and the open-API delta.
 - [x] 6.2 Run `pnpm exec openspec validate ab-1012-autosave --strict`. Verify it passes and that a search of the change shows every new scenario title appears as exactly one test title.
-- [ ] 6.3 Manual smoke on a dev database: edit a note for a minute, check the History drawer shows one autosave version plus any explicit ones, restore a version, leave with a failing API (stop the server), reload with unsaved text. Record the outcome in the PR.
+- [x] 6.3 Manual smoke on a dev database: edit a note for a minute, check the History drawer shows one autosave version plus any explicit ones, restore a version, leave with a failing API (stop the server), reload with unsaved text. Record the outcome in the PR. **Outcome (2026-10-22):** API level through the Vite proxy with a script, not a browser. 5 autosaves in a burst left one version (2:hello, 1:start); an explicit title save added its own version (3) and 2 later autosaves shared one new version (4), so the explicit version was not overwritten; restoring v1 returned 200 and appended v5; an empty patch with the flag gave 400. NOT run: leaving with the API stopped and reloading with unsaved text (browser behaviour, covered by the jsdom tests only).
 
 ## Workflow follow-up
 

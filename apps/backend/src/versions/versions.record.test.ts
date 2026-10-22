@@ -76,6 +76,30 @@ describe("versions: recorded and numbered", () => {
     expect(versions[2]!.content).toEqual(DOC("two"));
   });
 
+  // The window is exclusive: a version aged exactly 5 minutes (by the time the request runs, a few ms more) is too old.
+  async function autosaveAgainstAgedVersion(ageMs: number) {
+    const user = await registerAndLogin(t.app);
+    const note = await createNote(t.app, user, { content: DOC("start") });
+    await patchNote(t.app, user, note.id, { content: DOC("one"), autosave: true }).expect(200);
+    await t.prisma.noteVersion.updateMany({
+      where: { noteId: note.id, versionNumber: 2 },
+      data: { createdAt: new Date(Date.now() - ageMs) },
+    });
+    await patchNote(t.app, user, note.id, { content: DOC("two"), autosave: true }).expect(200);
+    return versionsOf(note.id);
+  }
+
+  it("Unit: autosave at the edge of the window adds a version", async () => {
+    const versions = await autosaveAgainstAgedVersion(5 * 60 * 1000);
+    expect(versions.map((v) => v.versionNumber)).toEqual([1, 2, 3]);
+  });
+
+  it("Unit: autosave just inside the window shares the version", async () => {
+    const versions = await autosaveAgainstAgedVersion(5 * 60 * 1000 - 10_000);
+    expect(versions.map((v) => v.versionNumber)).toEqual([1, 2]);
+    expect(versions[1]!.content).toEqual(DOC("two"));
+  });
+
   it("Autosave never overwrites an explicit version", async () => {
     const user = await registerAndLogin(t.app);
     const note = await createNote(t.app, user, { title: "start", content: DOC("start") });

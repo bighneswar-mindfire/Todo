@@ -123,4 +123,36 @@ describe("autosave controller", () => {
 
     await expect(autosave.flush()).resolves.toBe(false);
   });
+
+  it("Unit: an explicit save queued behind a save in flight is sent as an explicit save", async () => {
+    const first = deferred<boolean>();
+    const save = vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(true);
+    const autosave = createAutosave({ save });
+    autosave.schedule();
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
+    expect(save).toHaveBeenNthCalledWith(1, true);
+
+    void autosave.saveNow();
+    first.resolve(true);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save).toHaveBeenNthCalledWith(2, false);
+  });
+
+  it("Unit: a timer follow-up queued behind a save in flight stays an autosave", async () => {
+    const first = deferred<boolean>();
+    const save = vi.fn().mockReturnValueOnce(first.promise).mockResolvedValue(true);
+    const autosave = createAutosave({ save });
+    autosave.schedule();
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
+    autosave.schedule();
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
+
+    first.resolve(true);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save).toHaveBeenNthCalledWith(2, true);
+  });
 });

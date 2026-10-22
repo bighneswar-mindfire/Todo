@@ -29,6 +29,8 @@ export function createAutosave({ save }: AutosaveOptions): AutosaveController {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let inFlight: Promise<boolean> | undefined;
   let queued = false;
+  // The queued follow-up was asked for by an explicit save, so it must add a version.
+  let queuedExplicit = false;
 
   function clearTimer() {
     if (timer !== undefined) clearTimeout(timer);
@@ -43,12 +45,11 @@ export function createAutosave({ save }: AutosaveOptions): AutosaveController {
     inFlight = current;
     void current.then((ok) => {
       if (inFlight === current) inFlight = undefined;
-      if (ok && queued) {
-        queued = false;
-        void run(true);
-      } else {
-        queued = false;
-      }
+      const followUp = ok && queued;
+      const explicit = queuedExplicit;
+      queued = false;
+      queuedExplicit = false;
+      if (followUp) void run(!explicit);
     });
     return current;
   }
@@ -67,11 +68,13 @@ export function createAutosave({ save }: AutosaveOptions): AutosaveController {
     cancel() {
       clearTimer();
       queued = false;
+      queuedExplicit = false;
     },
     saveNow() {
       clearTimer();
       if (inFlight) {
         queued = true;
+        queuedExplicit = true;
         return inFlight;
       }
       return run(false);
@@ -79,6 +82,7 @@ export function createAutosave({ save }: AutosaveOptions): AutosaveController {
     async flush() {
       clearTimer();
       queued = false;
+      queuedExplicit = false;
       if (inFlight) await inFlight;
       return run(true);
     },

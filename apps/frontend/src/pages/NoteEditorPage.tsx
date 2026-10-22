@@ -10,12 +10,17 @@ function isNotFound(error: unknown): boolean {
   return error instanceof ApiError && (error.status === 404 || (error.status === 400 && error.code === "VALIDATION_ERROR"));
 }
 
+/** Route state set by the editor after it creates a note; anything else is not trusted. */
+function isJustCreated(state: unknown): boolean {
+  return typeof state === "object" && state !== null && "created" in state && state.created === true;
+}
+
 export function NoteEditorPage() {
   const { id } = useParams();
   const location = useLocation();
   const note = useNote(id);
   // An editor that just created its note keeps its place across the move to `/notes/<id>`.
-  const justCreated = (location.state as { created?: boolean } | null)?.created === true;
+  const justCreated = isJustCreated(location.state);
   const [goneId, setGoneId] = useState<string | undefined>(undefined);
   const gone = id !== undefined && goneId === id;
   // A restore replaces the note under the editor, which fixes its baseline at mount: remount it.
