@@ -113,6 +113,8 @@ model NoteVersion {
   title         String
   content       Json
   contentText   String   @default("")
+  /// True only for versions an autosave created; a later autosave may update them in place.
+  coalescible   Boolean  @default(false)
   createdAt     DateTime @default(now())
 
   note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
