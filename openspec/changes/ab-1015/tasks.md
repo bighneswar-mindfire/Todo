@@ -93,27 +93,27 @@ Requirement: History drawer accessibility
 ## 4. Editor integration
 
 `src/pages/NoteEditorPage.test.tsx` - Requirement: History entry in the editor
-- [ ] 4.1 Test "History button on an existing note"
-- [ ] 4.2 Test "No History button on a new note"
-- [ ] 4.3 Test "History button appears after the first save"
-- [ ] 4.4 Test "Opening history leaves the editor untouched"
+- [x] 4.1 Test "History button on an existing note"
+- [x] 4.2 Test "No History button on a new note"
+- [x] 4.3 Test "History button appears after the first save"
+- [x] 4.4 Test "Opening history leaves the editor untouched"
 
 Requirement: Opening and closing the history drawer
-- [ ] 4.5 Test "History button opens the drawer"
-- [ ] 4.6 Test "Close button returns focus to History"
+- [x] 4.5 Test "History button opens the drawer"
+- [x] 4.6 Test "Close button returns focus to History"
 
 Requirement: Preview a version
-- [ ] 4.7 Test "Previewing leaves the editor untouched"
+- [x] 4.7 Test "Previewing leaves the editor untouched"
 
 Requirement: Restore a version
-- [ ] 4.8 Test "Restore replaces the editor content"
-- [ ] 4.9 Test "Restore closes the drawer and announces it"
-- [ ] 4.10 Test "Unsaved edits are replaced after restore"
-- [ ] 4.11 Test "Restore refreshes the notes list"
-- [ ] 4.12 Test "Restore failure keeps everything"
-- [ ] 4.13 Test "Restore of a missing version"
-- [ ] 4.14 Implement in `NoteEditor.tsx` the **History** button (existing notes only, between **Share** and **Delete**) and `VersionHistoryDrawer` with `dirty` and `onRestored`; implement in `NoteEditorPage.tsx` the `revision` key, the restored-version state and the polite status line; verify with `pnpm --filter @todo/frontend test NoteEditorPage VersionHistoryDrawer` and that every existing editor test is still green
-- [ ] 4.15 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%)
+- [x] 4.8 Test "Restore replaces the editor content"
+- [x] 4.9 Test "Restore closes the drawer and announces it"
+- [x] 4.10 Test "Unsaved edits are replaced after restore"
+- [x] 4.11 Test "Restore refreshes the notes list"
+- [x] 4.12 Test "Restore failure keeps everything"
+- [x] 4.13 Test "Restore of a missing version"
+- [x] 4.14 Implement in `NoteEditor.tsx` the **History** button (existing notes only, between **Share** and **Delete**) and `VersionHistoryDrawer` with `dirty` and `onRestored`; implement in `NoteEditorPage.tsx` the `revision` key, the restored-version state and the polite status line; verify with `pnpm --filter @todo/frontend test NoteEditorPage VersionHistoryDrawer` and that every existing editor test is still green
+- [x] 4.15 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%)
 
 ## 5. Integration and spec check
 

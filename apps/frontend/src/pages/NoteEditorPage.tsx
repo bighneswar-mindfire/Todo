@@ -15,6 +15,9 @@ export function NoteEditorPage() {
   const note = useNote(id);
   const [goneId, setGoneId] = useState<string | undefined>(undefined);
   const gone = id !== undefined && goneId === id;
+  // A restore replaces the note under the editor, which fixes its baseline at mount: remount it.
+  const [revision, setRevision] = useState(0);
+  const [restored, setRestored] = useState<{ id: string; version: number } | null>(null);
 
   let body;
   if (id === undefined) {
@@ -44,7 +47,17 @@ export function NoteEditorPage() {
       </p>
     );
   } else {
-    body = <NoteEditor key={id} note={note.data} onGone={() => setGoneId(id)} />;
+    body = (
+      <NoteEditor
+        key={`${id}:${revision}`}
+        note={note.data}
+        onGone={() => setGoneId(id)}
+        onRestored={(version) => {
+          setRevision((current) => current + 1);
+          setRestored({ id, version });
+        }}
+      />
+    );
   }
 
   return (
@@ -55,6 +68,11 @@ export function NoteEditorPage() {
         </Link>
         <h1 className="text-2xl font-semibold">{id === undefined ? "New note" : "Edit note"}</h1>
       </header>
+      {restored !== null && restored.id === id ? (
+        <p role="status" className="text-sm text-muted-foreground">
+          {`Version ${restored.version} restored as a new version`}
+        </p>
+      ) : null}
       {body}
     </main>
   );

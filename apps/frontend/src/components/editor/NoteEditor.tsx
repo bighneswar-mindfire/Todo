@@ -10,6 +10,7 @@ import { GENERIC_ERROR } from "@/lib/form-errors";
 import { diffNote, isDirty, contentKey, type NoteSnapshot } from "@/lib/note-diff";
 import { useSaveNote } from "@/queries/note";
 import { ShareDialog } from "@/components/share/ShareDialog";
+import { VersionHistoryDrawer } from "@/components/versions/VersionHistoryDrawer";
 import { DeleteNoteDialog } from "./DeleteNoteDialog";
 import { DiscardChangesDialog } from "./DiscardChangesDialog";
 import { NoteTagPicker } from "./NoteTagPicker";
@@ -28,9 +29,11 @@ interface NoteEditorProps {
   note: Note | undefined;
   /** The note vanished on the server (404 on save). */
   onGone: () => void;
+  /** A version was restored: the page reloads this editor from the refreshed note. */
+  onRestored?: (version: number) => void;
 }
 
-export function NoteEditor({ note, onGone }: NoteEditorProps) {
+export function NoteEditor({ note, onGone, onRestored }: NoteEditorProps) {
   const navigate = useNavigate();
   const saveNote = useSaveNote();
 
@@ -44,6 +47,7 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const contentJson = useMemo(() => (content ? contentKey(content) : null), [content]);
   const dirty = baseline !== null && contentJson !== null && isDirty(baseline, { title, contentJson });
@@ -187,6 +191,9 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
             <Button variant="outline" onClick={() => setShareOpen(true)}>
               Share
             </Button>
+            <Button variant="outline" onClick={() => setHistoryOpen(true)}>
+              History
+            </Button>
             <Button variant="outline" onClick={() => setDeleteOpen(true)}>
               Delete
             </Button>
@@ -196,6 +203,19 @@ export function NoteEditor({ note, onGone }: NoteEditorProps) {
 
       {note ? (
         <ShareDialog open={shareOpen} noteId={note.id} dirty={dirty} onClose={() => setShareOpen(false)} />
+      ) : null}
+
+      {note ? (
+        <VersionHistoryDrawer
+          open={historyOpen}
+          noteId={note.id}
+          dirty={dirty}
+          onClose={() => setHistoryOpen(false)}
+          onRestored={(version) => {
+            setHistoryOpen(false);
+            onRestored?.(version);
+          }}
+        />
       ) : null}
 
       {note ? (

@@ -10,12 +10,16 @@ import {
   makeNote,
   makeShareLink,
   makeTag,
+  makeVersion,
+  makeVersionSummary,
   notesPage,
   paragraph,
   routeEmptyNotes,
   shareList,
   signIn,
+  versionsPage,
 } from "@/test/fixtures";
+import { notesKeys } from "@/queries/notes";
 import { renderApp } from "@/test/render";
 
 const A = "00000000-0000-4000-8000-0000000000a1";
@@ -876,5 +880,195 @@ describe("NoteEditorPage unsaved-edits notice", () => {
     expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
     expect(screen.queryByRole("dialog", { name: "Discard unsaved changes?" })).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`/notes/${A}`);
+  });
+});
+
+const VERSIONS = `GET /notes/${A}/versions`;
+const RESTORE = `POST /notes/${A}/versions/2/restore`;
+const historyButton = () => screen.getByRole("button", { name: "History" });
+const RESTORED_TITLE = "Draft list";
+
+type Clicker = { click: (el: Element) => Promise<void> };
+
+/** A note with versions 3 (current), 2 and 1; version 2 holds "Draft list" / "Eggs". */
+function routeVersions() {
+  route(VERSIONS, () => json(200, versionsPage([3, 2, 1].map((n) => makeVersionSummary({ versionNumber: n })))));
+  route(`GET /notes/${A}/versions/2`, () =>
+    json(200, makeVersion({ noteId: A, versionNumber: 2, title: RESTORED_TITLE, content: doc(paragraph("Eggs")) })),
+  );
+}
+
+const restoredNote = () => noteA({ title: RESTORED_TITLE, content: doc(paragraph("Eggs")) });
+
+async function restoreVersionTwo(user: Clicker) {
+  await user.click(historyButton());
+  await user.click(await screen.findByRole("button", { name: "Preview version 2" }));
+  await user.click(await screen.findByRole("button", { name: "Restore as new version" }));
+  await user.click(screen.getByRole("button", { name: "Confirm restore" }));
+}
+
+describe("NoteEditorPage history entry", () => {
+  it("History button on an existing note", async () => {
+    await openNote();
+
+    expect(historyButton()).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Share" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+  });
+
+  it("No History button on a new note", async () => {
+    await openNewNote();
+
+    expect(screen.queryByRole("button", { name: "History" })).not.toBeInTheDocument();
+  });
+
+  it("History button appears after the first save", async () => {
+    route("POST /notes", () => json(201, noteA()));
+    const { router, user } = await openNewNote();
+
+    await user.type(titleInput(), "Groceries");
+    await user.click(saveButton());
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/notes/${A}`));
+
+    expect(await screen.findByRole("button", { name: "History" })).toBeInTheDocument();
+  });
+
+  it("Opening history leaves the editor untouched", async () => {
+    routeVersions();
+    const { user } = await openNote();
+
+    await user.click(historyButton());
+    await screen.findByRole("dialog", { name: "Version history" });
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(titleInput()).toHaveValue("Groceries");
+    expect(contentBox()).toHaveTextContent("Milk");
+    expect(saveButton()).toBeDisabled();
+    expect(callsTo(`GET /notes/${A}`)).toHaveLength(1);
+    expect(allCalls().filter((c) => c.method !== "GET")).toHaveLength(0);
+  });
+});
+
+describe("NoteEditorPage history drawer", () => {
+  it("History button opens the drawer", async () => {
+    routeVersions();
+    const { user } = await openNote();
+
+    await user.click(historyButton());
+
+    expect(await screen.findByRole("dialog", { name: "Version history" })).toBeInTheDocument();
+    await waitFor(() => expect(callsTo(VERSIONS)).toHaveLength(1));
+    expect(callsTo(VERSIONS)[0]?.query.toString()).toBe("page=1&limit=20");
+  });
+
+  it("Close button returns focus to History", async () => {
+    routeVersions();
+    const { user } = await openNote();
+    const opener = historyButton();
+    await user.click(opener);
+    await screen.findByRole("button", { name: "Preview version 2" });
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(opener).toHaveFocus();
+  });
+
+  it("Previewing leaves the editor untouched", async () => {
+    routeVersions();
+    const { user } = await openNote();
+    await user.type(titleInput(), " extra");
+
+    await user.click(historyButton());
+    await user.click(await screen.findByRole("button", { name: "Preview version 2" }));
+    await screen.findByRole("document", { name: "Version content" });
+
+    expect(titleInput()).toHaveValue("Groceries extra");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
+  });
+});
+
+describe("NoteEditorPage restore", () => {
+  it("Restore replaces the editor content", async () => {
+    routeVersions();
+    route(RESTORE, () => json(200, restoredNote()));
+    const { user } = await openNote();
+
+    await restoreVersionTwo(user);
+
+    await waitFor(() => expect(titleInput()).toHaveValue(RESTORED_TITLE));
+    expect(contentBox()).toHaveTextContent("Eggs");
+    expect(saveButton()).toBeDisabled();
+    expect(callsTo(RESTORE)).toHaveLength(1);
+  });
+
+  it("Restore closes the drawer and announces it", async () => {
+    routeVersions();
+    route(RESTORE, () => json(200, restoredNote()));
+    const { user } = await openNote();
+
+    await restoreVersionTwo(user);
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    const announcement = screen.getByText("Version 2 restored as a new version");
+    expect(announcement.closest('[role="status"]')).not.toBeNull();
+  });
+
+  it("Unsaved edits are replaced after restore", async () => {
+    routeVersions();
+    routeEmptyNotes();
+    route(RESTORE, () => json(200, restoredNote()));
+    const { router, user } = await openNote();
+    await user.type(titleInput(), " extra");
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+
+    await restoreVersionTwo(user);
+    await waitFor(() => expect(titleInput()).toHaveValue(RESTORED_TITLE));
+
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: "Back to notes" }));
+    await waitFor(() => expect(router.state.location.pathname).toBe("/"));
+    expect(screen.queryByRole("dialog", { name: "Discard unsaved changes?" })).not.toBeInTheDocument();
+  });
+
+  it("Restore refreshes the notes list", async () => {
+    routeVersions();
+    route(RESTORE, () => json(200, restoredNote()));
+    const { client, user } = await openNote();
+    const listKey = [...notesKeys.lists, { page: 1 }];
+    client.setQueryData(listKey, notesPage([makeNote({ id: A, title: "Groceries" })]));
+
+    await restoreVersionTwo(user);
+
+    await waitFor(() => expect(client.getQueryState(listKey)?.isInvalidated).toBe(true));
+  });
+
+  it("Restore failure keeps everything", async () => {
+    routeVersions();
+    route(RESTORE, () => errorResponse(500, "INTERNAL_ERROR"));
+    const { user } = await openNote();
+
+    await restoreVersionTwo(user);
+
+    const dialog = await screen.findByRole("dialog", { name: "Version history" });
+    expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Confirm restore" })).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(titleInput()).toHaveValue("Groceries");
+    expect(contentBox()).toHaveTextContent("Milk");
+    expect(screen.queryByText(/restored as a new version/)).not.toBeInTheDocument();
+  });
+
+  it("Restore of a missing version", async () => {
+    routeVersions();
+    route(RESTORE, () => errorResponse(404, "NOT_FOUND"));
+    const { user } = await openNote();
+
+    await restoreVersionTwo(user);
+
+    expect(await screen.findByText("This version is no longer available")).toBeInTheDocument();
+    expect(titleInput()).toHaveValue("Groceries");
+    expect(contentBox()).toHaveTextContent("Milk");
   });
 });
