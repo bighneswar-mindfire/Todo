@@ -30,8 +30,8 @@ None.
 ## Impact
 
 - `packages/shared`: `updateNoteRequestSchema` gains `autosave`.
-- `apps/backend`: `versions/record-save.ts` (coalescing), `notes/notes.service.ts` and `notes.routes.ts` (pass the flag), `prisma/schema.prisma` plus one migration. Restore keeps calling the same save function without the flag.
-- `apps/frontend`: `components/editor/NoteEditor.tsx` (scheduler, status, flush), `api/notes.ts` and `queries/note.ts` (flag), `pages/NoteEditorPage.tsx` (no remount on create), editor tests and `test/fake-api.ts`.
+- `apps/backend`: `versions/record-save.ts` (coalescing), `notes/notes.service.ts` (pass the flag), `prisma/schema.prisma` plus one migration. Restore keeps calling the same save function without the flag.
+- `apps/frontend`: `components/editor/NoteEditor.tsx` (scheduler, status, flush), `pages/NoteEditorPage.tsx` (no remount on create), editor tests.
 - `delta-openapi.yaml`: `PATCH /notes/{id}` request body.
 - Docs: `docs/FRS.md` FR-VER-1, `docs/SDS.md` (NoteVersion table, autosave row, status table), `apps/frontend/CLAUDE.md` AB-1012 note ("there is no autosave").
 - Rollback: revert the commits. The migration only adds a defaulted column; leaving it in place is harmless. Existing versions all read `coalescible = false`, so nothing already stored is ever rewritten.

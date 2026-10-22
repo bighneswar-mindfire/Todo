@@ -211,6 +211,7 @@ describe("NoteEditorPage editing", () => {
     const body = callsTo(`PATCH /notes/${A}`)[0]?.body as Record<string, unknown>;
     expect(body).toHaveProperty("title", "Groceries!");
     expect(body).not.toHaveProperty("content");
+    expect(body).not.toHaveProperty("autosave");
   });
 
   it("Only the content is sent when only the content changed", async () => {
@@ -225,6 +226,7 @@ describe("NoteEditorPage editing", () => {
     const body = callsTo(`PATCH /notes/${A}`)[0]?.body as Record<string, unknown>;
     expect(body).toHaveProperty("content");
     expect(body).not.toHaveProperty("title");
+    expect(body).not.toHaveProperty("autosave");
   });
 
   it("Successful save resets the baseline", async () => {
@@ -260,6 +262,7 @@ describe("NoteEditorPage editing", () => {
 
     expect(event.defaultPrevented).toBe(true);
     await waitFor(() => expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(1));
+    expect(callsTo(`PATCH /notes/${A}`)[0]?.body).not.toHaveProperty("autosave");
   });
 
   it("Save refreshes the list", async () => {
