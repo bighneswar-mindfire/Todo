@@ -23,35 +23,35 @@
 ## 2. Trash link on the notes list
 
 `src/pages/NotesPage.test.tsx` - Requirement: Trash entry in the notes-list header
-- [ ] 2.1 Test "Trash link is shown"
-- [ ] 2.2 Test "Trash link is shown for an empty account"
-- [ ] 2.3 Test "Trash link opens the trash page" (needs the route from 3.x; write it now, it passes after 3.15)
-- [ ] 2.4 Add the **Trash** link to the `NotesPage` header outside the list-state branches; verify 2.1 and 2.2 pass and the existing `NotesPage` tests stay green unchanged
-- [ ] 2.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test` (2.3 may be the only failure until 3.15; record it, do not skip it)
+- [x] 2.1 Test "Trash link is shown"
+- [x] 2.2 Test "Trash link is shown for an empty account"
+- [x] 2.3 Test "Trash link opens the trash page" (needs the route from 3.x; write it now, it passes after 3.15)
+- [x] 2.4 Add the **Trash** link to the `NotesPage` header outside the list-state branches; verify 2.1 and 2.2 pass and the existing `NotesPage` tests stay green unchanged
+- [x] 2.5 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test` (2.3 may be the only failure until 3.15; record it, do not skip it)
 
 ## 3. Trash page: list, pagination, states
 
 `src/pages/TrashPage.test.tsx` (through `renderApp("/trash")`) - Requirement: Trash page
-- [ ] 3.1 Test "Trashed notes are listed with their details"
-- [ ] 3.2 Test "Empty excerpt is omitted in trash"
-- [ ] 3.3 Test "Trash order is kept"
-- [ ] 3.4 Test "Trash titles are not links"
-- [ ] 3.5 Test "Trash first request uses defaults"
-- [ ] 3.6 Test "Back to notes"
-- [ ] 3.7 Test "Unauthenticated trash visit is redirected"
+- [x] 3.1 Test "Trashed notes are listed with their details"
+- [x] 3.2 Test "Empty excerpt is omitted in trash"
+- [x] 3.3 Test "Trash order is kept"
+- [x] 3.4 Test "Trash titles are not links"
+- [x] 3.5 Test "Trash first request uses defaults"
+- [x] 3.6 Test "Back to notes"
+- [x] 3.7 Test "Unauthenticated trash visit is redirected"
 
 Requirement: Trash pagination in the URL
-- [ ] 3.8 Test "Trash pagination hidden for a single page"
-- [ ] 3.9 Test "Trash Next loads the next page"
-- [ ] 3.10 Test "Trash page restored from the URL"
-- [ ] 3.11 Test "Invalid trash page treated as 1"
-- [ ] 3.12 Test "Trash page beyond the end falls back to the last page"
+- [x] 3.8 Test "Trash pagination hidden for a single page"
+- [x] 3.9 Test "Trash Next loads the next page"
+- [x] 3.10 Test "Trash page restored from the URL"
+- [x] 3.11 Test "Invalid trash page treated as 1"
+- [x] 3.12 Test "Trash page beyond the end falls back to the last page"
 
 Requirement: Trash loading, empty and error states
-- [ ] 3.13 Tests "Trash loading indicator", "Empty trash", "Trash request failure with retry", "Trash network failure shown", "Malformed trash response becomes an error state" (five separate tests)
-- [ ] 3.14 Implement `useTrashList` in `src/queries/trash.ts` and `src/components/trash/TrashListItem.tsx` (title, excerpt, `<time>`, **Restore** button that does nothing yet; export the date formatter from `NoteMeta.tsx`)
-- [ ] 3.15 Implement `src/pages/TrashPage.tsx` (header, Back to notes, states, `PaginationBar`, past-the-end fallback using `parseListParams` and `buildListParams({ page })`) and the `/trash` route inside `RequireAuth`; verify 3.1 to 3.13 and 2.3 pass
-- [ ] 3.16 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.13 Tests "Trash loading indicator", "Empty trash", "Trash request failure with retry", "Trash network failure shown", "Malformed trash response becomes an error state" (five separate tests)
+- [x] 3.14 Implement `useTrashList` in `src/queries/trash.ts` and `src/components/trash/TrashListItem.tsx` (title, excerpt, `<time>`, **Restore** button that does nothing yet; export the date formatter from `NoteMeta.tsx`)
+- [x] 3.15 Implement `src/pages/TrashPage.tsx` (header, Back to notes, states, `PaginationBar`, past-the-end fallback using `parseListParams` and `buildListParams({ page })`) and the `/trash` route inside `RequireAuth`; verify 3.1 to 3.13 and 2.3 pass
+- [x] 3.16 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Restore
 

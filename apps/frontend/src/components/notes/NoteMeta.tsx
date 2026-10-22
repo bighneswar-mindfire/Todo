@@ -3,6 +3,10 @@ import { TagChip } from "./TagChip";
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 
+export function formatDateTime(iso: string): string {
+  return dateFormat.format(new Date(iso));
+}
+
 /** The tag chips and last-updated time shared by list and search items. */
 export function NoteMeta({ note }: { note: Pick<NoteSummary, "tags" | "updatedAt"> }) {
   return (
@@ -11,7 +15,7 @@ export function NoteMeta({ note }: { note: Pick<NoteSummary, "tags" | "updatedAt
         <TagChip key={tag.id} name={tag.name} color={tag.color} />
       ))}
       <time className="ml-auto text-xs text-muted-foreground" dateTime={note.updatedAt}>
-        {dateFormat.format(new Date(note.updatedAt))}
+        {formatDateTime(note.updatedAt)}
       </time>
     </div>
   );

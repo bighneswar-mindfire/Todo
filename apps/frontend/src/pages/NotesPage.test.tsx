@@ -3,7 +3,7 @@ import type { NoteListResponse, NoteSummary, TagWithCount } from "@todo/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useSession } from "@/stores/session";
 import { callsTo, empty, errorResponse, json, route } from "@/test/fake-api";
-import { deferred, makeNote, makeTag, notesPage, routeEmptyNotes, signIn } from "@/test/fixtures";
+import { deferred, makeNote, makeTag, notesPage, routeEmptyNotes, signIn, trashPage } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 
 const WORK_ID = "00000000-0000-4000-8000-0000000000a1";
@@ -527,3 +527,33 @@ describe("notes list header search", () => {
   });
 });
 
+
+describe("notes list page trash link", () => {
+  it("Trash link is shown", async () => {
+    signIn();
+    serveNotes(() => notesPage([titled("Alpha")]));
+    renderApp("/");
+
+    expect(await screen.findByRole("link", { name: "Trash" })).toHaveAttribute("href", "/trash");
+  });
+
+  it("Trash link is shown for an empty account", async () => {
+    signIn();
+    renderApp("/");
+
+    expect(await screen.findByText("No notes yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Trash" })).toBeInTheDocument();
+  });
+
+  it("Trash link opens the trash page", async () => {
+    signIn();
+    route("GET /notes/trash", () => json(200, trashPage([])));
+    const { user, router } = renderApp("/");
+
+    await user.click(await screen.findByRole("link", { name: "Trash" }));
+
+    expect(await screen.findByRole("heading", { name: "Trash" })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/trash");
+    expect(callsTo("GET /notes/trash")).toHaveLength(1);
+  });
+});
