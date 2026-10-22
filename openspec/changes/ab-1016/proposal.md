@@ -26,7 +26,7 @@ None. No existing requirement changes; the suite only observes behaviour already
 ## Impact
 
 - New: `apps/e2e/` (config, database preparation script, helpers, spec files), root `package.json` script, `pnpm-lock.yaml`, `pnpm-workspace.yaml` entry through the existing `apps/*` glob, `.gitignore` entries for Playwright output.
-- Dependency: `@playwright/test` (exact version, verified with Context7 at apply time).
+- Dependencies (all dev, exact-pinned): `@playwright/test` (verified with Context7 at apply time), plus `vitest` and `@types/node` at the versions the workspace already uses, for the config tests and `tsc`.
 - Environment: needs Docker Postgres running (`docker compose up -d`) and ports 3000 (API, fixed by the frontend proxy) and 5180 (web) free. The dev database is never touched.
 - `eslint.config.js` already covers `apps/**`; E2E files must pass `pnpm lint --max-warnings 0` and `tsc`.
 

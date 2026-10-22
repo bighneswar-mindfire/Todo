@@ -19,6 +19,7 @@ async function ensureDatabase() {
   }
 }
 
+// shell: true is needed to launch pnpm on Windows; Prisma prints the host and schema, never the connection string.
 function migrate() {
   const root = fileURLToPath(new URL("../../..", import.meta.url));
   execFileSync("pnpm", ["--filter", "@todo/backend", "migrate:deploy"], {

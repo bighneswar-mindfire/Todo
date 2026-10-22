@@ -35,7 +35,11 @@ See proposal.md (Why). Current state: the frontend is a Vite SPA that proxies `/
 
 7. **Config scenarios are verified by a Vitest unit test** (`apps/e2e/src/config.test.ts`) that imports the Playwright config and asserts the database name, ports, `reuseExistingServer: false`, trace/screenshot `retain-on-failure`, `retries: 0` and `outputDir`. That is what makes "uses own database", "reruns do not collide" (unique email helper) and "failure evidence" testable with exactly one named test each. `pnpm test` runs this Vitest file (fast, no browser); `pnpm test:e2e` runs Playwright. Vitest is already a pinned workspace dependency version (5.0.5).
 
-8. **Dependency:** `@playwright/test` pinned exactly; the version and the `webServer`, `test.describe.configure({ mode: "serial" })` APIs are confirmed with Context7 during apply (pnpm `onlyBuiltDependencies` unaffected). Browsers installed once with `pnpm --filter @todo/e2e exec playwright install chromium`.
+8. **NODE_ENV:** the E2E API runs with `NODE_ENV=test`. The backend never reads `NODE_ENV` (only `parseEnv` validates it), so it changes no behaviour; `test` just labels the run.
+
+9. **Dependencies:** `vitest` and `@types/node` (same pinned versions as the rest of the workspace) are dev dependencies of `apps/e2e` for the config tests and `tsc`.
+
+10. **Dependency (Playwright):** `@playwright/test` pinned exactly; the version and the `webServer`, `test.describe.configure({ mode: "serial" })` APIs are confirmed with Context7 during apply (pnpm `onlyBuiltDependencies` unaffected). Browsers installed once with `pnpm --filter @todo/e2e exec playwright install chromium`.
 
 ## Risks / Trade-offs
 

@@ -15,6 +15,8 @@ Playwright journey for FR-E2E-1 (AB-1016). It starts the real API and the Vite d
 
 The run uses its own database `todo_e2e` (created and migrated by `src/prepare-db.mjs` when the API starts); the development database is untouched. Set `E2E_DB_HOST_URL` (for example `postgresql://user:pass@host:5432`, no database name) to use a different Postgres server. Each run registers a new user, so no cleanup is needed. To start from an empty E2E database, delete `todo_e2e` with `psql` against the `postgres` database; it is recreated on the next run.
 
+The database URL (`todo:todo`, the docker-compose default) is development-only, and the JWT secret is generated fresh for every run.
+
 Failures keep a trace and screenshot in `test-results/` (`pnpm exec playwright show-trace <trace.zip>`).
 
 ## Layout

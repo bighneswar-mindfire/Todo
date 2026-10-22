@@ -12,6 +12,7 @@ const tagName = `tag-${runId}`;
 let context: BrowserContext;
 let page: Page;
 let anonymous: BrowserContext;
+let visitor: Page;
 let shareUrl = "";
 
 async function logIn(target: Page) {
@@ -65,6 +66,7 @@ test.describe("full user journey", () => {
     await expect(content).toContainText(noteBody);
     await content.press("Control+End");
     await content.pressSequentially(autosavedText);
+    await expect(page.getByText("Unsaved changes")).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
     await page.reload();
     await expect(page.getByRole("textbox", { name: "Note content" })).toContainText(autosavedText.trim());
@@ -87,6 +89,7 @@ test.describe("full user journey", () => {
     const result = page.getByRole("listitem").filter({ hasText: noteTitle });
     await expect(result.locator("mark").first()).toHaveText(/pelican/i);
   });
+
   test("Share a note", async () => {
     await page.getByRole("listitem").filter({ hasText: noteTitle }).getByRole("link", { name: noteTitle }).click();
     await page.getByRole("button", { name: "Share" }).click();
@@ -101,7 +104,7 @@ test.describe("full user journey", () => {
 
   test("Anonymous visitor opens the public link", async ({ browser }) => {
     anonymous = await browser.newContext();
-    const visitor = await anonymous.newPage();
+    visitor = await anonymous.newPage();
     await visitor.goto(shareUrl);
     await expect(visitor.getByRole("heading", { name: noteTitle })).toBeVisible();
     await expect(visitor.getByText(noteBody)).toBeVisible();
@@ -116,7 +119,6 @@ test.describe("full user journey", () => {
     await dialog.getByRole("button", { name: /^Revoke link created/ }).click();
     await dialog.getByRole("button", { name: /^Confirm revoke/ }).click();
     await expect(dialog.getByRole("row").filter({ hasText: "Revoked" })).toBeVisible();
-    const visitor = anonymous.pages()[0]!;
     await visitor.reload();
     await expect(visitor.getByRole("heading", { name: "This link is not available" })).toBeVisible();
     await dialog.getByRole("button", { name: "Close" }).click();

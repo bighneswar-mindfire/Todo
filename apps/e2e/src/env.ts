@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 /** Constants shared by the Playwright config and the database preparation script. */
 export const E2E_DB_NAME = "todo_e2e";
 /** Defaults to the docker-compose Postgres; set E2E_DB_HOST_URL (no database name) to use another server. */
@@ -11,5 +13,5 @@ export const WEB_PORT = 5180;
 export const API_URL = `http://localhost:${API_PORT}`;
 export const WEB_URL = `http://localhost:${WEB_PORT}`;
 
-/** Throwaway signing secret for the E2E backend only (at least 32 characters). */
-export const E2E_JWT_SECRET = "e2e-only-secret-not-used-anywhere-else-0123456789";
+/** Throwaway signing secret, regenerated for every run, for the E2E backend only (at least 32 characters). */
+export const E2E_JWT_SECRET = `${randomUUID()}${randomUUID()}`;
