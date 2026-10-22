@@ -117,13 +117,13 @@ Authenticated users create, organize, search and share rich-text notes. The syst
 | FR-VER-5 | History survives trash and restore. A deleted note's versions are not reachable.                                                                                                                                                                    | M   |
 | FR-VER-6 | Auto-purge: version snapshots of a note whose 30-day recovery window has passed are permanently removed together with that note by a scheduled job. Nothing is purged inside the window.                                                            | M   |
 
-### 2.7 Frontend (AB-1010 to AB-1015)
+### 2.7 Frontend (AB-1010 to AB-1015, AB-1019)
 
 | ID       | Requirement                                                                                                                                                                                          | Pri |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
 | FR-FE-1  | Auth pages: register, login, forgot password, reset password, with inline field errors, a global error alert, and logout.                                                                            | M   |
 | FR-FE-2  | Session handling: the access token is attached to API calls; a 401 triggers one refresh and a retry; a failed refresh returns the user to login. Protected routes redirect unauthenticated visitors. | M   |
-| FR-FE-3  | Notes list page: paginated list, sort control, tag filter, empty/loading/error states, trash view with restore, and a New note action.                                                               | M   |
+| FR-FE-3  | Notes list page: paginated list, sort control, tag filter, empty/loading/error states, a Trash link and a New note action.                                                                            | M   |
 | FR-FE-4  | Note editor: TipTap rich-text editor with a toolbar, title field, tag picker, delete dialog, and an unsaved-changes guard.                                                                           | M   |
 | FR-FE-5  | Autosave: edits are saved automatically after a short idle period and on leaving the editor. The UI shows saving, saved and error states and never drops edits.                                      | M   |
 | FR-FE-6  | Search UI: a search box with debounced queries, ranked results with highlighted title and snippet rendered safely, pagination and a tag filter.                                                      | M   |
@@ -131,6 +131,7 @@ Authenticated users create, organize, search and share rich-text notes. The syst
 | FR-FE-8  | Version history drawer: list versions, preview one, and restore it as a new version.                                                                                                                 | M   |
 | FR-FE-9  | The UI uses shared types and schemas only and never renders unsanitized HTML.                                                                                                                        | M   |
 | FR-FE-10 | Change all button colour to red.                                                                                                                                                                     | M   |
+| FR-FE-11 | Trash page (`/trash`): lists the user's trashed notes (FR-NOTE-6), newest deletion first and paginated, with empty/loading/error states. Each item has a Restore action (FR-NOTE-7) that returns the note to the notes list with its tags; a restore refused by the server (not deleted, or outside the 30 days) shows an error and refreshes the list. The UI offers no permanent delete and no way to edit or open a trashed note. | M   |
 
 ### 2.8 End-to-end (AB-1016)
 
@@ -174,6 +175,7 @@ Authenticated users create, organize, search and share rich-text notes. The syst
 | AB-1016 | E2E                             | FR-E2E-1                          |
 | AB-1017 | Button UI                       | FR-FE-10                          |
 | AB-1018 | Tag creation UI                 | FR-TAG-1, FR-FE-4                 |
+| AB-1019 | Trash page and restore UI       | FR-FE-11, FR-NOTE-6, FR-NOTE-7    |
 
 ## 5. Acceptance
 

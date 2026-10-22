@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.19.0
+  description: |
+    Delta for AB-1019 (frontend trash page and restore). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1004 (trash listing, restore).
+
+    The frontend consumes the endpoints listed under `x-frontend-consumes`, which also records how the UI must react to each status code. Tests assert these reactions. The error body is always `{ error: { code, message, details? } }`. Requests go through the `/api` base path. A 401 on a bearer call follows the AB-1010 refresh flow: one refresh, one retry, and if refresh is rejected the session is cleared and the user is sent to /login.
+paths: {}
+x-frontend-consumes:
+  /notes/trash:
+    get:
+      operationId: listTrash
+      auth: bearer
+      request: Query `page` (>= 1) and `limit=20`. No other parameters.
+      response: `trashListResponseSchema` from `@todo/shared` (`items` of id, title, excerpt, createdAt, updatedAt, deletedAt; `page`, `limit`, `total`), newest deletion first.
+      onStatus:
+        "200": Render the rows, or the empty state when `items` is empty and `total` is 0. Items empty with `total` > 0 on a page > 1 replaces the URL with the last page.
+        "200 (body fails schema)": Treated as a failure. Show the load error with Retry.
+        "400": VALIDATION_ERROR. Not expected, the UI sends a valid page. Show the load error with Retry.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "500": INTERNAL_ERROR. Show the load error with Retry.
+        "network failure": NETWORK_ERROR. Same as 500.
+  /notes/{id}/restore:
+    post:
+      operationId: restoreNote
+      auth: bearer
+      request: No body. Called once per press of Restore, for the row's note id.
+      response: `Note` from `@todo/shared` with `deletedAt` null.
+      onStatus:
+        "200": Remove the row; refetch the trash list; mark the notes lists, tags and search queries stale.
+        "200 (body fails schema)": Treated as a failure. Show the generic restore alert; the row stays until the refetched trash list says otherwise.
+        "400": VALIDATION_ERROR. Not expected (the id comes from the API). Treated like 500.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND (note not deleted, past 30 days, or not owned; all identical). Show "That note can't be restored" and refetch the trash list.
+        "500": INTERNAL_ERROR. Keep the row and show "Couldn't restore that note. Try again".
+        "network failure": NETWORK_ERROR. Same as 500.
