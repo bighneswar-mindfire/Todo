@@ -10,6 +10,12 @@ export const notesKeys = {
   tags: ["tags"] as const,
 };
 
+export const trashKeys = {
+  /** Under ["notes"] but outside ["notes", "list"], so saving a note never refetches the trash. */
+  all: ["notes", "trash"] as const,
+  list: (page: number) => ["notes", "trash", { page }] as const,
+};
+
 /** Keeps the previous page on screen while the next one loads. */
 export function useNotesList(params: ListParams) {
   return useQuery({

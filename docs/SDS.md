@@ -242,6 +242,7 @@ A job (`node-cron` or an in-process interval started in `server.ts`, version pin
 | Search UI | Debounced (300 ms) input bound to a URL query parameter; results render `highlight.title` and `highlight.snippet` through a sanitizer that allows only `<mark>`; never `dangerouslySetInnerHTML` with raw strings (FR-FE-9) |
 | Share modal | Create link (optional expiry), copy button, table with status (active/expired/revoked), view count, revoke with confirm |
 | Version drawer | Lists versions (paginated), previews one read-only, "Restore as new version" confirms, then refetches the note and versions |
+| Trash page (FR-FE-11) | `/trash` route behind the `RequireAuth` guard, linked from the notes list. Reads `GET /notes/trash` (paginated, `["notes", "trash", params]`, page in the URL). Each row shows title, excerpt and deletion date with a **Restore** button that calls `POST /notes/{id}/restore`; on 200 it drops the row, refetches the trash (`["notes", "trash"]`, deliberately outside the `["notes", "list"]` prefix so note saves never refetch it), marks the notes lists, tags and search stale and seeds the note detail cache; on 404 it shows an error and refetches the trash (the row disappears once refetched). Rows are not links, there is no permanent delete, and no backend or shared change is needed |
 | UI kit | shadcn/ui components in `components/ui`; accessibility: labelled controls, focus management in dialogs and drawers |
 
 ## 7. Testing strategy (NFR-QUAL-1,2)
@@ -290,5 +291,6 @@ Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archiv
 | Search UI, share modal (AB-1013, AB-1014) | Implemented |
 | Version drawer (AB-1015) | Implemented: list with Load more, read-only preview, restore as a new version |
 | Tag creation UI (AB-1018, FR-TAG-1, FR-FE-4) | Implemented by change `ab-1018-tag-create-ui`: an inline New tag form in the editor's Tags group creates the tag and attaches it to the open note (partial failure keeps the tag, unpressed, with an alert). No backend or shared change. |
-| E2E (AB-1016) | Not started |
+| **Trash page and restore UI** (AB-1019, FR-FE-11) | **Gap.** The backend (`GET /notes/trash`, `POST /notes/{id}/restore`) is implemented, but the frontend has no `/trash` page or Restore action, although FR-FE-3 once claimed a trash view. FR-FE-3 now excludes it; AB-1019 delivers it. |
+| E2E (AB-1016) | Not started; its trash step depends on AB-1019 |
 | Ticket numbering | The archived backend tickets AB-1005 to AB-1007 are tags, search and highlight, whereas the assignment sequence is pagination/sorting, tags, search. The mapping in `FRS.md` section 4 follows the assignment; the gaps above are the net effect of that drift. |

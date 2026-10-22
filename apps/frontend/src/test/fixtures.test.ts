@@ -6,9 +6,11 @@ import {
   shareLinkSchema,
   sharedNoteSchema,
   tagWithCountSchema,
+  trashListResponseSchema,
+  trashNoteSummarySchema,
 } from "@todo/shared";
 import { describe, expect, it } from "vitest";
-import { makeShareLink, makeSharedNote, makeTag, makeVersion, makeVersionSummary, shareList, versionsPage } from "./fixtures";
+import { makeShareLink, makeSharedNote, makeTag, makeTrashNote, makeVersion, makeVersionSummary, shareList, trashPage, versionsPage } from "./fixtures";
 
 describe("share fixtures", () => {
   it("Unit: makeShareLink is valid and tokens differ", () => {
@@ -42,5 +44,16 @@ describe("tag fixtures", () => {
   it("Unit: makeTag is valid against tagWithCountSchema", () => {
     expect(tagWithCountSchema.safeParse(makeTag()).success).toBe(true);
     expect(tagWithCountSchema.safeParse(makeTag({ name: "Home", color: "#ff0000" })).success).toBe(true);
+  });
+});
+
+describe("trash fixtures", () => {
+  it("Unit: makeTrashNote and trashPage are valid against the shared schemas", () => {
+    const a = makeTrashNote();
+    const b = makeTrashNote({ title: "Other" });
+
+    expect(trashNoteSummarySchema.safeParse(a).success).toBe(true);
+    expect(trashListResponseSchema.safeParse(trashPage([a, b], { total: 45 })).success).toBe(true);
+    expect(a.id).not.toBe(b.id);
   });
 });

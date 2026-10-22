@@ -93,6 +93,9 @@ export function NotesPage() {
           <Link to="/notes/new" className={buttonVariants()}>
             New note
           </Link>
+          <Link to="/trash" className={buttonVariants({ variant: "outline" })}>
+            Trash
+          </Link>
           <Button variant="outline" disabled={loggingOut} onClick={logout}>
             Log out
           </Button>

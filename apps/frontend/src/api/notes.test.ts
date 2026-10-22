@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { callsTo, empty, json, route } from "@/test/fake-api";
-import { doc, makeFullNote, makeTag, notesPage, paragraph, signIn } from "@/test/fixtures";
-import { attachTag, createNote, createTag, deleteNote, detachTag, getNote, listNotes, updateNote } from "./notes";
+import { doc, makeFullNote, makeTag, makeTrashNote, notesPage, paragraph, signIn, trashPage } from "@/test/fixtures";
+import { attachTag, createNote, createTag, deleteNote, detachTag, getNote, listNotes, listTrash, restoreNote, updateNote } from "./notes";
 
 describe("notes api", () => {
   it("listNotes builds the query", async () => {
@@ -115,5 +115,37 @@ describe("notes api", () => {
     route("POST /tags", () => json(201, { id: "not-a-uuid" }));
 
     await expect(createTag({ name: "Work", color: "#6b7280" })).rejects.toBeDefined();
+  });
+
+  it("listTrash builds the query", async () => {
+    signIn({ accessToken: "access-7" });
+    route("GET /notes/trash", () => json(200, trashPage([makeTrashNote()])));
+
+    await listTrash({ page: 2, limit: 20 });
+
+    const [call] = callsTo("GET /notes/trash");
+    expect(call?.query.toString()).toBe("page=2&limit=20");
+    expect(call?.headers.get("Authorization")).toBe("Bearer access-7");
+  });
+
+  it("restoreNote posts to the note", async () => {
+    signIn({ accessToken: "access-7" });
+    const restored = makeFullNote({ id: "00000000-0000-4000-8000-0000000000b1" });
+    route(`POST /notes/${restored.id}/restore`, () => json(200, restored));
+
+    await expect(restoreNote(restored.id)).resolves.toEqual(restored);
+
+    const [call] = callsTo(`POST /notes/${restored.id}/restore`);
+    expect(call?.headers.get("Authorization")).toBe("Bearer access-7");
+    expect(call?.body).toBeUndefined();
+  });
+
+  it("Unit: listTrash and restoreNote reject a response that fails its schema", async () => {
+    signIn();
+    route("GET /notes/trash", () => json(200, { items: "nope" }));
+    route("POST /notes/n1/restore", () => json(200, { id: "n1" }));
+
+    await expect(listTrash({ page: 1, limit: 20 })).rejects.toBeDefined();
+    await expect(restoreNote("n1")).rejects.toBeDefined();
   });
 });
