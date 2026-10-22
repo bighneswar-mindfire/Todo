@@ -84,7 +84,7 @@ Requirement: Session handling for tag creation (patterned on the AB-1010 session
 
 - [x] 6.1 Verify scenario coverage: every one of the 29 scenario names in `specs/frontend-tags/spec.md` appears as exactly one test title (`pnpm test` in `packages/repo-checks` for the scenario-to-test mapping, if it covers frontend titles; otherwise a grep) and `pnpm exec openspec validate ab-1018-tag-create-ui --strict` passes
 - [x] 6.2 Definition of done: `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage` (new code at least 80%), no new `any`, `@ts-ignore` or `eslint-disable`
-- [ ] 6.3 Manual smoke with the `run` skill: start Postgres, backend and frontend; register a user through the Vite proxy with curl, create a note, create a tag through the editor's request sequence with curl (`POST /tags`, `PUT /notes/{id}/tags/{tagId}`), check a duplicate name returns 409 and the list shows the tag with `noteCount` 1. No browser is available here; the browser journey belongs to AB-1016. Record what was checked
+- [x] 6.3 Manual smoke with the `run` skill: start Postgres, backend and frontend; register a user through the Vite proxy with curl, create a note, create a tag through the editor's request sequence with curl (`POST /tags`, `PUT /notes/{id}/tags/{tagId}`), check a duplicate name returns 409 and the list shows the tag with `noteCount` 1. No browser is available here; the browser journey belongs to AB-1016. Record what was checked. Result (2026-10-22): the user ran the smoke test by hand against the running app and reported that everything worked as expected; Claude could not run it because `curl` was denied by the permission layer. Individual responses were not recorded
 
 ## Workflow follow-up
 
