@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Full-stack notes app, built ticket by ticket (AB-1001 to AB-1016). Business rules: `docs/FRS.md`. Design: `docs/SDS.md`. Per-ticket changes and current behaviour: `openspec/`.
+Full-stack notes app, built ticket by ticket (AB-1001 to AB-1019). Business rules: `docs/FRS.md`. Design: `docs/SDS.md`. Per-ticket changes and current behaviour: `openspec/`.
 
 ## Repo structure
 

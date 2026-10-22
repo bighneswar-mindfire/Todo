@@ -279,7 +279,7 @@ Test titles equal the spec scenario names verbatim. Expired and locked states ar
 
 ## 10. Implementation status against this design
 
-Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archived):
+Verified against the repository on 2026-10-22 (tickets AB-1001 to AB-1015, AB-1018 and AB-1019 archived):
 
 | Item | Status |
 | --- | --- |
@@ -291,6 +291,6 @@ Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archiv
 | Search UI, share modal (AB-1013, AB-1014) | Implemented |
 | Version drawer (AB-1015) | Implemented: list with Load more, read-only preview, restore as a new version |
 | Tag creation UI (AB-1018, FR-TAG-1, FR-FE-4) | Implemented by change `ab-1018-tag-create-ui`: an inline New tag form in the editor's Tags group creates the tag and attaches it to the open note (partial failure keeps the tag, unpressed, with an alert). No backend or shared change. |
-| **Trash page and restore UI** (AB-1019, FR-FE-11) | **Gap.** The backend (`GET /notes/trash`, `POST /notes/{id}/restore`) is implemented, but the frontend has no `/trash` page or Restore action, although FR-FE-3 once claimed a trash view. FR-FE-3 now excludes it; AB-1019 delivers it. |
-| E2E (AB-1016) | Not started; its trash step depends on AB-1019 |
+| Trash page and restore UI (AB-1019, FR-FE-11) | Implemented by change `ab-1019-trash-restore-ui`: a protected `/trash` page lists trashed notes (20 per page, page in the URL), each row has a Restore button that returns the note with its tags, and the notes-list header has a Trash link. No backend or shared change. |
+| E2E (AB-1016) | Not started; its prerequisites (tag creation UI, trash page and restore UI) are implemented |
 | Ticket numbering | The archived backend tickets AB-1005 to AB-1007 are tags, search and highlight, whereas the assignment sequence is pagination/sorting, tags, search. The mapping in `FRS.md` section 4 follows the assignment; the gaps above are the net effect of that drift. |
