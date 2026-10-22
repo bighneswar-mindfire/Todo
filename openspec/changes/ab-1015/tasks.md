@@ -118,9 +118,9 @@ Requirement: Restore a version
 ## 5. Integration and spec check
 
 - [ ] 5.1 Manual smoke through the Vite proxy with the backend up: edit a note twice and save, open History, check three rows with "Current" on the newest, preview version 1, restore it, confirm the editor shows the old text and History now has four rows; record the outcome in the PR
-- [ ] 5.2 Verify scenario coverage: every scenario title in the two spec deltas appears as exactly one test title (`pnpm test` passes and the repo-checks conformance test is green)
-- [ ] 5.3 Update the `["versions", noteId, page]` entry in the `docs/SDS.md` section 6 key list to `["versions", noteId, "list"]` and `["versions", noteId, "detail", n]`, and the status row in section 10; verify with `git diff docs/SDS.md`
-- [ ] 5.4 Run `pnpm exec openspec validate ab-1015 --strict` and confirm it passes
+- [x] 5.2 Verify scenario coverage: every scenario title in the two spec deltas appears as exactly one test title (`pnpm test` passes and the repo-checks conformance test is green)
+- [x] 5.3 Update the `["versions", noteId, page]` entry in the `docs/SDS.md` section 6 key list to `["versions", noteId, "list"]` and `["versions", noteId, "detail", n]`, and the status row in section 10; verify with `git diff docs/SDS.md`
+- [x] 5.4 Run `pnpm exec openspec validate ab-1015 --strict` and confirm it passes
 
 ## Workflow follow-up
 

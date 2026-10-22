@@ -232,7 +232,7 @@ A job (`node-cron` or an in-process interval started in `server.ts`, version pin
 | Concern | Design |
 | --- | --- |
 | Routing | `react-router`; `ProtectedRoute` redirects visitors to `/login`; routes `/login`, `/register`, `/forgot-password`, `/reset-password`, `/notes`, `/notes/new`, `/notes/:id`, `/trash`, `/search`, `/shared/:token` (public) |
-| Server state | TanStack Query in `src/queries`. Keys: `["notes", params]`, `["note", id]`, `["tags"]`, `["search", params]`, `["shares", noteId]`, `["versions", noteId, page]`. Mutations invalidate the narrowest affected keys. |
+| Server state | TanStack Query in `src/queries`. Keys: `["notes", params]`, `["note", id]`, `["tags"]`, `["search", params]`, `["shares", noteId]`, `["versions", noteId, "list"]` (one growing list for "Load more"), `["versions", noteId, "detail", n]`. Mutations invalidate the narrowest affected keys. |
 | Client state | Zustand: `authStore` (access token in memory, refresh token persisted, user), small UI stores (sidebar, drawers) |
 | API client | `src/api/client.ts` attaches the bearer token, validates responses with shared schemas, normalizes errors into `ApiError { code, status, details }`. On 401 it makes one single-flight call to `/auth/refresh` and retries the request once; a failed refresh clears the session and redirects to login (FR-FE-2). |
 | Forms | `react-hook-form` plus the shared Zod schemas; server `details` map to field errors (`lib/form-errors`) |
@@ -287,5 +287,7 @@ Verified against the repository on 2026-10-21 (tickets AB-1001 to AB-1012 archiv
 | **Note list sorting** (FR-NOTE-9, `sort`/`order` on `GET /notes`) | **Gap.** The shipped contract only orders by `updatedAt desc`; the assignment places sorting in AB-1005. Needs a delta amendment (additive, backward compatible) before frontend sort UI. |
 | **Auto-purge** (FR-VER-6, section 5.7) | **Gap.** No purge code exists; the AB-1009 spec lists it only implicitly. Needs its own spec scenarios (nothing purged inside 30 days; older notes and versions purged). |
 | **Editor autosave** (FR-FE-5) | **Gap.** The AB-1012 editor ships explicit save with an unsaved-changes guard; no debounced autosave found. |
-| Search UI, share modal, version drawer, E2E (AB-1013 to AB-1016) | Not started |
+| Search UI, share modal (AB-1013, AB-1014) | Implemented |
+| Version drawer (AB-1015) | Implemented: list with Load more, read-only preview, restore as a new version |
+| E2E (AB-1016) | Not started |
 | Ticket numbering | The archived backend tickets AB-1005 to AB-1007 are tags, search and highlight, whereas the assignment sequence is pagination/sorting, tags, search. The mapping in `FRS.md` section 4 follows the assignment; the gaps above are the net effect of that drift. |
