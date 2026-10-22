@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import { ApiError } from "@/api/errors";
 import { NoteEditor } from "@/components/editor/NoteEditor";
 import { Alert } from "@/components/ui/alert";
@@ -12,7 +12,10 @@ function isNotFound(error: unknown): boolean {
 
 export function NoteEditorPage() {
   const { id } = useParams();
+  const location = useLocation();
   const note = useNote(id);
+  // An editor that just created its note keeps its place across the move to `/notes/<id>`.
+  const justCreated = (location.state as { created?: boolean } | null)?.created === true;
   const [goneId, setGoneId] = useState<string | undefined>(undefined);
   const gone = id !== undefined && goneId === id;
   // A restore replaces the note under the editor, which fixes its baseline at mount: remount it.
@@ -21,7 +24,7 @@ export function NoteEditorPage() {
 
   let body;
   if (id === undefined) {
-    body = <NoteEditor key="new" note={undefined} onGone={() => undefined} />;
+    body = <NoteEditor key="new:0" note={undefined} onGone={() => undefined} />;
   } else if (gone || (note.isError && isNotFound(note.error))) {
     body = (
       <div className="flex flex-col items-start gap-3">
@@ -49,7 +52,7 @@ export function NoteEditorPage() {
   } else {
     body = (
       <NoteEditor
-        key={`${id}:${revision}`}
+        key={`${justCreated ? "new" : id}:${revision}`}
         note={note.data}
         onGone={() => setGoneId(id)}
         onRestored={(version) => {

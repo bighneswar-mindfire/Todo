@@ -248,6 +248,7 @@ describe("NoteEditorPage editing", () => {
 
     expect(saveButton()).toBeDisabled();
     expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument();
+    expect(callsTo(`PATCH /notes/${A}`)).toHaveLength(0);
   });
 
   it("Keyboard shortcut saves", async () => {
@@ -321,6 +322,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Dirty page asks before leaving", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { router, user } = await openNote();
     await user.type(titleInput(), "!");
 
@@ -334,6 +336,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Stay keeps the edits", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { user } = await openNote();
     await user.type(titleInput(), "!");
     await user.click(screen.getByRole("link", { name: "Back to notes" }));
@@ -346,6 +349,7 @@ describe("NoteEditorPage unsaved-changes guard", () => {
 
   it("Discard leaves the page", async () => {
     routeEmptyNotes();
+    route(`PATCH /notes/${A}`, () => errorResponse(500, "INTERNAL_ERROR"));
     const { router, user } = await openNote();
     await user.type(titleInput(), "!");
     await user.click(screen.getByRole("link", { name: "Back to notes" }));
