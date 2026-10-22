@@ -117,7 +117,7 @@ Requirement: Restore a version
 
 ## 5. Integration and spec check
 
-- [ ] 5.1 Manual smoke through the Vite proxy with the backend up: edit a note twice and save, open History, check three rows with "Current" on the newest, preview version 1, restore it, confirm the editor shows the old text and History now has four rows; record the outcome in the PR
+- [x] 5.1 Manual smoke through the Vite proxy with the backend up: edit a note twice and save, open History, check three rows with "Current" on the newest, preview version 1, restore it, confirm the editor shows the old text and History now has four rows; record the outcome in the PR **Outcome (2026-10-22):** run through the Vite proxy (backend :3000, Vite :5173) with a script, not a browser. 3 versions listed newest first; v1 read in full; restore of v1 returned 200 and appended v4 (4 versions); restoring the newest was a 200 no-op; version 0 gave 400, version 99 gave 404, no token gave 401, another user gave 404; a 26-version history paged 20 + 6; the list, version and restored note all pass the shared Zod schemas. The drawer UI itself was not clicked in a browser; it is covered by the jsdom tests.
 - [x] 5.2 Verify scenario coverage: every scenario title in the two spec deltas appears as exactly one test title (`pnpm test` passes and the repo-checks conformance test is green)
 - [x] 5.3 Update the `["versions", noteId, page]` entry in the `docs/SDS.md` section 6 key list to `["versions", noteId, "list"]` and `["versions", noteId, "detail", n]`, and the status row in section 10; verify with `git diff docs/SDS.md`
 - [x] 5.4 Run `pnpm exec openspec validate ab-1015 --strict` and confirm it passes
