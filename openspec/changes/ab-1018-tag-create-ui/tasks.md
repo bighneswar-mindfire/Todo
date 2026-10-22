@@ -21,21 +21,21 @@
 
 `src/lib/form-errors.test.ts`
 - [x] 1.6 Unit tests then code: `friendlyZodMessage` returns "Enter a tag name of 1 to 50 characters" for a `name` issue (existing branches unchanged), and `applyApiError` maps `TAG_NAME_TAKEN` to a `name` field error "You already have a tag with that name" and still returns null; with `fields = []` a `VALIDATION_ERROR` with details returns the generic message; verify with `pnpm --filter @todo/frontend test form-errors`
-- [ ] 1.7 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 1.7 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 2. New tag form: open, cancel, accessibility
 
 `src/components/editor/NewTagForm.test.tsx` (rendered through `renderApp("/notes/<id>")`) - Requirement: New tag form
-- [ ] 2.1 Test "New tag opens the form"
-- [ ] 2.2 Test "Cancel closes the form without a request"
-- [ ] 2.3 Test "Reopened form starts empty"
-- [ ] 2.4 Test "New note cannot create tags yet"
+- [x] 2.1 Test "New tag opens the form"
+- [x] 2.2 Test "Cancel closes the form without a request"
+- [x] 2.3 Test "Reopened form starts empty"
+- [x] 2.4 Test "New note cannot create tags yet"
 
 Requirement: Tag form accessibility
-- [ ] 2.5 Test "Fields have accessible names"
-- [ ] 2.6 Test "Escape cancels"
-- [ ] 2.7 Implement `NewTagForm.tsx` (name input, colour input, **Create tag**, **Cancel**, form named "New tag", Escape handling) and wire it into `NoteTagPicker.tsx` (`creating` state, **New tag** button, focus to the name input on open and back to **New tag** on cancel, disabled button on `/notes/new`); submit does nothing yet; verify with `pnpm --filter @todo/frontend test NewTagForm` and that the existing `NoteEditorPage` tag tests pass unchanged
-- [ ] 2.8 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.5 Test "Fields have accessible names"
+- [x] 2.6 Test "Escape cancels"
+- [x] 2.7 Implement `NewTagForm.tsx` (name input, colour input, **Create tag**, **Cancel**, form named "New tag", Escape handling) and wire it into `NoteTagPicker.tsx` (`creating` state, **New tag** button, focus to the name input on open and back to **New tag** on cancel, disabled button on `/notes/new`); submit does nothing yet; verify with `pnpm --filter @todo/frontend test NewTagForm` and that the existing `NoteEditorPage` tag tests pass unchanged
+- [x] 2.8 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Create and attach
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TagRef } from "@todo/shared";
 import { ApiError } from "@/api/errors";
 import { Alert } from "@/components/ui/alert";
@@ -7,6 +7,7 @@ import { GENERIC_ERROR } from "@/lib/form-errors";
 import { textColorFor } from "@/lib/tag-color";
 import { useToggleNoteTag } from "@/queries/note";
 import { useTags } from "@/queries/notes";
+import { NewTagForm } from "./NewTagForm";
 
 const TAG_GONE = "That tag no longer exists";
 
@@ -22,6 +23,9 @@ export function NoteTagPicker({ noteId, attached }: { noteId: string | undefined
             {tag.name}
           </Button>
         ))}
+        <Button variant="outline" size="sm" disabled>
+          New tag
+        </Button>
       </div>
     );
   }
@@ -40,6 +44,22 @@ function SavedNoteTags({
   const toggle = useToggleNoteTag(noteId);
   const [error, setError] = useState<string | null>(null);
   const pendingTagId = toggle.isPending ? toggle.variables.tag.id : undefined;
+  const [creating, setCreating] = useState(false);
+  const newTagButton = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+
+  // Once the form is gone and the button is back, hand focus back to it.
+  useEffect(() => {
+    if (!creating && restoreFocus.current) {
+      restoreFocus.current = false;
+      newTagButton.current?.focus();
+    }
+  }, [creating]);
+
+  function closeForm() {
+    restoreFocus.current = true;
+    setCreating(false);
+  }
 
   function press(tag: TagRef, isAttached: boolean) {
     setError(null);
@@ -89,6 +109,13 @@ function SavedNoteTags({
           </button>
         );
       })}
+      {creating ? (
+        <NewTagForm onClose={closeForm} />
+      ) : (
+        <Button ref={newTagButton} variant="outline" size="sm" onClick={() => setCreating(true)}>
+          New tag
+        </Button>
+      )}
       {error ? (
         <Alert variant="destructive" role="alert" className="w-full">
           {error}
