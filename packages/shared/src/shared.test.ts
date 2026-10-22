@@ -123,6 +123,13 @@ describe("shared note schemas", () => {
     expect(updateNoteRequestSchema.safeParse({ content: doc }).success).toBe(true);
   });
 
+  it("[design] the autosave flag is an optional boolean that cannot stand alone", () => {
+    expect(updateNoteRequestSchema.safeParse({ content: doc, autosave: true }).success).toBe(true);
+    expect(updateNoteRequestSchema.safeParse({ autosave: true }).success).toBe(false);
+    expect(updateNoteRequestSchema.safeParse({ title: "x", autosave: "yes" }).success).toBe(false);
+    expect(updateNoteRequestSchema.parse({ title: "x" })).toEqual({ title: "x" });
+  });
+
   it("[design] page and limit coerce, default and are bounded", () => {
     expect(pageQuerySchema.parse({})).toEqual({ page: 1, limit: 20 });
     expect(pageQuerySchema.parse({ page: "2", limit: "100" })).toEqual({ page: 2, limit: 100 });

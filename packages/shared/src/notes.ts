@@ -20,6 +20,7 @@ export const updateNoteRequestSchema = z
   .object({
     title: titleSchema.optional(),
     content: tipTapDocSchema.optional(),
+    autosave: z.boolean().optional(),
   })
   .refine((v) => v.title !== undefined || v.content !== undefined, {
     message: "At least one of title or content is required",
