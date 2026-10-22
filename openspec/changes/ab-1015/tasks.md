@@ -30,65 +30,65 @@
 ## 2. Drawer: open, list and load more
 
 `src/components/versions/VersionHistoryDrawer.test.tsx` (rendered with props `open`, `noteId`, `dirty`, `onClose`, `onRestored`) - Requirement: Opening and closing the history drawer
-- [ ] 2.1 Test "Escape closes the drawer"
-- [ ] 2.2 Test "Reopening refreshes the version list"
+- [x] 2.1 Test "Escape closes the drawer"
+- [x] 2.2 Test "Reopening refreshes the version list"
 
 Requirement: Version list
-- [ ] 2.3 Test "Version list loading state"
-- [ ] 2.4 Test "Empty history"
-- [ ] 2.5 Test "Versions are listed in server order"
-- [ ] 2.6 Test "Row shows summary fields"
-- [ ] 2.7 Test "Newest version is labelled Current"
-- [ ] 2.8 Test "Version list request fails"
-- [ ] 2.9 Test "Retry reloads the version list"
-- [ ] 2.10 Test "Malformed version list response is an error"
-- [ ] 2.11 Implement `VersionHistoryDrawer` (`Dialog placement="right"` titled "Version history", **Close**, polite status region) and `VersionList` (loading, empty, rows with version number, title, excerpt, time, "Current" label, error alert with **Retry**); verify tasks 2.1 to 2.10 pass
+- [x] 2.3 Test "Version list loading state"
+- [x] 2.4 Test "Empty history"
+- [x] 2.5 Test "Versions are listed in server order"
+- [x] 2.6 Test "Row shows summary fields"
+- [x] 2.7 Test "Newest version is labelled Current"
+- [x] 2.8 Test "Version list request fails"
+- [x] 2.9 Test "Retry reloads the version list"
+- [x] 2.10 Test "Malformed version list response is an error"
+- [x] 2.11 Implement `VersionHistoryDrawer` (`Dialog placement="right"` titled "Version history", **Close**, polite status region) and `VersionList` (loading, empty, rows with version number, title, excerpt, time, "Current" label, error alert with **Retry**); verify tasks 2.1 to 2.10 pass
 
 Requirement: Load more versions
-- [ ] 2.12 Test "Load more is offered when more versions exist"
-- [ ] 2.13 Test "Load more appends the next page"
-- [ ] 2.14 Test "No Load more when everything is loaded"
-- [ ] 2.15 Test "Load more failure keeps loaded rows"
-- [ ] 2.16 Test "Double Load more activation sends one request"
-- [ ] 2.17 Implement **Load more** in `VersionList` (`hasNextPage`, in-flight guard, disabled while fetching, inline "Couldn't load more versions" alert that keeps the rows); verify tasks 2.12 to 2.16 pass
-- [ ] 2.18 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 2.12 Test "Load more is offered when more versions exist"
+- [x] 2.13 Test "Load more appends the next page"
+- [x] 2.14 Test "No Load more when everything is loaded"
+- [x] 2.15 Test "Load more failure keeps loaded rows"
+- [x] 2.16 Test "Double Load more activation sends one request"
+- [x] 2.17 Implement **Load more** in `VersionList` (`hasNextPage`, in-flight guard, disabled while fetching, inline "Couldn't load more versions" alert that keeps the rows); verify tasks 2.12 to 2.16 pass
+- [x] 2.18 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 3. Drawer: preview, restore, session and accessibility
 
 Requirement: Preview a version
-- [ ] 3.1 Test "Selecting a version loads it"
-- [ ] 3.2 Test "Version preview loading state"
-- [ ] 3.3 Test "Preview renders formatting"
-- [ ] 3.4 Test "Preview cannot be edited"
-- [ ] 3.5 Test "HTML-like text in a version stays text"
-- [ ] 3.6 Test "Unrenderable content shows an error"
-- [ ] 3.7 Test "Back keeps the loaded list"
-- [ ] 3.8 Test "Preview request fails"
-- [ ] 3.9 Test "Version no longer exists"
-- [ ] 3.10 Implement `VersionPreview` (title, `ReadOnlyNote` labelled "Version content", **Back to versions**, loading, retryable error, 404 state, unrenderable state) and the `selected` state in the drawer body; verify tasks 3.1 to 3.9 pass
+- [x] 3.1 Test "Selecting a version loads it"
+- [x] 3.2 Test "Version preview loading state"
+- [x] 3.3 Test "Preview renders formatting"
+- [x] 3.4 Test "Preview cannot be edited"
+- [x] 3.5 Test "HTML-like text in a version stays text"
+- [x] 3.6 Test "Unrenderable content shows an error"
+- [x] 3.7 Test "Back keeps the loaded list"
+- [x] 3.8 Test "Preview request fails"
+- [x] 3.9 Test "Version no longer exists"
+- [x] 3.10 Implement `VersionPreview` (title, `ReadOnlyNote` labelled "Version content", **Back to versions**, loading, retryable error, 404 state, unrenderable state) and the `selected` state in the drawer body; verify tasks 3.1 to 3.9 pass
 
 Requirement: Restore a version
-- [ ] 3.11 Test "Older version offers restore"
-- [ ] 3.12 Test "Current version offers no restore"
-- [ ] 3.13 Test "Restore asks for confirmation"
-- [ ] 3.14 Test "Cancel sends nothing"
-- [ ] 3.15 Test "Confirmed restore sends one request"
-- [ ] 3.16 Test "Restore warns about unsaved edits"
-- [ ] 3.17 Test "No warning for a clean editor"
-- [ ] 3.18 Implement the restore flow in `VersionPreview` (**Restore as new version**, inline confirm with **Confirm restore** and **Cancel**, `dirty` warning, in-flight guard, `onRestored(version)` on success, error alert and 404 state on failure, no Restore on the current version); verify tasks 3.11 to 3.17 pass
+- [x] 3.11 Test "Older version offers restore"
+- [x] 3.12 Test "Current version offers no restore"
+- [x] 3.13 Test "Restore asks for confirmation"
+- [x] 3.14 Test "Cancel sends nothing"
+- [x] 3.15 Test "Confirmed restore sends one request"
+- [x] 3.16 Test "Restore warns about unsaved edits"
+- [x] 3.17 Test "No warning for a clean editor"
+- [x] 3.18 Implement the restore flow in `VersionPreview` (**Restore as new version**, inline confirm with **Confirm restore** and **Cancel**, `dirty` warning, in-flight guard, `onRestored(version)` on success, error alert and 404 state on failure, no Restore on the current version); verify tasks 3.11 to 3.17 pass
 
 Requirement: Authorization and session handling
-- [ ] 3.19 Test "Expired access token is refreshed while browsing history"
-- [ ] 3.20 Test "Rejected refresh ends the session while browsing history"
-- [ ] 3.21 Test "Another user's note history is not available"
-- [ ] 3.22 Implement the "This note is no longer available" state (404 on the first page hides rows and controls except **Close**); verify tasks 3.19 to 3.21 pass
+- [x] 3.19 Test "Expired access token is refreshed while browsing history"
+- [x] 3.20 Test "Rejected refresh ends the session while browsing history"
+- [x] 3.21 Test "Another user's note history is not available"
+- [x] 3.22 Implement the "This note is no longer available" state (404 on the first page hides rows and controls except **Close**); verify tasks 3.19 to 3.21 pass
 
 Requirement: History drawer accessibility
-- [ ] 3.23 Test "Drawer is labelled and modal"
-- [ ] 3.24 Test "Row buttons identify their version"
-- [ ] 3.25 Test "Preview announces loading"
-- [ ] 3.26 Make 3.23 to 3.25 pass (`aria-label="Preview version N"` on row buttons, loading text inside the `role="status"` region); verify with `pnpm --filter @todo/frontend test VersionHistoryDrawer`
-- [ ] 3.27 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
+- [x] 3.23 Test "Drawer is labelled and modal"
+- [x] 3.24 Test "Row buttons identify their version"
+- [x] 3.25 Test "Preview announces loading"
+- [x] 3.26 Make 3.23 to 3.25 pass (`aria-label="Preview version N"` on row buttons, loading text inside the `role="status"` region); verify with `pnpm --filter @todo/frontend test VersionHistoryDrawer`
+- [x] 3.27 Checkpoint: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`
 
 ## 4. Editor integration
 
