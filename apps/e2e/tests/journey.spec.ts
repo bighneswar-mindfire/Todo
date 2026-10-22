@@ -10,6 +10,8 @@ const tagName = `tag-${runId}`;
 
 let context: BrowserContext;
 let page: Page;
+let anonymous: BrowserContext;
+let shareUrl = "";
 
 async function logIn(target: Page) {
   await target.getByLabel("Email").fill(email);
@@ -26,6 +28,7 @@ test.describe("full user journey", () => {
   });
 
   test.afterAll(async () => {
+    await anonymous?.close();
     await context.close();
   });
 
@@ -82,5 +85,74 @@ test.describe("full user journey", () => {
     await expect(page).toHaveURL(/\/search\?/);
     const result = page.getByRole("listitem").filter({ hasText: noteTitle });
     await expect(result.locator("mark").first()).toHaveText(/pelican/i);
+  });
+  test("Share a note", async () => {
+    await page.getByRole("listitem").filter({ hasText: noteTitle }).getByRole("link", { name: noteTitle }).click();
+    await page.getByRole("button", { name: "Share" }).click();
+    const dialog = page.getByRole("dialog", { name: "Share this note" });
+    await dialog.getByRole("button", { name: "Create link" }).click();
+    const row = dialog.getByRole("row").filter({ hasText: "Never expires" });
+    await expect(row.getByText("Active")).toBeVisible();
+    const link = (await row.locator("span.font-mono").textContent()) ?? "";
+    expect(link).toMatch(/\/shared\/[A-Za-z0-9_-]+$/);
+    shareUrl = link;
+  });
+
+  test("Anonymous visitor opens the public link", async ({ browser }) => {
+    anonymous = await browser.newContext();
+    const visitor = await anonymous.newPage();
+    await visitor.goto(shareUrl);
+    await expect(visitor.getByRole("heading", { name: noteTitle })).toBeVisible();
+    await expect(visitor.getByText(noteBody)).toBeVisible();
+    await expect(visitor.getByRole("button", { name: "Save" })).toHaveCount(0);
+  });
+
+  test("Revoke the share link", async () => {
+    const dialog = page.getByRole("dialog", { name: "Share this note" });
+    await dialog.getByRole("button", { name: /^Revoke link created/ }).click();
+    await dialog.getByRole("button", { name: /^Confirm revoke/ }).click();
+    await expect(dialog.getByRole("row").filter({ hasText: "Revoked" })).toBeVisible();
+    const visitor = anonymous.pages()[0]!;
+    await visitor.reload();
+    await expect(visitor.getByRole("heading", { name: "This link is not available" })).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).click();
+  });
+
+  test("View history and restore a version", async () => {
+    const content = page.getByRole("textbox", { name: "Note content" });
+    await content.fill("Second draft body");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
+    await page.getByRole("button", { name: "History" }).click();
+    const drawer = page.getByRole("dialog", { name: "Version history" });
+    await drawer.getByRole("button", { name: /^Preview version 1\b/ }).click();
+    await expect(drawer.getByText(noteBody)).toBeVisible();
+    await drawer.getByRole("button", { name: "Restore as new version" }).click();
+    await drawer.getByRole("button", { name: "Confirm restore" }).click();
+    await expect(drawer).toBeHidden();
+    await expect(page.getByRole("textbox", { name: "Note content" })).toContainText(noteBody);
+    await expect(page.getByRole("textbox", { name: "Note content" })).not.toContainText("Second draft body");
+    await page.getByRole("button", { name: "History" }).click();
+    await expect(page.getByRole("dialog", { name: "Version history" }).getByRole("button", { name: /^Preview version 4\b/ })).toBeVisible();
+    await page.getByRole("dialog", { name: "Version history" }).getByRole("button", { name: "Close" }).click();
+  });
+
+  test("Delete and restore from trash", async () => {
+    await page.getByRole("button", { name: "Delete", exact: true }).click();
+    await page.getByRole("dialog", { name: "Delete this note?" }).getByRole("button", { name: "Delete note" }).click();
+    await page.goto("/trash");
+    await page.getByRole("button", { name: `Restore ${noteTitle}` }).click();
+    await expect(page.getByRole("button", { name: `Restore ${noteTitle}` })).toHaveCount(0);
+    await page.getByRole("link", { name: "Back to notes" }).click();
+    const item = page.getByRole("listitem").filter({ hasText: noteTitle });
+    await expect(item).toBeVisible();
+    await expect(item.getByText(tagName)).toBeVisible();
+  });
+
+  test("Log out", async () => {
+    await page.getByRole("button", { name: "Log out" }).click();
+    await expect(page).toHaveURL(/\/login$/);
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/login$/);
   });
 });

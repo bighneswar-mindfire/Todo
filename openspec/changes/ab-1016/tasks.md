@@ -14,10 +14,10 @@
 
 ## 3. Journey tests (sharing, history, trash)
 
-- [ ] 3.1 Add "Share a note", "Anonymous visitor opens the public link" (fresh context, no storage state) and "Revoke the share link" (owner revokes, anonymous reload shows not-found). Verify: all three pass in a full run.
-- [ ] 3.2 Add "View history and restore a version" (preview an earlier version, restore, new latest version listed). The journey must have produced at least two versions (use **Save**, not autosave, for the second edit in step 2.2 if autosave coalesces). Verify: the test passes in a full run.
-- [ ] 3.3 Add "Delete and restore from trash" and "Log out". Verify: the restored note shows its tag in the notes list; after log out `/` redirects to `/login`.
-- [ ] 3.4 Checkpoint: full `pnpm test:e2e` green twice in a row (rerun scenario), plus `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`.
+- [x] 3.1 Add "Share a note", "Anonymous visitor opens the public link" (fresh context, no storage state) and "Revoke the share link" (owner revokes, anonymous reload shows not-found). Verify: all three pass in a full run.
+- [x] 3.2 Add "View history and restore a version" (preview an earlier version, restore, new latest version listed). The journey must have produced at least two versions (use **Save**, not autosave, for the second edit in step 2.2 if autosave coalesces). Verify: the test passes in a full run.
+- [x] 3.3 Add "Delete and restore from trash" and "Log out". Verify: the restored note shows its tag in the notes list; after log out `/` redirects to `/login`.
+- [x] 3.4 Checkpoint: full `pnpm test:e2e` green twice in a row (rerun scenario), plus `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`.
 
 ## 4. Guard scenarios
 
