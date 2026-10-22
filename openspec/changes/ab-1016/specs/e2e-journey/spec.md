@@ -16,10 +16,10 @@ The suite SHALL cover FR-E2E-1 as one ordered journey for a single user, with ex
 
 #### Scenario: Register a new account
 - **WHEN** a visitor submits the registration form with a valid unique email and password
-- **THEN** the app shows the signed-in notes list at `/` with the user's email in the header
+- **THEN** the app shows the login page with the notice "Account created, please log in"
 
 #### Scenario: Log in with the registered account
-- **WHEN** the user logs out of the fresh session and submits the login form with the registered credentials
+- **WHEN** the user submits the login form with the registered credentials
 - **THEN** the app shows the notes list at `/` with the user's email in the header
 
 #### Scenario: Create a note
