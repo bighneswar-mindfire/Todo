@@ -3,7 +3,7 @@
 | Field                   | Value                                               |
 | ----------------------- | --------------------------------------------------- |
 | Product                 | Note Taking Application                             |
-| Scope                   | Tickets AB-1001 to AB-1016                          |
+| Scope                   | Tickets AB-1001 to AB-1019                          |
 | Companion               | `SDS.md` (design, data model, API contracts)        |
 | Status of this document | Source of truth for `/review` FRS-compliance checks |
 
