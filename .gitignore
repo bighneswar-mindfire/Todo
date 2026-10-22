@@ -7,3 +7,5 @@ coverage/
 apps/backend/src/generated/
 .DS_Store
 *.log
+test-results/
+playwright-report/
