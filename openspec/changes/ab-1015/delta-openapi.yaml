@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.15.0
+  description: |
+    Delta for AB-1015 (frontend version history drawer). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1009 (version list, read and restore).
+
+    The frontend consumes the endpoints listed under `x-frontend-consumes`, which also records how the UI must react to each status code. Tests assert these reactions. The error body is always `{ error: { code, message, details? } }`. Requests go through the `/api` base path, unchanged from AB-1010. A 401 on a bearer call follows the AB-1010 refresh flow: one refresh, one retry, and if refresh is rejected the session is cleared and the user is sent to /login.
+paths: {}
+x-frontend-consumes:
+  /notes/{id}/versions:
+    get:
+      operationId: listVersions
+      auth: bearer
+      request: Query `page` (>= 1) and `limit` (1 to 100). The UI sends `page=1&limit=20` first and `page=N&limit=20` for each Load more.
+      response: NoteVersionListResponse from `@todo/shared` (`items` of `{ id, versionNumber, title, excerpt, createdAt }` newest first, `page`, `limit`, `total`). No `content`.
+      onStatus:
+        "200": Render the rows, or "No earlier versions yet" when `items` is empty. Show Load more while the loaded row count is below `total`.
+        "200 (body fails schema)": Treated as a failure. Show the error alert with Retry (first page) or the Load more alert (later page).
+        "400": VALIDATION_ERROR. Not expected, the UI never sends an invalid page or limit. Treated as a failure like 500.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND for a foreign, missing or soft-deleted note. Show "This note is no longer available" (first page) or the Load more alert (later page).
+        "500": INTERNAL_ERROR. Show the error alert with Retry (first page) or the Load more alert (later page); loaded rows stay.
+        "network failure": NETWORK_ERROR. Same as 500.
+  /notes/{id}/versions/{versionNumber}:
+    get:
+      operationId: getVersion
+      auth: bearer
+      request: Path `versionNumber`, an integer >= 1 (validated with `versionNumberParamSchema` before sending).
+      response: NoteVersion from `@todo/shared` (`id`, `noteId`, `versionNumber`, `title`, `content`, `createdAt`).
+      onStatus:
+        "200": Preview the title and content read-only through the editor schema (never as HTML).
+        "200 (body fails schema)": Treated as a failure. Show the error alert with Retry.
+        "400": VALIDATION_ERROR. Not expected. Treated as a failure like 500.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND (no such version, foreign or deleted note). Show "This version is no longer available" with Back to versions.
+        "500": INTERNAL_ERROR. Show the error alert with Retry.
+        "network failure": NETWORK_ERROR. Same as 500.
+  /notes/{id}/versions/{versionNumber}/restore:
+    post:
+      operationId: restoreVersion
+      auth: bearer
+      request: No body. `versionNumber` validated as above.
+      response: Note from `@todo/shared` (the note with the restored title and content; a new version has been appended, or nothing was written when the version equalled the current state).
+      onStatus:
+        "200": Seed the note cache with the response, mark the notes list, search results and version list stale, close the drawer, show the restored note in the editor and announce "Version N restored as a new version".
+        "200 (body fails schema)": Treated as a failure. Show the error alert; the drawer and the editor stay as they were.
+        "400": VALIDATION_ERROR. Not expected. Treated as a failure like 500.
+        "401": UNAUTHORIZED. Refresh once and retry (AB-1010).
+        "404": NOT_FOUND (version, note foreign or deleted). Show "This version is no longer available"; the editor is unchanged.
+        "500": INTERNAL_ERROR. Show the error alert and stay on the preview; nothing changes.
+        "network failure": NETWORK_ERROR. Same as 500.

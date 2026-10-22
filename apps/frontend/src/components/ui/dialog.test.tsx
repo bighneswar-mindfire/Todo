@@ -61,4 +61,28 @@ describe("Dialog", () => {
     const dialog = screen.getByRole("dialog", { name: "Sure?" });
     expect(dialog).toHaveAttribute("aria-modal", "true");
   });
+
+  it("Unit: right placement anchors the panel to the right edge", () => {
+    render(
+      <Dialog open title="Side" placement="right" onClose={() => undefined}>
+        <button>Inside</button>
+      </Dialog>,
+    );
+
+    const panel = screen.getByRole("dialog");
+    expect(panel).toHaveClass("h-full", "overflow-y-auto");
+    expect(panel.parentElement).toHaveClass("justify-end");
+  });
+
+  it("Unit: default placement stays centred", () => {
+    render(
+      <Dialog open title="Middle" onClose={() => undefined}>
+        <button>Inside</button>
+      </Dialog>,
+    );
+
+    const panel = screen.getByRole("dialog");
+    expect(panel).not.toHaveClass("h-full");
+    expect(panel.parentElement).toHaveClass("justify-center");
+  });
 });

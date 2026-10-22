@@ -18,3 +18,8 @@ export class ApiError extends Error {
     this.details = details;
   }
 }
+
+/** The server answered 404: the resource is missing, foreign or deleted (the API does not say which). */
+export function isNotFound(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404;
+}

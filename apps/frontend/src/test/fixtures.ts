@@ -3,6 +3,9 @@ import type {
   Note,
   NoteListResponse,
   NoteSummary,
+  NoteVersion,
+  NoteVersionListResponse,
+  NoteVersionSummary,
   SearchResponse,
   SearchResult,
   ShareLink,
@@ -125,6 +128,40 @@ export function makeSharedNote(overrides: Partial<SharedNote> = {}): SharedNote 
     title: "Shared title",
     content: doc(paragraph("Shared text")),
     updatedAt: "2026-10-03T10:00:00.000Z",
+    ...overrides,
+  };
+}
+
+/** A version summary as listed by `GET /notes/{id}/versions`. Numbers are one hour apart, so rows differ. */
+export function makeVersionSummary(overrides: Partial<NoteVersionSummary> = {}): NoteVersionSummary {
+  const versionNumber = overrides.versionNumber ?? 1;
+  return {
+    id: uuid(),
+    versionNumber,
+    title: `Title v${versionNumber}`,
+    excerpt: `Text v${versionNumber}`,
+    createdAt: new Date(Date.UTC(2026, 9, 20, 9 + versionNumber, 0, 0)).toISOString(),
+    ...overrides,
+  };
+}
+
+export function versionsPage(
+  items: NoteVersionSummary[],
+  meta: { page?: number; limit?: number; total?: number } = {},
+): NoteVersionListResponse {
+  return { items, page: meta.page ?? 1, limit: meta.limit ?? 20, total: meta.total ?? items.length };
+}
+
+/** One version in full, as returned by `GET /notes/{id}/versions/{n}`. */
+export function makeVersion(overrides: Partial<NoteVersion> = {}): NoteVersion {
+  const versionNumber = overrides.versionNumber ?? 1;
+  return {
+    id: uuid(),
+    noteId: "00000000-0000-4000-8000-0000000000a1",
+    versionNumber,
+    title: `Title v${versionNumber}`,
+    content: doc(paragraph(`Text v${versionNumber}`)),
+    createdAt: new Date(Date.UTC(2026, 9, 20, 9 + versionNumber, 0, 0)).toISOString(),
     ...overrides,
   };
 }

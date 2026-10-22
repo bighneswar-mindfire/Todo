@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { SHARE_TOKEN_PATTERN } from "@todo/shared";
 import { ApiError } from "@/api/errors";
-import { ReadOnlyNote } from "@/components/share/ReadOnlyNote";
+import { ReadOnlyNote } from "@/components/ReadOnlyNote";
 import { SharedNotAvailable } from "@/components/share/SharedNotAvailable";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,12 @@ export function SharedNotePage() {
           Last updated <time dateTime={note.data.updatedAt}>{dateFormat.format(new Date(note.data.updatedAt))}</time>
         </p>
         <div className="rounded-md border px-2">
-          <ReadOnlyNote key={note.dataUpdatedAt} content={note.data.content} onUnrenderable={() => setUnrenderable(true)} />
+          <ReadOnlyNote
+            key={note.dataUpdatedAt}
+            content={note.data.content}
+            label="Shared note content"
+            onUnrenderable={() => setUnrenderable(true)}
+          />
         </div>
       </article>
     );
