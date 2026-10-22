@@ -7,6 +7,7 @@ Full-stack notes app, built ticket by ticket (AB-1001 to AB-1019). Business rule
 ```
 apps/backend        Express 5 API (src/<feature>/ routes, service, tests; prisma/ schema + migrations)
 apps/frontend       React 19 SPA (api/, queries/, stores/, routes/, pages/, components/, lib/, test/)
+apps/e2e            Playwright journey (own todo_e2e database; see its README)
 packages/shared     ONLY place for TypeScript types and Zod schemas (@todo/shared)
 packages/repo-checks  Repository rule checks (Vitest)
 docs/               FRS.md, SDS.md, decisions/ (ADRs)
@@ -46,7 +47,7 @@ JWT access token (15 min, HS256) plus a DB-stored, hashed refresh token (7 days,
 ## Testing
 
 - Every spec scenario has exactly one named test, titled like the scenario. Tests are written before the code.
-- Backend: Vitest + Supertest in `src/**/*.test.ts`. Frontend: Vitest + Testing Library (jsdom) in `src/**/*.test.tsx`. E2E: Playwright (AB-1016).
+- Backend: Vitest + Supertest in `src/**/*.test.ts`. Frontend: Vitest + Testing Library (jsdom) in `src/**/*.test.tsx`. E2E: Playwright in `apps/e2e` (`pnpm test:e2e`, needs ports 3000 and 5180 free; AB-1016).
 - Coverage of new code must be at least 80%.
 
 ## Anti-patterns

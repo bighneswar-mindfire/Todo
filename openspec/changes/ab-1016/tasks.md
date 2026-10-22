@@ -26,8 +26,8 @@
 
 ## 5. Docs and verification
 
-- [ ] 5.1 Add `apps/e2e/README.md` (prerequisites, ports, `playwright install chromium`, run, reset the E2E database), update `docs/SDS.md` section 10 (E2E row), `AGENTS.md` / `apps/frontend/CLAUDE.md` pointers and the `apps/e2e` layer notes. Verify: documented commands copy-paste run on a clean checkout.
-- [ ] 5.2 Final check: map each of the 17 scenarios to its test title (`grep` for exact titles), run `pnpm exec openspec validate ab-1016 --strict`, `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage`, `pnpm test:e2e`. Verify: all green, no `any`, `@ts-ignore` or `eslint-disable` added.
+- [x] 5.1 Add `apps/e2e/README.md` (prerequisites, ports, `playwright install chromium`, run, reset the E2E database), update `docs/SDS.md` section 10 (E2E row), `AGENTS.md` / `apps/frontend/CLAUDE.md` pointers and the `apps/e2e` layer notes. Verify: documented commands copy-paste run on a clean checkout.
+- [x] 5.2 Final check: map each of the 17 scenarios to its test title (`grep` for exact titles), run `pnpm exec openspec validate ab-1016 --strict`, `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage`, `pnpm test:e2e`. Verify: all green, no `any`, `@ts-ignore` or `eslint-disable` added.
 
 ## Workflow follow-up
 

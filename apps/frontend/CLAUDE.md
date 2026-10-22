@@ -4,7 +4,7 @@ React 19 + TypeScript + Vite. Auth UI and the app foundation exist (AB-1010); no
 
 - Server state: TanStack Query. Client state: Zustand. Editor: TipTap. UI: shadcn/ui. Add each only in the ticket that needs it.
 - Types and Zod schemas come from `@todo/shared`; never redefine API types here. `@todo/shared` is consumed from `dist/`, so run `pnpm --filter @todo/shared build` after changing it.
-- Tests: Vitest + Testing Library (jsdom), files `src/**/*.test.tsx`. Playwright E2E arrives in AB-1016.
+- Tests: Vitest + Testing Library (jsdom), files `src/**/*.test.tsx`. Playwright E2E lives in `apps/e2e` (AB-1016, `pnpm test:e2e`; see its README).
 - Hooks rules are enforced by ESLint (`eslint-plugin-react-hooks`), zero warnings.
 
 ## AB-1010 foundation
