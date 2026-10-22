@@ -23,7 +23,7 @@ export default defineConfig({
   // because Playwright starts web servers before globalSetup would run.
   webServer: [
     {
-      command: "node src/prepare-db.ts && pnpm --filter @todo/backend exec tsx src/server.ts",
+      command: "node src/prepare-db.mjs && pnpm --filter @todo/backend exec tsx src/server.ts",
       url: `${API_URL}/health`,
       timeout: 120_000,
       reuseExistingServer: false,
