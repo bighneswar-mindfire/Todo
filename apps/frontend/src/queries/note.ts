@@ -20,7 +20,7 @@ export function useNote(id: string | undefined) {
 }
 
 /** Lists, searches and tag counts go stale; the detail query is excluded so a freshly seeded note is not refetched. */
-function useInvalidateLists() {
+export function useInvalidateLists() {
   const queryClient = useQueryClient();
   return () => {
     void queryClient.invalidateQueries({ queryKey: notesKeys.lists });

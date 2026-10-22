@@ -10,20 +10,22 @@ const ALLOWED_MARKS: ReadonlySet<string> = new Set(Object.keys(getSchema(extensi
 
 interface ReadOnlyNoteProps {
   content: TipTapDoc;
+  /** Accessible name of the document, e.g. "Shared note content". */
+  label: string;
   /** Called when the document cannot be rendered with the editor schema. */
   onUnrenderable: () => void;
 }
 
 /** Renders a shared document through the editor schema in non-editable mode. Never uses HTML strings. */
-export function ReadOnlyNote({ content, onUnrenderable }: ReadOnlyNoteProps) {
+export function ReadOnlyNote({ content, label, onUnrenderable }: ReadOnlyNoteProps) {
   return (
     <RenderGuard onFailure={onUnrenderable}>
-      <Viewer content={content} onUnrenderable={onUnrenderable} />
+      <Viewer content={content} label={label} onUnrenderable={onUnrenderable} />
     </RenderGuard>
   );
 }
 
-function Viewer({ content, onUnrenderable }: ReadOnlyNoteProps) {
+function Viewer({ content, label, onUnrenderable }: ReadOnlyNoteProps) {
   const editor = useEditor({
     editable: false,
     extensions,
@@ -34,7 +36,7 @@ function Viewer({ content, onUnrenderable }: ReadOnlyNoteProps) {
     editorProps: {
       attributes: {
         role: "document",
-        "aria-label": "Shared note content",
+        "aria-label": label,
         class: "prose-editor px-1 py-2 outline-none",
       },
     },
