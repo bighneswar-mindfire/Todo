@@ -86,6 +86,42 @@ describe("quality gates", () => {
   });
 });
 
+describe("continuous integration", () => {
+  const workflow = () => read(".github/workflows/ci.yml");
+
+  it("CI runs on pull requests: the workflow triggers on pull_request and pushes to main", () => {
+    expect(existsSync(join(root, ".github/workflows/ci.yml"))).toBe(true);
+    expect(workflow()).toMatch(/^\s*pull_request:/m);
+    expect(workflow()).toMatch(/^\s*push:\s*\n\s*branches:\s*\[main\]/m);
+  });
+
+  it("CI repeats the local gate: it runs build, lint, coverage tests and strict spec validation", () => {
+    for (const command of [
+      "pnpm install --frozen-lockfile",
+      "pnpm build",
+      "pnpm lint --max-warnings 0",
+      "pnpm test --coverage",
+      "pnpm exec openspec validate --changes --strict --no-interactive",
+      "pnpm exec openspec validate --archived",
+    ]) {
+      expect(workflow(), command).toContain(command);
+    }
+  });
+
+  it("CI checks commit messages: commitlint runs over every commit in the pull request", () => {
+    expect(workflow()).toMatch(/commitlint --from\s+\S+\s+--to\s+\S+/);
+  });
+
+  it("CI does not float: actions are pinned to exact versions and secrets are not used", () => {
+    const uses = [...workflow().matchAll(/uses:\s*(\S+)/g)].map((m) => m[1] ?? "");
+    expect(uses.length).toBeGreaterThan(0);
+    for (const ref of uses) {
+      expect(ref, ref).toMatch(/@v\d+\.\d+\.\d+$/);
+    }
+    expect(workflow()).not.toMatch(/\$\{\{\s*secrets\./);
+  });
+});
+
 describe("claude code configuration", () => {
   it("Reviewer is read-only: the agent grants Read, Grep, Glob and git diff/log only", () => {
     const agent = read(".claude/agents/reviewer.md");
