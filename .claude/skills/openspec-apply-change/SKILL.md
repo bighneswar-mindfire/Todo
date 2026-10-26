@@ -106,7 +106,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    For each pending task:
    - Show which task is being worked on
-   - Make the code changes required
+   - If the task is a test task (it writes tests for spec scenarios), delegate it to the `test-writer` sub-agent: call the Agent tool with `subagent_type: "test-writer"`, passing the change name and the scenarios the task covers. It writes failing tests only, titled exactly as the scenarios, and reports that they fail for the right reason. Review its tests and fix them before moving on; never let it edit implementation code. If the agent is unavailable, write the tests directly and say so
+   - For implementation tasks, make the code changes required (the failing tests from the preceding test task must exist first)
    - Keep changes minimal and focused
    - Before editing, confirm the checkbox at the returned `sourcePath` and `line` still matches the task description; if it does not, rerun the apply instructions and use the refreshed location
    - Mark the task complete at its returned `sourcePath` and `line`: `- [ ]` → `- [x]`
