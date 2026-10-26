@@ -11,7 +11,7 @@ Every feature of the notes app is tested in isolation (Vitest + Supertest on the
 - Add one pinned dev dependency, `@playwright/test`, which FR-E2E-1 requires. Browser binaries are installed with `playwright install chromium` (documented, not committed).
 - Update `docs/SDS.md` section 10 and the `apps/frontend/CLAUDE.md` / `AGENTS.md` pointers once the suite exists.
 
-No production code, API contract, database schema or `packages/shared` change. No `delta-openapi.yaml` is needed because no endpoint changes.
+No production code, API contract, database schema or `packages/shared` change. `delta-openapi.yaml` is present as every change carries one; its `paths` is empty because no endpoint changes, and `x-e2e-exercises` lists the endpoints the journey observes.
 
 ## Capabilities
 

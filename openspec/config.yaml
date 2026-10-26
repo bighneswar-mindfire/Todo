@@ -2,7 +2,7 @@ schema: spec-driven
 
 context: |
   Stack: Node 22, Express 5, TypeScript (ESM), PostgreSQL 16 + Prisma 7 (driver adapter), React 19 + Vite, TanStack Query, Zustand, TipTap, shadcn/ui. pnpm workspaces: apps/backend, apps/frontend, packages/shared, packages/repo-checks.
-  API: REST, no version prefix. Every error is { error: { code, message, details? } }. Other users' resources return 404, not 403. Each change carries a delta-openapi.yaml; status codes must match it.
+  API: REST, no version prefix. Every error is { error: { code, message, details? } }. Other users' resources return 404, not 403. Each change carries a delta-openapi.yaml, even when no endpoint changes (then `paths` is empty and the file lists the endpoints the change consumes or exercises); status codes must match it.
   Auth: JWT access token (15 min, HS256) + DB-stored hashed refresh token (7 days). Password reset OTP is logged to the console, no real email.
   Testing: Vitest + Supertest (backend src/**/*.test.ts), Vitest + Testing Library (frontend src/**/*.test.tsx), Playwright E2E. Every scenario has exactly one test titled like the scenario.
   Business rules live in docs/FRS.md, design in docs/SDS.md. Out of scope: realtime collaboration, attachments, mobile app, OAuth, folders/nesting, real email.
