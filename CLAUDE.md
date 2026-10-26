@@ -26,7 +26,7 @@ Never skip Gate 1 for features. Stop and wait for approval after propose; do not
 
 - Delta specs use `ADDED` / `MODIFIED` / `REMOVED` / `RENAMED`. For MODIFIED copy the whole current requirement first and keep its title exactly.
 - Scenarios use WHEN/THEN and SHALL/MUST. Include an authorization-denied and a validation-failure scenario.
-- Every scenario has exactly one named test. API changes carry a `delta-openapi.yaml`.
+- Every scenario has exactly one named test. Every change carries a `delta-openapi.yaml` (empty `paths` when no endpoint changes).
 
 ## Commands
 

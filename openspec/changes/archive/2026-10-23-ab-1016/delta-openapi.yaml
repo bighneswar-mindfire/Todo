@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Note Taking App API
+  version: 0.20.0
+  description: |
+    Delta for AB-1016 (Playwright end-to-end journey). This ticket adds NO new endpoints and changes NO existing request, response or status code, so `paths` is intentionally empty. The backend contract is the one fixed by AB-1002 to AB-1009 (auth, notes, tags, search, sharing, versions).
+
+    The journey observes the endpoints listed under `x-e2e-exercises` through the real browser, the Vite `/api` proxy, the real API and the dedicated `todo_e2e` PostgreSQL database. The error body is always `{ error: { code, message, details? } }`.
+paths: {}
+x-e2e-exercises:
+  /auth/register:
+    post:
+      operationId: register
+      onStatus:
+        "201": The journey registers a fresh user per run.
+        "400": VALIDATION_ERROR. A rejected registration form shows a validation error (validation-failure scenario).
+  /auth/login:
+    post:
+      operationId: login
+      onStatus:
+        "200": The journey signs in and reaches the notes list.
+  /auth/logout:
+    post:
+      operationId: logout
+      onStatus:
+        "204": The journey ends by logging out; protected pages redirect to login again.
+  /notes:
+    post:
+      operationId: createNote
+      onStatus:
+        "201": The journey creates a note.
+    get:
+      operationId: listNotes
+      onStatus:
+        "200": The journey sees the note in the list.
+        "401": UNAUTHORIZED. An unauthenticated visit to a protected page redirects to login (authorization-denied scenario).
+  /notes/{id}:
+    patch:
+      operationId: updateNote
+      onStatus:
+        "200": Autosave persists the edit.
+    delete:
+      operationId: deleteNote
+      onStatus:
+        "204": The note moves to trash (soft delete).
+  /notes/trash:
+    get:
+      operationId: listTrash
+      onStatus:
+        "200": The deleted note appears in trash.
+  /notes/{id}/restore:
+    post:
+      operationId: restoreNote
+      onStatus:
+        "200": The note is restored from trash.
+  /tags:
+    post:
+      operationId: createTag
+      onStatus:
+        "201": The journey creates a tag and attaches it to the note.
+  /search:
+    get:
+      operationId: searchNotes
+      onStatus:
+        "200": The journey finds the note with highlighted matches.
+  /notes/{id}/tags/{tagId}:
+    put:
+      operationId: attachTag
+      onStatus:
+        "204": The tag is attached to the note.
+  /notes/{id}/shares:
+    post:
+      operationId: createShareLink
+      onStatus:
+        "201": The journey creates a public share link.
+  /notes/{id}/shares/{shareId}:
+    delete:
+      operationId: revokeShareLink
+      onStatus:
+        "204": The link is revoked; the anonymous view then fails.
+  /shared/{token}:
+    get:
+      operationId: viewSharedNote
+      onStatus:
+        "200": The public link opens anonymously before revocation.
+        "404": NOT_FOUND after revocation.
+  /notes/{id}/versions:
+    get:
+      operationId: listVersions
+      onStatus:
+        "200": The journey opens the version history.
+  /notes/{id}/versions/{versionNumber}/restore:
+    post:
+      operationId: restoreVersion
+      onStatus:
+        "200": The journey restores an earlier version.
