@@ -22,6 +22,17 @@
 
 Never skip Gate 1 for features. Stop and wait for approval after propose; do not start apply in the same turn.
 
+### Prompt template
+
+Start a ticket (`/opsx:explore AB-1042`) with a prompt that has these parts. Where the FRS and SDS do not settle something, say so as a question instead of choosing:
+
+- **Ticket and goal**: the `AB-` number, the FR IDs, one sentence on what the user can do afterwards.
+- **Read first**: repo-relative file references (FRS rows, SDS sections, specs, layer `CLAUDE.md`, a similar existing file).
+- **Constraints**: stack rules, out-of-scope items close to the work, what not to touch.
+- **Expected output**: what should come back and where it stops (for example "proposal, stop at Gate 1, no code").
+- **Edge cases**: limits, auth-denied, validation failure, empty, duplicate, deleted or expired states.
+- **Tests**: scenarios to cover, test files and helpers; tests first.
+
 ## Rule files
 
 Workflow rules are kept out of the commands, in `.claude/rules/`, so commands stay short and regenerating them (`openspec update`) loses nothing:
