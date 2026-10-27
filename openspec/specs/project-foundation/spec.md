@@ -68,6 +68,21 @@ The repository SHALL reject a commit that changes both specs (`openspec/specs/`,
 - **WHEN** a commit stages spec files, or test files, or production code, but not spec files together with production code
 - **THEN** the specs-and-code check passes
 
+### Requirement: Change logs are append-only and checkpoints are recorded
+The repository SHALL reject a commit that changes or removes an existing line of a change's `review.md` or `handoff.md`, and a commit that ticks a task group's checkpoint task in `tasks.md` unless the latest `apply | group <n>` section of that change's `review.md` is `PASS`.
+
+#### Scenario: Edited review log line rejected
+- **WHEN** a commit stages a modification that changes or removes an existing line of a change's `review.md` or `handoff.md`
+- **THEN** the pre-commit hook rejects the commit and names the file
+
+#### Scenario: Ticked checkpoint without a PASS record rejected
+- **WHEN** a commit stages a `tasks.md` with a ticked checkpoint task for a group whose latest `apply | group <n>` section in `review.md` is missing or `FAIL`
+- **THEN** the pre-commit hook rejects the commit and names the group
+
+#### Scenario: Ticked checkpoint with a PASS record accepted
+- **WHEN** a commit stages a `tasks.md` with a ticked checkpoint task for a group whose latest `apply | group <n>` section in `review.md` is `PASS`
+- **THEN** the review-log check passes
+
 ### Requirement: Claude Code configuration
 The repository SHALL include root and per-app `CLAUDE.md` files, a read-only `reviewer` agent, the workflow commands and the Context7 MCP configuration.
 

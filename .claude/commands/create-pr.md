@@ -7,7 +7,7 @@ Change: $ARGUMENTS
 
 Read `.claude/rules/handoff.md` first.
 
-1. **Handoff check**: read `openspec/changes/<change>/handoff.md`. The latest `review` block must be `PASS` and its `head:` must equal `git rev-parse --short HEAD`. No review block, a `FAIL`, or a different head (a commit after the review) means stop: "Run `/review <change>` in a fresh session first", naming which of the three failed. Do not run the reviewer yourself to get around it.
+1. **Handoff check**: read `openspec/changes/<change>/handoff.md`. The latest `review` block must be `PASS` and its `head:` must equal `git rev-parse --short HEAD`. No review block, a `FAIL`, or a different head (a commit after the review) means stop: "Run `/review <change>` in a fresh session first", naming which of the three failed. Also read `review.md`: its latest `review` section must be `PASS` with the same `head`; the PR description links the final result. Do not run the reviewer yourself to get around it.
 2. Run `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test --coverage` (at least 80% on new code) and `pnpm exec openspec validate <change> --strict`. Stop on any failure and show the output.
 3. Summarise the diff. Write the PR description with: the ticket link (`AB#<number>`), the FRS requirements covered, a table mapping every spec scenario to its test name, and any risk or rollback notes.
 4. Ask the user before pushing or creating the PR. Never push to `main` or force-push.

@@ -38,9 +38,9 @@ Every Decision that settles an open decision names its ID (`resolves OD-2`).
 - Inside a group: test tasks first, then the implementation task(s) that make them pass, then a checkpoint.
 - A test task names the test file and the spec requirement, lists the scenarios it covers by exact name, and is marked as a `test-writer` task. One scenario appears in exactly one test task and gets exactly one test.
 - An implementation task says which test tasks it turns green.
-- The checkpoint task is: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test`.
+- The checkpoint task ends **every** group (database groups too) and is the full checkpoint of `checkpoint.md`: `pnpm build` (0 errors), `pnpm lint --max-warnings 0`, `pnpm test` (0 red), `pnpm test --coverage` (at least 80% on the files the group changed), `pnpm exec openspec validate <change> --strict`, the group's scenario tests, `db-change-checker` when the group changes `apps/backend/prisma/`, then `reviewer`. Its result is appended to `review.md`.
 - Size: about 1 to 2 hours of agent work and one commit per task.
-- The last group is **Verification**: coverage run (`pnpm test --coverage`, at least 80% on new code), `pnpm exec openspec validate <change> --strict`, reviewer sub-agent on `git diff main...HEAD`, then `/review <change>` in a fresh session.
+- The last group is **Verification**: full-diff run of the checkpoint (coverage at least 80% on new code, `pnpm exec openspec validate <change> --strict`), reviewer sub-agent on `git diff main...HEAD`, then `/review <change>` in a fresh session.
 - End the file with a **Scenario to test map**: table `Capability | Scenario | Test file | Task`. No scenario missing, none twice.
 
 ## delta-openapi.yaml
