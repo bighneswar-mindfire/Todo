@@ -3,6 +3,16 @@
     "context7": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@upstash/context7-mcp@4.4.3"]
+    },
+    "code-review-graph": {
+      "command": "python",
+      "args": [
+        "-m",
+        "code_review_graph",
+        "serve",
+        "--tools",
+        "get_minimal_context_tool,detect_changes_tool,get_impact_radius_tool,get_review_context_tool,get_affected_flows_tool,query_graph_tool"
+      ]
     }
   }
 }

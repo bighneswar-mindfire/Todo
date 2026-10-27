@@ -15,7 +15,7 @@ Runs at the end of **every** group, whatever its layer: shared, backend, fronten
 | 5 | Spec | `pnpm exec openspec validate <change> --strict` | valid |
 | 6 | Scenarios | the tests named by the group's test tasks | every scenario test of this group is green, and its title equals the scenario name |
 | 7 | Database | `db-change-checker` sub-agent | only when the group changed `apps/backend/prisma/` (`git diff --name-only <last checkpoint head> -- apps/backend/prisma`); no high or medium finding. Otherwise record `n/a (no prisma changes)` |
-| 8 | Review | `reviewer` sub-agent (brief in `apply-delegation.md`) | `RESULT: PASS` |
+| 8 | Review | `python -m code_review_graph update`, then `reviewer` sub-agent (brief in `apply-delegation.md`) | `RESULT: PASS`. The graph is advisory: if it is missing or fails, the reviewer works from the diff and the report says `graph: unavailable` |
 
 Rules:
 
