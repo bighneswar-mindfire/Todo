@@ -57,6 +57,17 @@ The repository SHALL enforce build and lint success, test success (except for co
 - **WHEN** a commit message does not match `type: description` (an optional `(scope)` after the type is accepted)
 - **THEN** commitlint rejects the commit
 
+### Requirement: Specs and code are committed separately
+The repository SHALL reject a commit that changes both specs (`openspec/specs/`, a change's `specs/` or `delta-openapi.yaml`) and production code (`src/` files other than tests, or `apps/backend/prisma/`).
+
+#### Scenario: Spec and code in one commit rejected
+- **WHEN** a commit stages a spec file and a production code file together
+- **THEN** the pre-commit hook rejects the commit and lists both groups of files
+
+#### Scenario: Spec or tests committed without production code accepted
+- **WHEN** a commit stages spec files, or test files, or production code, but not spec files together with production code
+- **THEN** the specs-and-code check passes
+
 ### Requirement: Claude Code configuration
 The repository SHALL include root and per-app `CLAUDE.md` files, a read-only `reviewer` agent, the workflow commands and the Context7 MCP configuration.
 

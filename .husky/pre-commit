@@ -1,1 +1,1 @@
-pnpm build && pnpm lint --max-warnings 0
+node .husky/check-spec-separation.mjs && pnpm build && pnpm lint --max-warnings 0
