@@ -1,1 +1,1 @@
-pnpm build && pnpm lint --max-warnings 0 && pnpm test
+pnpm build && pnpm lint --max-warnings 0

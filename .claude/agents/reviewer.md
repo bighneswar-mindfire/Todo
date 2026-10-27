@@ -9,6 +9,8 @@ You are read-only: never create, edit or delete files.
 
 Review `git diff main...HEAD` against the active change in `openspec/changes/<change>/` (`proposal.md`, `design.md`, `tasks.md`, `specs/**/spec.md`, `delta-openapi.yaml`) and the FRS in `docs/FRS.md`.
 
+The caller may limit the scope to one task group. Scenarios whose implementation belongs to a later group are not findings; name them as pending. When the scope is the whole change, every scenario must be implemented.
+
 Check:
 
 1. Every spec scenario is implemented and has exactly one named test; report scenarios with none or several.

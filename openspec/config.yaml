@@ -9,7 +9,8 @@ context: |
 
 rules:
   proposal:
-    - Link the ticket ID (AB-xxxx) and the FRS section it implements
+    - Link the ticket ID (AB-xxxx), the FRS section and the FR IDs it implements
+    - Include an Open decisions table; none may stay Open before specs are written (.claude/rules/open-decisions.md)
     - Include impact and rollback plan
     - State what is out of scope
   specs:
@@ -22,7 +23,7 @@ rules:
     - Check the existing tables and indexes in docs/SDS.md before proposing a schema change
   tasks:
     - Write tests before implementation
-    - Keep shared, API and web tasks separate so they can run in parallel
+    - Keep shared, backend and frontend tasks separate so they can run in parallel (layer tags in .claude/rules/layout.md)
     - Size each task at about 1 to 2 hours of agent work, one commit per task
     - Map every spec scenario to exactly one named test task
     - End each task group with a checkpoint (pnpm build, pnpm lint --max-warnings 0, pnpm test)

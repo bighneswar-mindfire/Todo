@@ -151,7 +151,7 @@ Authenticated users create, organize, search and share rich-text notes. The syst
 | NFR-REL-1  | Multi-step writes (reset password, version allocation, view count, restore) are atomic.                                                                                                                    |
 | NFR-QUAL-1 | Every spec scenario has exactly one named test. Error status codes match `delta-openapi.yaml` exactly.                                                                                                     |
 | NFR-QUAL-2 | At least 80% coverage on new code. `pnpm build` has 0 errors and 0 warnings; `pnpm lint --max-warnings 0` is clean; `pnpm test` is green.                                                                  |
-| NFR-PROC-1 | Commits follow `feat(scope): description AB#ticket`. Tool versions are pinned; `@latest` is never used.                                                                                                    |
+| NFR-PROC-1 | Commits follow `type: description` (optional `(scope)` after the type). Tool versions are pinned; `@latest` is never used.                                                                                                    |
 
 ## 4. Traceability
 

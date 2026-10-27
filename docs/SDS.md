@@ -259,7 +259,7 @@ Test titles equal the spec scenario names verbatim. Expired and locked states ar
 
 ## 8. Quality gates and delivery
 
-- **Checkpoint per phase**: `pnpm build` (0 errors, 0 warnings), `pnpm lint --max-warnings 0`, `pnpm test`. Husky pre-commit enforces them; commitlint enforces `feat(scope): description AB#1234`.
+- **Checkpoint per phase**: `pnpm build` (0 errors, 0 warnings), `pnpm lint --max-warnings 0`, `pnpm test`. Husky enforces them (`pre-commit` runs build and lint; `commit-msg` runs commitlint, then `pnpm test` except for `test(...)` commits, which hold the failing tests of a test-first task); commitlint enforces `type: description` (optional `(scope)`).
 - **Per ticket workflow**: `/spec` (proposal, delta spec, `delta-openapi.yaml`) -> human approval -> `/plan` (design.md) -> approval -> `/tasks` -> approval -> `/implement`. Backend and frontend `[PARALLEL]` tasks run in separate worktrees. `/review` in a fresh terminal must be all ✅, then `openspec archive`, then `/pr` with the FRS requirements and scenarios listed.
 - **Dependencies**: exact versions only; Node 22 (`.nvmrc`), pnpm 10, `engine-strict`.
 
