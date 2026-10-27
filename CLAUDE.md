@@ -46,6 +46,7 @@ Workflow rules are kept out of the commands, in `.claude/rules/`, so commands st
 ## Commits and branches
 
 - **The human commits; Claude never does.** No `git commit` (denied) and no message suggestions. `git add` asks for permission and is used only when the human asks Claude to stage specific files. When a task is done and its checks pass, Claude stops, lists the files changed, and waits. The human writes the message and commits; Claude continues only after it sees the new commit (`git log`) and a clean tree.
+- **Specs and code never share a commit.** The `pre-commit` hook (`.husky/check-spec-separation.mjs`) rejects a commit that stages a spec file (`openspec/specs/`, a change's `specs/` or `delta-openapi.yaml`) together with production code (non-test `src/` files, `apps/backend/prisma/`). Commit spec changes first (Gate 1), code after. Tests may go with either.
 - Message format the human writes (commitlint): `type: description`, for example `feat: add tag rename` (an optional `(scope)` after the type is accepted; no ticket suffix). One task, one commit.
 - Branch: `feature/{domain}/AB-{ticket}-{short-name}`, for example `feature/backend/AB-1042-user-registration`. Existing `feat/ab-*` branches keep their names.
 

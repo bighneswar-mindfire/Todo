@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
@@ -72,7 +72,9 @@ describe("quality gates", () => {
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line !== "" && !line.startsWith("#"));
-    expect(commands).toEqual(["pnpm build && pnpm lint --max-warnings 0"]);
+    expect(commands).toEqual([
+      "node .husky/check-spec-separation.mjs && pnpm build && pnpm lint --max-warnings 0",
+    ]);
     const commitMsg = read(".husky/commit-msg");
     expect(commitMsg).toContain("commitlint");
     expect(commitMsg).toMatch(/test:\*\|test\\\(\*\|test!\*\)[^;]*;;\s*\n\s*\*\)\s*pnpm test/);
@@ -86,6 +88,36 @@ describe("quality gates", () => {
   it("Good commit message accepted: type: description", () => {
     expect(commitlint("feat: add monorepo").status).toBe(0);
     expect(commitlint("feat(setup): add monorepo").status).toBe(0);
+  });
+});
+
+describe("specs and code are committed separately", () => {
+  type Violation = { code: string[]; specs: string[] } | null;
+  const loadGuard = async () =>
+    (await import(pathToFileURL(join(root, ".husky/check-spec-separation.mjs")).href)) as {
+      violation: (files: string[]) => Violation;
+    };
+
+  it("Spec and code in one commit rejected", async () => {
+    const { violation } = await loadGuard();
+    expect(
+      violation(["openspec/changes/ab-1/specs/notes/spec.md", "apps/backend/src/notes/notes.service.ts"]),
+    ).toEqual({
+      code: ["apps/backend/src/notes/notes.service.ts"],
+      specs: ["openspec/changes/ab-1/specs/notes/spec.md"],
+    });
+    expect(violation(["openspec/specs/notes/spec.md", "apps/backend/prisma/schema.prisma"])).not.toBeNull();
+    expect(violation(["openspec/changes/ab-1/delta-openapi.yaml", "packages/shared/src/index.ts"])).not.toBeNull();
+  });
+
+  it("Spec or tests committed without production code accepted", async () => {
+    const { violation } = await loadGuard();
+    expect(violation(["openspec/specs/notes/spec.md", "openspec/changes/ab-1/tasks.md"])).toBeNull();
+    expect(violation(["openspec/specs/notes/spec.md", "apps/backend/src/notes/notes.test.ts"])).toBeNull();
+    expect(violation(["apps/frontend/src/App.tsx", "apps/frontend/src/App.test.tsx"])).toBeNull();
+    expect(
+      violation(["openspec/changes/archive/2026-10-27-ab-1/specs/notes/spec.md", "apps/backend/src/a.ts"]),
+    ).toBeNull();
   });
 });
 
