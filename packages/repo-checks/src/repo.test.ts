@@ -200,10 +200,31 @@ describe("continuous integration", () => {
 });
 
 describe("claude code configuration", () => {
-  it("Reviewer is read-only: the agent grants Read, Grep, Glob and git diff/log only", () => {
+  it("Reviewer is read-only: the agent grants Read, Grep, Glob, git diff/log and read-only code-graph queries only", () => {
     const agent = read(".claude/agents/reviewer.md");
     const tools = /^tools:\s*(.+)$/m.exec(agent)?.[1]?.split(/,\s*(?![^(]*\))/).map((t) => t.trim());
-    expect(tools).toEqual(["Read", "Grep", "Glob", "Bash(git diff:*)", "Bash(git log:*)"]);
+    const graphTools = [
+      "get_minimal_context_tool",
+      "detect_changes_tool",
+      "get_impact_radius_tool",
+      "get_review_context_tool",
+      "get_affected_flows_tool",
+      "query_graph_tool",
+    ];
+    expect(tools).toEqual([
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(python -m code_review_graph detect-changes:*)",
+      "Bash(python -m code_review_graph impact:*)",
+      "Bash(python -m code_review_graph status:*)",
+      ...graphTools.map((t) => `mcp__code-review-graph__${t}`),
+    ]);
+    const mcp = readJson(".mcp.json") as { mcpServers: Record<string, { args: string[] }> };
+    const served = mcp.mcpServers["code-review-graph"]?.args.at(-1)?.split(",");
+    expect(served).toEqual(graphTools);
   });
 
   it("Context7 configured: .mcp.json defines a pinned Context7 server", () => {

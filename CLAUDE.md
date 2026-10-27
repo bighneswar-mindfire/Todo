@@ -59,6 +59,7 @@ Workflow rules are kept out of the commands, in `.claude/rules/`, so commands st
 
 ## Tools
 
+- Code graph (`code-review-graph` 2.3.9, MIT, local only, no embeddings): one-time setup `pip install code-review-graph==2.3.9` then `python -m code_review_graph build`. It stores a SQLite graph in the git-ignored `.code-review-graph/` and runs as the project MCP server `code-review-graph` (`.mcp.json`, read-only tools only; approve it on first use). `reviewer` and `/review` use it to find callers, affected flows and test gaps; it is advisory and never replaces reading the diff. Do not run `code-review-graph install`: it adds user-level hooks and edits rules files. Without it everything still works (`graph: unavailable`).
 - Verify library APIs with Context7 before using them. Add a dependency only if the spec requires it, and pin its exact version.
 - Sub-agents in `.claude/agents/`: `reviewer` (diff vs spec), `test-writer` (tests from scenarios), `db-change-checker` (schema/migrations), `security-auditor` (audit, sensitive data). Review in a fresh context, never in the session that wrote the code.
 - Permissions and hooks are in `.claude/settings.json`; scripts in `.claude/hooks/`. Edits do not need a confirmation prompt.
