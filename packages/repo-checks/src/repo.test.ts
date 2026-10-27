@@ -67,22 +67,25 @@ describe("quality gates", () => {
     expect(scripts["test"]).toBeTruthy();
   });
 
-  it("Failing check blocks commit: pre-commit runs build, lint and test chained with &&", () => {
+  it("Failing check blocks commit: pre-commit runs build and lint, commit-msg runs commitlint and tests (not for test commits)", () => {
     const commands = read(".husky/pre-commit")
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line !== "" && !line.startsWith("#"));
-    expect(commands).toEqual(["pnpm build && pnpm lint --max-warnings 0 && pnpm test"]);
-    expect(read(".husky/commit-msg")).toContain("commitlint");
+    expect(commands).toEqual(["pnpm build && pnpm lint --max-warnings 0"]);
+    const commitMsg = read(".husky/commit-msg");
+    expect(commitMsg).toContain("commitlint");
+    expect(commitMsg).toMatch(/test:\*\|test\\\(\*\|test!\*\)[^;]*;;\s*\n\s*\*\)\s*pnpm test/);
   });
 
-  it("Bad commit message rejected: commitlint fails without the AB#ticket suffix", () => {
-    expect(commitlint("feat(setup): add thing").status).not.toBe(0);
+  it("Bad commit message rejected: commitlint fails without a type and colon", () => {
+    expect(commitlint("added stuff").status).not.toBe(0);
     expect(commitlint("added stuff AB#1001").status).not.toBe(0);
   });
 
-  it("Good commit message accepted: type(scope): description AB#ticket", () => {
-    expect(commitlint("feat(setup): add monorepo AB#1001").status).toBe(0);
+  it("Good commit message accepted: type: description", () => {
+    expect(commitlint("feat: add monorepo").status).toBe(0);
+    expect(commitlint("feat(setup): add monorepo").status).toBe(0);
   });
 });
 

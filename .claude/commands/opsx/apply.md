@@ -1,203 +1,70 @@
 ---
 name: "OPSX: Apply"
-description: "Implement tasks from an OpenSpec change (Experimental)"
-allowed-tools: Bash(openspec:*)
+description: "Implement tasks from an OpenSpec change (tests via test-writer, group checks via reviewer)"
+allowed-tools: Bash(pnpm exec openspec:*), Bash(git status), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion
 category: "Workflow"
 tags: ["workflow", "artifacts", "experimental"]
 ---
 
-Implement tasks from an OpenSpec change.
+Implement tasks from an OpenSpec change. Tests are written by the `test-writer` sub-agent, implementation by this session, each task group is checked by the `reviewer` sub-agent.
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**Read before step 1:** `.claude/rules/handoff.md` (stage log), `.claude/rules/apply-delegation.md` (briefs, checks, preconditions) and `.claude/rules/layout.md`. Read the `CLAUDE.md` of each layer a task touches.
 
-**Project check:** These steps expect a project that already uses OpenSpec. Before the first step that writes anything (`new change`, `archive`, `sync specs`, or authoring an artifact file), confirm the project has a root: run `openspec list --json` (with `--store <id>` when a store is selected, since the store is then the root) and read `root`. A root object means the project is set up. `"root": null` means it is not - there is no `openspec/` directory here, and a write such as `openspec new change` would create one as a side effect. The command also exits non-zero, which is that answer rather than a broken CLI, so read the JSON instead of retrying or working around it.
-
-One `"root": null` is not about setup: when a `status` error message starts with `Declared in` or `Invalid store declaration in` and names this project's `openspec/config.yaml` (or `config.yml`), the project does use OpenSpec through a store it declares, which this machine cannot resolve (the store is not registered, or the `store:` line is malformed). Do not treat it as uninitialized and skip the branches below: stop before writing and show the user that error's `message` and `fix`.
-
-Otherwise, with no root, what happens next depends on how this workflow was reached:
-
-- **Auto-selected**: you chose this workflow yourself, without the user naming OpenSpec, naming this skill, or running its slash command. Stop using OpenSpec and answer the request normally, as you would with no OpenSpec installed. Do not ask them to set anything up and do not mention OpenSpec setup.
-- **Explicit OpenSpec request**: the user named OpenSpec, named this skill, or ran its slash command. Stop before writing and ask how to proceed: set this project up (`openspec init`), target a store they already have (`--store <id>`), or continue without OpenSpec for this request. Wait for their answer.
-
-In both branches, never create the root as a side effect: do not run `openspec init` until the user asks for it, do not hand-create `openspec/` files, and do not let a command create it.
-
-**Input**: Optionally specify a change name (e.g., `/opsx:apply add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: optional change name (`/opsx:apply ab-1042`). Else infer from the conversation or branch, auto-select if one active change exists, else list with `pnpm exec openspec list --json` and ask. Announce "Using change: <name>".
 
 **Steps**
 
-1. **Select the change**
+1. **Check OpenSpec root**: `pnpm exec openspec list --json`; `"root": null` means stop and tell the user (never run `openspec init` or create `openspec/` yourself).
+2. **Status**: `pnpm exec openspec status --change "<name>" --json` (schema, `changeRoot`, tasks artifact).
+3. **Handoff and Gate 1** (`handoff.md`). Read `<changeRoot>/handoff.md`.
+   - No `propose` block: stop, "Run `/opsx:propose <name>` first".
+   - Latest `propose`/`update` block is `BLOCKED_OPEN_DECISIONS`: stop and list its `open:` rows.
+   - Latest `gate-1` is `APPROVED` and newer than the last `propose`/`update`: continue. If the last `apply` block is `IN_PROGRESS` or `PAUSED`, this is a resume: the first pending task in `tasks.md` is the start, and its `head` must be an ancestor of HEAD (else stop and report).
+   - Otherwise (no `gate-1`, or a newer `update`): show the Proposed summary (artifacts, scenario count, `Assumed` rows) and ask with AskUserQuestion "Approve the spec for <name>?" (Approve / Revise with /opsx:update). Approve: append `### gate-1 | <date> | APPROVED` (`produced: approved by user in session`). Revise: append `REJECTED` and stop.
+   - Never infer approval from the request wording.
+4. **Preconditions** (`apply-delegation.md`; stop and report if any fails): no `Open` row in the proposal's Open decisions table; `delta-openapi.yaml` exists; every scenario is in exactly one test task; `git status` shows no unrelated changes; on the feature branch, not `main`.
+5. **Instructions**: `pnpm exec openspec instructions apply --change "<name>" --json`. `state: "blocked"` -> show the message, complete `missingArtifacts` via `openspec instructions <id>`, do not implement. `state: "all_done"` -> report and suggest `/review`. Treat `context` and `operationGuidance` as constraints; never copy them into files or count them as proof of completion.
+6. **Read every file in `contextFiles`**, then show progress: schema, "N/M tasks complete", remaining tasks.
+7. **Loop over pending tasks** (show "Working on task N/M: ..."):
+   - **Test task** -> `Agent` with `subagent_type: "test-writer"` and the brief from `apply-delegation.md`. Then read the test file: titles equal scenario names, one test per scenario, real assertions, nothing outside test files touched; run it and confirm each test fails for the right reason. Defects go back via SendMessage. If the agent is unavailable, write the tests directly and say so.
+   - **Implementation task** -> minimal code that turns the named failing tests green. Never edit, skip or weaken a test to get green.
+   - **Checkpoint task** -> `pnpm build`, `pnpm lint --max-warnings 0`, `pnpm test`; then `Agent` with `subagent_type: "reviewer"` and the brief from `apply-delegation.md`. PASS: note `reviewer: PASS` on the checkpoint line. FAIL: fix high and medium findings, re-run checkpoint and reviewer; ask after two failed rounds on one finding. After a passing checkpoint, append `### apply | <date> | IN_PROGRESS` to `handoff.md` (`produced:` group title and tasks done N/M, `head`, `checks:` build/lint/test results, `open:` low findings, `next:` the next task).
+   - Before editing a checkbox confirm `sourcePath` and `line` still match the task; mark `- [x]` only when the specified behaviour is fully done; rerun the apply instructions to confirm progress.
+   - **Never run `git commit` and never suggest a message; run `git add` only if the user asks for it.** One task, one commit, made by the human. When a task is done (checkbox `[x]`, its checks run), stop and report: `## Task N/M done - waiting for your commit`, the files changed (`git status`), the checks run and their results. Then wait.
+   - **Resume** only when the user says they committed. Verify: `git status` shows a clean tree (apart from untracked files that existed before), and `git log -1` shows a commit newer than the head recorded at the last stop. If not, say what is missing and wait again. Do not start the next task before this check passes.
+8. **Pause** (report, give options, wait) on: unclear task; design issue (suggest `/opsx:update`); work beyond the spec or temptation to drop, narrow or defer specified behaviour; a new unresolved behaviour question (add it as `Open` to the register, ask, resume after the answer); any error or blocker. On every pause append `### apply | <date> | PAUSED` with the reason in `open:` and `next:`.
+9. **Complete**: when all tasks are `[x]`, append `### apply | <date> | COMPLETE` to `handoff.md` (`head`, `produced:` commit range `main..HEAD` and "M/M tasks, S/S scenarios have a passing test", `checks:` final build/lint/test, `open:` low findings, `next: /review <name>` in a fresh session).
 
-   If a name is provided, use it. Otherwise:
-   - Infer from conversation context if the user mentioned a change
-   - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
+**Output**
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
+During: `## Implementing: <change> (schema: <schema>)`, then per task `Working on task N/M: ...` and `✓ Task complete`.
 
-2. **Check status to understand the schema**
-   ```bash
-   openspec status --change "<name>" --json
-   ```
-   Parse the JSON to understand:
-   - `schemaName`: The workflow being used (e.g., "spec-driven")
-   - `planningHome`, `changeRoot`, and `actionContext`: planning scope and edit constraints
-   - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
-
-3. **Get apply instructions**
-
-   ```bash
-   openspec instructions apply --change "<name>" --json
-   ```
-
-   This returns:
-   - `contextFiles`: artifact ID -> array of concrete file paths (varies by schema - could be proposal/specs/design/tasks or spec/tests/implementation/docs)
-   - Progress (total, complete, remaining)
-   - Task list with status, source path, and source line
-   - Dynamic instruction based on current state
-   - Optional `context`: current required project instruction input from the selected root
-   - Optional `operationGuidance`: current advisory guidance for apply
-   - `missingArtifacts` (when present): required artifact ids with no output
-
-   **Handle states:**
-   - If `state: "blocked"`: show the message and pause implementation.
-     - If `missingArtifacts` is non-empty: suggest completing the missing artifacts. Run `openspec status --change "<name>" --json`, select the next `ready` artifact (not `skipped` or `blocked`), and use `openspec instructions "<artifact-id>" --change "<name>" --json` for its rules and template. Keep the selected `--store <id>` on both commands.
-     - Otherwise, follow the CLI instruction to create or repair the schema-configured tracking file from existing planning artifacts. Do not assume another artifact is ready or start implementation while blocked.
-   - If `state: "all_done"`: report that all tracked tasks are complete and suggest review or verification as appropriate before archiving
-   - Otherwise: proceed to implementation
-
-   Treat `context` as a required prompt-level input. Read and consider it, and
-   apply relevant project facts, conventions, and constraints while implementing.
-   Treat `operationGuidance` as optional additive advice. Read and consider every
-   entry, and follow entries that are applicable and compatible with the built-in
-   workflow.
-
-   Keep both fields separate from CLI-returned state, missing artifacts, tasks,
-   progress, `contextFiles`, and the built-in `instruction`. They are not
-   evidence of task completion, do not replace the built-in instruction, and do
-   not permit bypassing a blocked state. If context conflicts with the built-in
-   instruction, an explicit user choice, or a CLI-controlled value, report the
-   conflict and preserve the controlling value. If guidance is inapplicable or
-   conflicts with those controlling inputs, do not follow it and explain why.
-   These are prompt-level behavior contracts, not enforceable checks.
-
-4. **Read context files**
-
-   Read every file path listed under `contextFiles` from the apply instructions output.
-   The files depend on the schema being used:
-   - **spec-driven**: proposal, specs, design, tasks
-   - Other schemas: follow the contextFiles from CLI output
-
-   Do not copy `context` or `operationGuidance` verbatim into implementation
-   files or planning artifacts unless the user separately asks for that content.
-
-5. **Show current progress**
-
-   Display:
-   - Schema being used
-   - Progress: "N/M tasks complete"
-   - Remaining tasks overview
-   - Dynamic instruction from CLI
-
-6. **Implement tasks (loop until done or blocked)**
-
-   For each pending task:
-   - Show which task is being worked on
-   - If the task is a test task (it writes tests for spec scenarios), delegate it to the `test-writer` sub-agent: call the Agent tool with `subagent_type: "test-writer"`, passing the change name and the scenarios the task covers. It writes failing tests only, titled exactly as the scenarios, and reports that they fail for the right reason. Review its tests and fix them before moving on; never let it edit implementation code. If the agent is unavailable, write the tests directly and say so
-   - For implementation tasks, make the code changes required (the failing tests from the preceding test task must exist first)
-   - Keep changes minimal and focused
-   - Before editing, confirm the checkbox at the returned `sourcePath` and `line` still matches the task description; if it does not, rerun the apply instructions and use the refreshed location
-   - Mark the task complete at its returned `sourcePath` and `line`: `- [ ]` → `- [x]`
-   - Rerun the apply instructions and confirm that task is now done and progress changed
-   - Continue to next task
-
-   **Pause if:**
-   - Task is unclear → ask for clarification
-   - Implementation reveals a design issue → suggest updating artifacts
-   - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
-   - Error or blocker encountered → report and wait for guidance
-   - User interrupts
-
-7. **On completion or pause, show status**
-
-   Display:
-   - Tasks completed this session
-   - Overall progress: "N/M tasks complete"
-   - If all done: report that tracked tasks are complete and suggest review or verification as appropriate before archiving
-   - If paused: explain why and wait for guidance
-
-**Output During Implementation**
-
-```
-## Implementing: <change-name> (schema: <schema-name>)
-
-Working on task 3/7: <task description>
-[...implementation happening...]
-✓ Task complete
-
-Working on task 4/7: <task description>
-[...implementation happening...]
-✓ Task complete
-```
-
-**Output On Completion**
+On completion:
 
 ```
 ## Implementation Complete
+**Change:** <name>  **Progress:** M/M tasks complete
 
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Progress:** 7/7 tasks complete ✓
+### Scenario coverage
+| Capability | Scenario | Test file | Test | Result |   (one row per scenario, from the last pnpm test)
 
-### Completed This Session
-- [x] Task 1
-- [x] Task 2
-...
+### Delegation
+- test-writer: <n> calls, <n> sent back
+- reviewer: <group> PASS/FAIL (<n> findings, <n> open); final full-diff run PASS/FAIL
+- Low findings left open: <list or none>
 
-All tracked tasks are complete. Review or verify the change as appropriate
-before archiving. You can archive this change with `/opsx:archive`.
+### Checks
+build: <r>  lint: <r>  test: <r>
+
+Next, in a FRESH session: `/review <name>`, then `/create-pr <name>`. Archive only after merge.
 ```
 
-**Output On Pause (Issue Encountered)**
-
-```
-## Implementation Paused
-
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Progress:** 4/7 tasks complete
-
-### Issue Encountered
-<description of the issue>
-
-**Options:**
-1. <option 1>
-2. <option 2>
-3. Other approach
-
-What would you like to do?
-```
+On pause: `## Implementation Paused`, change, progress N/M, the issue, numbered options, "What would you like to do?".
 
 **Guardrails**
-- Keep going through tasks until done or blocked
-- Always read context files before starting (from the apply instructions output)
-- If task is ambiguous, pause and ask before implementing
-- If implementation reveals issues, pause and suggest artifact updates
-- Keep code changes minimal and scoped to each task
-- Update task checkbox immediately after completing each task
-- Pause on errors, blockers, or unclear requirements - don't guess
-- When a task needs work beyond what the spec describes, surface the added scope and pause - never silently narrow, defer, or simplify away specified behavior
-- Only mark a task `- [x]` when its specified behavior is fully implemented, not when it is partially done or deferred
-- Use contextFiles from CLI output, don't assume specific file names
-- Use each task's sourcePath and line to update its exact checkbox
-- Do not use context or operation guidance as proof that a task is complete
-- Apply relevant project context; report conflicts with controlling workflow inputs
-- Consider every guidance entry; explain any inapplicable or conflicting advice
-- Do not copy runtime context or operation guidance into implementation files or planning artifacts
-- Preserve CLI-controlled blocked/ready/all-done behavior and completion criteria
-
-**Fluid Workflow Integration**
-
-This skill supports the "actions on a change" model:
-
-- **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
-- **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly
+- Never write code before `gate-1 APPROVED` is in `handoff.md`; never edit or delete earlier handoff blocks.
+- Keep going until done or blocked; keep changes minimal and scoped to each task; update the checkbox immediately.
+- Do not guess on errors or ambiguity; never silently narrow, defer or simplify specified behaviour.
+- Test tasks go to `test-writer`, group checks to `reviewer`; do not hand-write scenario tests while the agent is available.
+- Apply does not replace `/review`: never run `security-auditor` or `db-change-checker` here; the reviewer pass does not clear Gate 2.
+- Preserve CLI-controlled blocked/ready/all-done behaviour. Can be invoked at any time and may suggest artifact updates.

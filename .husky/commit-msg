@@ -1,1 +1,9 @@
-pnpm exec commitlint --edit "$1"
+pnpm exec commitlint --edit "$1" || exit 1
+
+# Tests run here, not in pre-commit, because only this hook can see the message.
+# A test(...) commit holds the failing tests of a test-first task, so it skips them.
+header=$(grep -v '^#' "$1" | head -n 1)
+case "$header" in
+  test:*|test\(*|test!*) echo "test commit: skipping pnpm test (build and lint already passed)" ;;
+  *) pnpm test ;;
+esac

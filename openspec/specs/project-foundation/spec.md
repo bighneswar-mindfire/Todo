@@ -43,18 +43,18 @@ All TypeScript types and Zod schemas SHALL live only in `packages/shared` and be
 - **THEN** `pnpm build` succeeds with 0 errors
 
 ### Requirement: Quality gates
-The repository SHALL enforce build, lint and test success and conventional commit messages before any commit.
+The repository SHALL enforce build and lint success, test success (except for commits of type `test`, which hold the failing tests of a test-first task) and conventional commit messages before any commit.
 
 #### Scenario: Clean checkpoint
 - **WHEN** `pnpm build`, `pnpm lint --max-warnings 0` and `pnpm test` are run
 - **THEN** all three exit with code 0
 
 #### Scenario: Failing check blocks commit
-- **WHEN** a commit is attempted while lint, build or tests fail
-- **THEN** the pre-commit hook rejects the commit
+- **WHEN** a commit is attempted while lint or build fail, or while tests fail and the commit type is not `test`
+- **THEN** the Husky hooks (`pre-commit` for build and lint, `commit-msg` for tests) reject the commit
 
 #### Scenario: Bad commit message rejected
-- **WHEN** a commit message does not match `type(scope): description AB#ticket`
+- **WHEN** a commit message does not match `type: description` (an optional `(scope)` after the type is accepted)
 - **THEN** commitlint rejects the commit
 
 ### Requirement: Claude Code configuration

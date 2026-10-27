@@ -2,9 +2,9 @@ export default {
   extends: ["@commitlint/config-conventional"],
   parserPreset: {
     parserOpts: {
-      // type(scope): description AB#1234
-      headerPattern: /^(\w+)(?:\(([^)]*)\))?!?: (.+) AB#(\d+)$/,
-      headerCorrespondence: ["type", "scope", "subject", "ticket"],
+      // type: description   (an optional (scope) after the type is accepted)
+      headerPattern: /^(\w+)(?:\(([^)]*)\))?!?: (.+)$/,
+      headerCorrespondence: ["type", "scope", "subject"],
     },
   },
 };
