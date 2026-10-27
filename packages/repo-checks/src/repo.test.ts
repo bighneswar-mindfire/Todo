@@ -73,7 +73,7 @@ describe("quality gates", () => {
       .map((line) => line.trim())
       .filter((line) => line !== "" && !line.startsWith("#"));
     expect(commands).toEqual([
-      "node .husky/check-spec-separation.mjs && pnpm build && pnpm lint --max-warnings 0",
+      "node .husky/check-spec-separation.mjs && node .husky/check-review-log.mjs && pnpm build && pnpm lint --max-warnings 0",
     ]);
     const commitMsg = read(".husky/commit-msg");
     expect(commitMsg).toContain("commitlint");
@@ -118,6 +118,48 @@ describe("specs and code are committed separately", () => {
     expect(
       violation(["openspec/changes/archive/2026-10-27-ab-1/specs/notes/spec.md", "apps/backend/src/a.ts"]),
     ).toBeNull();
+  });
+});
+
+describe("change logs are append-only and checkpoints are recorded", () => {
+  type Guard = {
+    appendOnlyViolations: (numstat: string[]) => string[];
+    missingCheckpointRecords: (tasks: string, review: string | null) => string[];
+  };
+  const loadGuard = async () =>
+    (await import(pathToFileURL(join(root, ".husky/check-review-log.mjs")).href)) as Guard;
+
+  const tasks = [
+    "## 1. Shared",
+    "- [x] 1.1 Test",
+    "- [x] 1.2 Checkpoint: build, lint, test",
+    "## 2. Backend",
+    "- [x] 2.1 Test",
+    "- [ ] 2.2 Checkpoint: build, lint, test",
+  ].join("\n");
+  const pass = "## 2026-10-27 | apply | group 1: Shared | PASS";
+  const fail = "## 2026-10-27 | apply | group 1: Shared | FAIL";
+
+  it("Edited review log line rejected", async () => {
+    const { appendOnlyViolations } = await loadGuard();
+    expect(appendOnlyViolations(["3\t1\topenspec/changes/ab-1/review.md"])).toHaveLength(1);
+    expect(appendOnlyViolations(["2\t2\topenspec/changes/ab-1/handoff.md"])).toHaveLength(1);
+    expect(appendOnlyViolations(["9\t0\topenspec/changes/ab-1/review.md"])).toEqual([]);
+    expect(appendOnlyViolations(["4\t4\topenspec/changes/ab-1/tasks.md"])).toEqual([]);
+  });
+
+  it("Ticked checkpoint without a PASS record rejected", async () => {
+    const { missingCheckpointRecords } = await loadGuard();
+    expect(missingCheckpointRecords(tasks, null)).toHaveLength(1);
+    expect(missingCheckpointRecords(tasks, "# Review log")).toHaveLength(1);
+    expect(missingCheckpointRecords(tasks, `${pass}\n${fail}`)).toHaveLength(1);
+  });
+
+  it("Ticked checkpoint with a PASS record accepted", async () => {
+    const { missingCheckpointRecords } = await loadGuard();
+    expect(missingCheckpointRecords(tasks, pass)).toEqual([]);
+    expect(missingCheckpointRecords(tasks, `${fail}\n${pass}`)).toEqual([]);
+    expect(missingCheckpointRecords("## 1. Shared\n- [ ] 1.1 Checkpoint", null)).toEqual([]);
   });
 });
 

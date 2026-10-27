@@ -33,7 +33,7 @@ Implement against the failing tests only, minimal and scoped. When the named tes
 
 ## Reviewer -> after each task group and at the end
 
-After the checkpoint of every group, call the `reviewer` sub-agent (fresh context, read-only):
+The checkpoint (all steps, in `checkpoint.md`) runs at the end of every group. Its last step calls the `reviewer` sub-agent (fresh context, read-only):
 
 ```
 Change: <change-name>
@@ -44,10 +44,10 @@ Report the findings table and RESULT.
 
 Handling:
 
-- `RESULT: PASS`: record `reviewer: PASS` on the group's checkpoint line in `tasks.md`, continue.
-- `RESULT: FAIL`: fix high and medium findings in the main session (through `test-writer` for test defects), re-run the checkpoint, call `reviewer` again. Low findings are listed in the final summary. Stop and ask after two failed rounds on the same finding.
+- `RESULT: PASS`: record `reviewer: PASS` on the group's checkpoint line in `tasks.md` and in the group's `review.md` section, continue.
+- `RESULT: FAIL`: fix high and medium findings in the main session (through `test-writer` for test defects), re-run the whole checkpoint as a new round (a new `review.md` section), call `reviewer` again. Low findings are listed in the final summary. Stop and ask after two failed rounds on the same finding.
 - Pending scenarios whose implementation sits in a later group are not defects; say which group in the brief.
-- The reviewer runs on the final group in full scope (`git diff main...HEAD`, every scenario). The independent gate is still `/review <change>` in a fresh session before `/create-pr`; apply never replaces it and never runs `security-auditor` or `db-change-checker` (those belong to `/review`).
+- The reviewer runs on the final group in full scope (`git diff main...HEAD`, every scenario). The independent gate is still `/review <change>` in a fresh session before `/create-pr`; apply never replaces it and never runs `security-auditor` (that belongs to `/review`). `db-change-checker` runs in apply only in the checkpoint of a group that changed `apps/backend/prisma/`, with the brief: `Change: <change-name>`, `Files: <prisma files changed in this group>`, "Report the findings table and RESULT"; `/review` runs it again on the full diff.
 
 ## Preconditions
 

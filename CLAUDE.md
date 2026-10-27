@@ -30,6 +30,7 @@ Workflow rules are kept out of the commands, in `.claude/rules/`, so commands st
 - `propose-artifacts.md`: what `/opsx:propose` must put in each artifact (proposal, specs, design, tasks, `delta-openapi.yaml`) and the self-check.
 - `open-decisions.md`: the open-decision gate; no Open decision may survive into specs or apply.
 - `handoff.md`: the append-only `openspec/changes/<name>/handoff.md` stage log. Every command checks the previous stage's block before it starts and appends its own when it ends; Gate 1 approval is recorded there by `/opsx:apply` from the user's answer.
+- `checkpoint.md`: the checkpoint every task group ends with, and the append-only `review.md` evidence log per change (`apply` and `/review` each append dated sections).
 - `apply-delegation.md`: how `/opsx:apply` briefs `test-writer` and `reviewer` and checks what they return.
 
 ## Spec rules
@@ -41,7 +42,7 @@ Workflow rules are kept out of the commands, in `.claude/rules/`, so commands st
 ## Commands
 
 - Lint: `pnpm lint --max-warnings 0` | Types and build: `pnpm build` | Test: `pnpm test` | Spec: `pnpm exec openspec validate <change> --strict`.
-- Checkpoint after every task group: build (0 errors), lint, test all green. Husky enforces this on commit: `pre-commit` runs build and lint; `commit-msg` runs commitlint, then `pnpm test`, except for `test(...)` commits (they hold the failing tests of a test-first task).
+- Checkpoint after every task group, database groups included: build (0 errors), lint, test with 0 red, coverage, spec validation, `db-change-checker` when prisma changed, `reviewer`; the results are appended to `openspec/changes/<name>/review.md` (see `checkpoint.md`); `pre-commit` rejects a ticked checkpoint with no PASS section in `review.md` and any edit to an existing line of `review.md` or `handoff.md`. Husky enforces the basics on commit: `pre-commit` runs build and lint; `commit-msg` runs commitlint, then `pnpm test`, except for `test(...)` commits (they hold the failing tests of a test-first task).
 
 ## Commits and branches
 
