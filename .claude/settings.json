@@ -37,6 +37,9 @@
     "PreToolUse": [
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "node .claude/hooks/block-dangerous.mjs" }] }
     ],
+    "PreCompact": [
+      { "hooks": [{ "type": "command", "command": "node .claude/hooks/save-context.mjs" }] }
+    ],
     "PostToolUse": [
       { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "node .claude/hooks/format-file.mjs" }] }
     ]

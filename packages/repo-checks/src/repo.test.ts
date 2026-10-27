@@ -163,6 +163,34 @@ describe("change logs are append-only and checkpoints are recorded", () => {
   });
 });
 
+describe("session context is saved before compaction", () => {
+  it("PreCompact hook registered: settings run the save-context hook and session-context.md is ignored", () => {
+    const settings = readJson(".claude/settings.json") as {
+      hooks: { PreCompact?: { hooks: { command: string }[] }[] };
+    };
+    const commands = settings.hooks.PreCompact?.flatMap((entry) => entry.hooks.map((h) => h.command)) ?? [];
+    expect(commands).toContain("node .claude/hooks/save-context.mjs");
+    expect(existsSync(join(root, ".claude/hooks/save-context.mjs"))).toBe(true);
+    expect(read(".gitignore").split(/\r?\n/)).toContain("session-context.md");
+  });
+
+  it("Snapshot keeps the notes: a rewrite replaces only the auto block", async () => {
+    const { applySnapshot } = (await import(
+      pathToFileURL(join(root, ".claude/hooks/save-context.mjs")).href
+    )) as { applySnapshot: (existing: string | null, snapshot: string) => string };
+    const existing = [
+      "# Session context",
+      "<!-- auto:start -->\nOLD SNAPSHOT\n<!-- auto:end -->",
+      "<!-- notes:start -->\nMY NOTES\n<!-- notes:end -->",
+    ].join("\n");
+    const next = applySnapshot(existing, "NEW SNAPSHOT");
+    expect(next).toContain("NEW SNAPSHOT");
+    expect(next).not.toContain("OLD SNAPSHOT");
+    expect(next).toContain("<!-- notes:start -->\nMY NOTES\n<!-- notes:end -->");
+    expect(applySnapshot(null, "FIRST")).toMatch(/auto:start -->\nFIRST\n<!-- auto:end[\s\S]*notes:start/);
+  });
+});
+
 describe("continuous integration", () => {
   const workflow = () => read(".github/workflows/ci.yml");
 

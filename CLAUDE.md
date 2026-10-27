@@ -6,7 +6,7 @@
 
 - Features, API or schema changes: use OpenSpec (`/opsx:*`). No production code without an approved change.
 - Typos, dependency bumps, styling tweaks and small bug fixes that restore specified behaviour may skip the spec (fast lane: failing test, minimal fix, normal PR).
-- One ticket per session; `/clear` between tasks. If a session passes about 60k tokens, save progress to `session-context.md`, `/clear`, then resume from it. `/compact` at about 70% context.
+- One ticket per session; `/clear` between tasks. If a session passes about 60k tokens, run `/save-context` (writes `session-context.md`, git-ignored), `/clear`, then start the next session with "read `session-context.md` and continue". A `PreCompact` hook (`.claude/hooks/save-context.mjs`) refreshes the file's auto snapshot (branch, git state, active change, last handoff block, next tasks) before every `/compact` or auto-compact; hooks cannot count tokens, so the 60k check stays manual. `/compact` at about 70% context. After resuming, `handoff.md` and `git log` win over the notes if they disagree.
 - OpenSpec change names are lowercase (`ab-1017`). Run the CLI as `pnpm exec openspec`.
 
 | Step | Command |

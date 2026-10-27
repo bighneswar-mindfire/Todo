@@ -7,5 +7,6 @@ coverage/
 apps/backend/src/generated/
 .DS_Store
 *.log
+session-context.md
 test-results/
 playwright-report/

@@ -83,6 +83,17 @@ The repository SHALL reject a commit that changes or removes an existing line of
 - **WHEN** a commit stages a `tasks.md` with a ticked checkpoint task for a group whose latest `apply | group <n>` section in `review.md` is `PASS`
 - **THEN** the review-log check passes
 
+### Requirement: Session context is saved before compaction
+The repository SHALL register a `PreCompact` hook that refreshes the auto snapshot in the git-ignored `session-context.md` without altering the notes written by `/save-context`.
+
+#### Scenario: PreCompact hook registered
+- **WHEN** `.claude/settings.json` is inspected
+- **THEN** a `PreCompact` hook runs `.claude/hooks/save-context.mjs`, which exists, and `session-context.md` is git-ignored
+
+#### Scenario: Snapshot keeps the notes
+- **WHEN** the snapshot is applied to an existing `session-context.md` that contains notes
+- **THEN** only the auto block is replaced and the notes are unchanged
+
 ### Requirement: Claude Code configuration
 The repository SHALL include root and per-app `CLAUDE.md` files, a read-only `reviewer` agent, the workflow commands and the Context7 MCP configuration.
 
